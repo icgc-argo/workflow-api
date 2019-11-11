@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 /** The service will return a RunListResponse when receiving a successful RunListRequest. */
@@ -17,10 +19,11 @@ import org.springframework.validation.annotation.Validated;
 @javax.annotation.Generated(
     value = "io.swagger.codegen.languages.SpringCodegen",
     date = "2019-11-01T10:34:43.963-04:00")
+@Data
+@Builder
 public class RunListResponse {
 
   @JsonProperty("runs")
-  @Valid
   private List<RunStatus> runs = null;
 
   @JsonProperty("next_page_token")

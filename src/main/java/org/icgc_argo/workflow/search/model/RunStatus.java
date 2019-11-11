@@ -1,11 +1,12 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 /** Small description of a workflow run, returned by server during listing */
@@ -14,12 +15,12 @@ import org.springframework.validation.annotation.Validated;
 @javax.annotation.Generated(
     value = "io.swagger.codegen.languages.SpringCodegen",
     date = "2019-11-01T10:34:43.963-04:00")
+@Data
+@Builder
 public class RunStatus {
 
-  @JsonProperty("run_id")
   private String runId = null;
 
-  @JsonProperty("state")
   private State state = null;
 
   public RunStatus runId(String runId) {

@@ -2,6 +2,8 @@ package org.icgc_argo.workflow.search.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * - UNKNOWN: The state of the task is unknown. This provides a safe default for messages where this
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * disk space, etc. - CANCELED: The task was canceled by the user. - CANCELING: The task was
  * canceled by the user, and is in the process of stopping.
  */
+@RequiredArgsConstructor
 public enum State {
   UNKNOWN("UNKNOWN"),
 
@@ -52,12 +55,11 @@ public enum State {
   }
 
   @JsonCreator
-  public static State fromValue(String text) {
-    for (State b : State.values()) {
-      if (String.valueOf(b.value).equals(text)) {
-        return b;
-      }
-    }
-    return null;
+  public static State fromValue(@NonNull String text) {
+    if (text.equalsIgnoreCase("started")) {
+      return State.RUNNING;
+    } else if (text.equalsIgnoreCase("completed")) {
+      return State.COMPLETE;
+    } else return State.UNKNOWN;
   }
 }
