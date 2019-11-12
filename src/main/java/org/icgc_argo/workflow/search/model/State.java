@@ -1,9 +1,6 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 /**
  * - UNKNOWN: The state of the task is unknown. This provides a safe default for messages where this
@@ -42,24 +39,18 @@ public enum State {
 
   CANCELING("CANCELING");
 
-  private String value;
+  @NonNull private final String value;
 
-  State(String value) {
-    this.value = value;
-  }
-
-  @Override
-  @JsonValue
-  public String toString() {
-    return String.valueOf(value);
-  }
-
-  @JsonCreator
   public static State fromValue(@NonNull String text) {
     if (text.equalsIgnoreCase("started")) {
       return State.RUNNING;
     } else if (text.equalsIgnoreCase("completed")) {
       return State.COMPLETE;
     } else return State.UNKNOWN;
+  }
+
+  @Override
+  public String toString() {
+    return value;
   }
 }
