@@ -3,33 +3,46 @@ package org.icgc_argo.workflow.search.controller.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.icgc_argo.workflow.search.controller.RunsApi;
 import org.icgc_argo.workflow.search.model.RunListResponse;
 import org.icgc_argo.workflow.search.model.RunLog;
 import org.icgc_argo.workflow.search.model.RunStatus;
+import org.icgc_argo.workflow.search.service.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
-@Api(value = "WorkflowExecutionService", description = "the runs API", tags = "WorkflowExecutionService")
+@Api(
+    value = "WorkflowExecutionService",
+    description = "the runs API",
+    tags = "WorkflowExecutionService")
+@RequestMapping("/runs")
 public class RunsApiController implements RunsApi {
 
   private final ObjectMapper objectMapper;
   private final HttpServletRequest request;
+  private RunService runService;
 
   @Autowired
-  public RunsApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+  public RunsApiController(
+      ObjectMapper objectMapper, HttpServletRequest request, RunService runService) {
     this.objectMapper = objectMapper;
     this.request = request;
+    this.runService = runService;
   }
 
   public ResponseEntity<RunLog> getRunLog(
@@ -69,9 +82,14 @@ public class RunsApiController implements RunsApi {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
+  @GetMapping(value = "/listRuns")
+  @ApiResponses(
+      value = {
+        @ApiResponse(code = 200, message = "List Run Results", response = RunListResponse.class)
+      })
   public ResponseEntity<RunListResponse> listRuns(
       @ApiParam(
-              example = "123",
+              example = "10",
               value =
                   "OPTIONAL The preferred number of workflow runs to return in a page. If not provided, the implementation should use a default page size. The implementation must not return more items than `page_size`, but it may return fewer.  Clients should not assume that if fewer than `page_size` items are returned that all items have been returned.  The availability of additional pages is indicated by the value of `next_page_token` in the response.")
           @Valid
@@ -83,20 +101,8 @@ public class RunsApiController implements RunsApi {
           @Valid
           @RequestParam(value = "page_token", required = false)
           String pageToken) {
-    String accept = request.getHeader("Accept");
-    if (accept != null && accept.contains("application/json")) {
-      try {
-        return new ResponseEntity<>(
-            objectMapper.readValue(
-                "{  \"next_page_token\" : \"next_page_token\",  \"runs\" : [ {    \"run_id\" : \"run_id\",    \"state\" : { }  }, {    \"run_id\" : \"run_id\",    \"state\" : { }  } ]}",
-                RunListResponse.class),
-            HttpStatus.NOT_IMPLEMENTED);
-      } catch (IOException e) {
-        log.error("Couldn't serialize response for content type application/json", e);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
 
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    val response = runService.listRuns();
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

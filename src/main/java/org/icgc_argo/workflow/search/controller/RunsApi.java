@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Api(value = "WorkflowExecutionService", description = "the runs API", tags = "WorkflowExecutionService")
+@Api(
+    value = "WorkflowExecutionService",
+    description = "the runs API",
+    tags = "WorkflowExecutionService")
 public interface RunsApi {
 
   @ApiOperation(
@@ -125,7 +128,7 @@ public interface RunsApi {
       method = RequestMethod.GET)
   ResponseEntity<RunListResponse> listRuns(
       @ApiParam(
-              example = "123",
+              example = "10",
               value =
                   "OPTIONAL The preferred number of workflow runs to return in a page. If not provided, the implementation should use a default page size. The implementation must not return more items than `page_size`, but it may return fewer.  Clients should not assume that if fewer than `page_size` items are returned that all items have been returned.  The availability of additional pages is indicated by the value of `next_page_token` in the response.")
           @Valid
