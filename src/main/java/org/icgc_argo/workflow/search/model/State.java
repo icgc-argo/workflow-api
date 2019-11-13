@@ -42,10 +42,14 @@ public enum State {
   @NonNull private final String value;
 
   public static State fromValue(@NonNull String text) {
-    if (text.equalsIgnoreCase("started")) {
+    if (text.equalsIgnoreCase("RUNNING")) {
       return State.RUNNING;
-    } else if (text.equalsIgnoreCase("completed")) {
+    } else if (text.equalsIgnoreCase("QUEUED")) {
+      return State.QUEUED;
+    } else if (text.equalsIgnoreCase("COMPLETE")) {
       return State.COMPLETE;
+    } else if (text.equalsIgnoreCase("EXECUTOR_ERROR")) {
+      return State.EXECUTOR_ERROR;
     } else return State.UNKNOWN;
   }
 
