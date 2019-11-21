@@ -23,11 +23,11 @@ service-info:
       type: "type 2"
   supportedFilesystemProtocols:
     - "S3"
-    - "SONG"
+    - "SCORE"
   supportedWesVersions:
     - "1.0.0"
   workflowType: "nextflow"
   workflowEngineVersions:
-    nextflow: "19.07.0.5106"
+    nextflow: "19.10.0"
   workflowTypeVersions:
     pcawg-bwa-mem: "0.0.1"
