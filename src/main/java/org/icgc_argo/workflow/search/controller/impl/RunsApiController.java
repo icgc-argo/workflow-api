@@ -1,19 +1,18 @@
 package org.icgc_argo.workflow.search.controller.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.controller.RunsApi;
 import org.icgc_argo.workflow.search.model.RunListResponse;
 import org.icgc_argo.workflow.search.model.RunLog;
 import org.icgc_argo.workflow.search.model.RunStatus;
+import org.icgc_argo.workflow.search.model.ServiceInfo;
 import org.icgc_argo.workflow.search.service.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,56 +32,40 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/runs")
 public class RunsApiController implements RunsApi {
 
-  private final ObjectMapper objectMapper;
-  private final HttpServletRequest request;
   private RunService runService;
 
   @Autowired
-  public RunsApiController(
-      ObjectMapper objectMapper, HttpServletRequest request, RunService runService) {
-    this.objectMapper = objectMapper;
-    this.request = request;
+  public RunsApiController(RunService runService) {
     this.runService = runService;
   }
 
+  @GetMapping(value = "/{run_id}")
+  @ApiResponses(
+      value = { @ApiResponse(
+            code = 200,
+            message = "Get detailed info about a workflow run",
+            response = RunLog.class)})
   public ResponseEntity<RunLog> getRunLog(
-      @ApiParam(required = true) @PathVariable("run_id") String runId) {
-    String accept = request.getHeader("Accept");
-    if (accept != null && accept.contains("application/json")) {
-      try {
-        return new ResponseEntity<>(
-            objectMapper.readValue(
-                "{  \"outputs\" : \"{}\",  \"request\" : {    \"workflow_engine_parameters\" : {      \"key\" : \"workflow_engine_parameters\"    },    \"workflow_url\" : \"workflow_url\",    \"workflow_params\" : \"{}\",    \"workflow_type\" : \"workflow_type\",    \"workflow_type_version\" : \"workflow_type_version\",    \"tags\" : {      \"key\" : \"tags\"    }  },  \"run_id\" : \"run_id\",  \"run_log\" : {    \"start_time\" : \"start_time\",    \"stdout\" : \"stdout\",    \"name\" : \"name\",    \"end_time\" : \"end_time\",    \"exit_code\" : 0,    \"cmd\" : [ \"cmd\", \"cmd\" ],    \"stderr\" : \"stderr\"  },  \"state\" : { },  \"task_logs\" : [ {    \"start_time\" : \"start_time\",    \"stdout\" : \"stdout\",    \"name\" : \"name\",    \"end_time\" : \"end_time\",    \"exit_code\" : 0,    \"cmd\" : [ \"cmd\", \"cmd\" ],    \"stderr\" : \"stderr\"  }, {    \"start_time\" : \"start_time\",    \"stdout\" : \"stdout\",    \"name\" : \"name\",    \"end_time\" : \"end_time\",    \"exit_code\" : 0,    \"cmd\" : [ \"cmd\", \"cmd\" ],    \"stderr\" : \"stderr\"  } ]}",
-                RunLog.class),
-            HttpStatus.NOT_IMPLEMENTED);
-      } catch (IOException e) {
-        log.error("Couldn't serialize response for content type application/json", e);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
-
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+      @ApiParam(required = true) @PathVariable("run_id") @NonNull String runId) {
+    val response = runService.getRunLog(runId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @GetMapping(value = "/{run_id}/status")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            code = 200,
+            message = "Get quick status info about a workflow run",
+            response = RunStatus.class)})
   public ResponseEntity<RunStatus> getRunStatus(
       @ApiParam(required = true) @PathVariable("run_id") String runId) {
-    String accept = request.getHeader("Accept");
-    if (accept != null && accept.contains("application/json")) {
-      try {
-        return new ResponseEntity<>(
-            objectMapper.readValue(
-                "{  \"run_id\" : \"run_id\",  \"state\" : { }}", RunStatus.class),
-            HttpStatus.NOT_IMPLEMENTED);
-      } catch (IOException e) {
-        log.error("Couldn't serialize response for content type application/json", e);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
 
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    val response = runService.getRunStatusById(runId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @GetMapping(value = "/listRuns")
+  @GetMapping(value = "")
   @ApiResponses(
       value = {
         @ApiResponse(code = 200, message = "List Run Results", response = RunListResponse.class)
@@ -105,4 +88,14 @@ public class RunsApiController implements RunsApi {
     val response = runService.listRuns();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
+
+  @GetMapping(value = "/service-info")
+  @ApiResponses(
+          value = {@ApiResponse(code = 200, message = "Get information about workflow execution service.",
+                                response = ServiceInfo.class)})
+  public ResponseEntity<ServiceInfo> getServiceInfo() {
+    val response = runService.getServiceInfo();
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
 }
