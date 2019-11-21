@@ -10,3 +10,24 @@ elastic:
   port: 9200
   workflowIndex: workflow
   taskIndex: task
+
+service-info:
+  authInstructionsUrl: "https://example.com/auth"
+  contactInfoUrl: "https://example.com/contact"
+  defaultWorkflowEngineParameters:
+    - defaultValue:
+      name: "defaultContainer"
+      type: "type 1"
+    - defaultValue:
+      name: "workflowVersion"
+      type: "type 2"
+  supportedFilesystemProtocols:
+    - "S3"
+    - "SCORE"
+  supportedWesVersions:
+    - "1.0.0"
+  workflowType: "nextflow"
+  workflowEngineVersions:
+    nextflow: "19.10.0"
+  workflowTypeVersions:
+    pcawg-bwa-mem: "0.0.1"

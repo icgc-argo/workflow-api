@@ -2,7 +2,6 @@ package org.icgc_argo.workflow.search.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import javax.validation.Valid;
 import lombok.*;
 
 @Data
@@ -13,6 +12,7 @@ import lombok.*;
 @EqualsAndHashCode
 public class RunLog {
   @JsonProperty("run_id")
+  @NonNull
   private String runId;
 
   @JsonProperty("request")
@@ -25,7 +25,6 @@ public class RunLog {
   private Log runLog;
 
   @JsonProperty("task_logs")
-  @Valid
   private List<Log> taskLogs;
 
   @JsonProperty("outputs")

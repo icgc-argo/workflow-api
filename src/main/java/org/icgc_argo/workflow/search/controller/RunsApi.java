@@ -2,10 +2,7 @@ package org.icgc_argo.workflow.search.controller;
 
 import io.swagger.annotations.*;
 import javax.validation.Valid;
-import org.icgc_argo.workflow.search.model.ErrorResponse;
-import org.icgc_argo.workflow.search.model.RunListResponse;
-import org.icgc_argo.workflow.search.model.RunLog;
-import org.icgc_argo.workflow.search.model.RunStatus;
+import org.icgc_argo.workflow.search.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -140,4 +137,18 @@ public interface RunsApi {
           @Valid
           @RequestParam(value = "page_token", required = false)
           String pageToken);
+
+
+  @ApiOperation(
+          value = "Get information about workflow execution service.",
+          nickname = "service info",
+          response = ServiceInfo.class,
+          tags = {"WorkflowExecutionService",})
+  @RequestMapping(
+          value = "/service-info",
+          produces = {"application/json"},
+          consumes = {"application/json"},
+          method = RequestMethod.GET)
+  ResponseEntity<ServiceInfo> getServiceInfo();
+
 }
