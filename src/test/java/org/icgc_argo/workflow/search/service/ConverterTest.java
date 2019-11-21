@@ -97,7 +97,7 @@ public class ConverterTest {
   private WorkflowDocument buildWorkflowDoc(){
     val params = new HashMap<String, Object>();
     params.put("class", "File");
-    params.put("path", "tp://ftp-private.ebi.ac.uk/upload/foivos/test.txt");
+    params.put("path", "ftp://ftp-private.ebi.ac.uk/upload/foivos/test.txt");
 
     return WorkflowDocument.builder()
             .runId(RUN_ID)
