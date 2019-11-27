@@ -138,17 +138,21 @@ public interface RunsApi {
           @RequestParam(value = "page_token", required = false)
           String pageToken);
 
-
   @ApiOperation(
-          value = "Get information about workflow execution service.",
-          nickname = "service info",
-          response = ServiceInfo.class,
-          tags = {"WorkflowExecutionService",})
+      value = "Get information about workflow execution service.",
+      nickname = "service info",
+      response = ServiceInfo.class,
+      tags = {
+        "WorkflowExecutionService",
+      })
   @RequestMapping(
-          value = "/service-info",
-          produces = {"application/json"},
-          consumes = {"application/json"},
-          method = RequestMethod.GET)
+      value = "/service-info",
+      produces = {"application/json"},
+      consumes = {"application/json"},
+      method = RequestMethod.GET)
   ResponseEntity<ServiceInfo> getServiceInfo();
+
+  @RequestMapping(value="/", method=RequestMethod.GET)
+  ResponseEntity<String> isAlive();
 
 }
