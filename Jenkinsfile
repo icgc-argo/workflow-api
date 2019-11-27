@@ -4,7 +4,7 @@ def version = "UNKNOWN"
 pipeline {
     agent {
         kubernetes {
-            label 'ego-executor'
+            label 'workflow-search'
             yaml """
 apiVersion: v1
 kind: Pod

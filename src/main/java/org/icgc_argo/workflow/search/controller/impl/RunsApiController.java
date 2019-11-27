@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
@@ -29,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
     value = "WorkflowExecutionService",
     description = "the runs API",
     tags = "WorkflowExecutionService")
-@RequestMapping("/runs")
 public class RunsApiController implements RunsApi {
 
   private RunService runService;
@@ -39,25 +35,28 @@ public class RunsApiController implements RunsApi {
     this.runService = runService;
   }
 
-  @GetMapping(value = "/{run_id}")
+  @GetMapping(value = "/runs/{run_id}")
   @ApiResponses(
-      value = { @ApiResponse(
+      value = {
+        @ApiResponse(
             code = 200,
             message = "Get detailed info about a workflow run",
-            response = RunLog.class)})
+            response = RunLog.class)
+      })
   public ResponseEntity<RunLog> getRunLog(
       @ApiParam(required = true) @PathVariable("run_id") @NonNull String runId) {
     val response = runService.getRunLog(runId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @GetMapping(value = "/{run_id}/status")
+  @GetMapping(value = "/runs/{run_id}/status")
   @ApiResponses(
       value = {
         @ApiResponse(
             code = 200,
             message = "Get quick status info about a workflow run",
-            response = RunStatus.class)})
+            response = RunStatus.class)
+      })
   public ResponseEntity<RunStatus> getRunStatus(
       @ApiParam(required = true) @PathVariable("run_id") String runId) {
 
@@ -65,7 +64,7 @@ public class RunsApiController implements RunsApi {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @GetMapping(value = "")
+  @GetMapping(value = "/runs")
   @ApiResponses(
       value = {
         @ApiResponse(code = 200, message = "List Run Results", response = RunListResponse.class)
@@ -91,11 +90,21 @@ public class RunsApiController implements RunsApi {
 
   @GetMapping(value = "/service-info")
   @ApiResponses(
-          value = {@ApiResponse(code = 200, message = "Get information about workflow execution service.",
-                                response = ServiceInfo.class)})
+      value = {
+        @ApiResponse(
+            code = 200,
+            message = "Get information about workflow execution service.",
+            response = ServiceInfo.class)
+      })
   public ResponseEntity<ServiceInfo> getServiceInfo() {
     val response = runService.getServiceInfo();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @RequestMapping(
+      value = "/",
+      method = RequestMethod.GET)
+  public ResponseEntity<String> isAlive() {
+    return new ResponseEntity<>("Workflow search is alive!", HttpStatus.OK);
+  }
 }
