@@ -58,8 +58,4 @@ public class ServiceInfo {
   @Valid
   @NonNull
   private Map<String, String> workflowTypeVersions;
-
-//  @JsonProperty("tags")
-//  @Valid
-//  private Map<String, String> tags;
 }

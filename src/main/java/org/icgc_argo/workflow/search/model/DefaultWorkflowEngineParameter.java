@@ -21,5 +21,4 @@ public class DefaultWorkflowEngineParameter {
 
   @JsonProperty("type")
   private String type;
-
 }

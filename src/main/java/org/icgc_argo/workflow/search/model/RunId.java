@@ -1,6 +1,5 @@
 package org.icgc_argo.workflow.search.model;
 
-
 import lombok.*;
 
 @Data

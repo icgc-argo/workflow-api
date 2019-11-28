@@ -20,5 +20,4 @@ public class ServiceInfoProperties {
   private Map<String, String> workflowEngineVersions;
   private Map<String, String> workflowTypeVersions;
   private List<DefaultWorkflowEngineParameter> defaultWorkflowEngineParameters;
-
 }
