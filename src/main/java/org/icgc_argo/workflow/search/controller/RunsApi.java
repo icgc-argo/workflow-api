@@ -152,7 +152,6 @@ public interface RunsApi {
       method = RequestMethod.GET)
   ResponseEntity<ServiceInfo> getServiceInfo();
 
-  @RequestMapping(value="/", method=RequestMethod.GET)
+  @RequestMapping(value = "/", method = RequestMethod.GET)
   ResponseEntity<String> isAlive();
-
 }

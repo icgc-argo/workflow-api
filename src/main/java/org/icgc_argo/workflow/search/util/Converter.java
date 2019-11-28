@@ -1,7 +1,6 @@
 package org.icgc_argo.workflow.search.util;
 
-import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
-import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
 import static org.icgc_argo.workflow.search.model.State.fromValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +40,7 @@ public class Converter {
 
   public static RunStatus convertSourceMapToRunStatus(@NonNull Map<String, Object> source) {
     return RunStatus.builder()
-        .runId(source.get(RUN_ID).toString())
+        .runId(source.get(RUN_NAME).toString())
         .state(fromValue(source.get(STATE).toString()))
         .build();
   }
@@ -52,7 +51,7 @@ public class Converter {
       @NonNull String workflowType) {
     val runLog =
         RunLog.builder()
-            .runId(workflowDoc.getRunId())
+            .runId(workflowDoc.getRunName())
             .state(State.fromValue(workflowDoc.getState()))
             // todo ticket #24
             .outputs("")

@@ -17,5 +17,4 @@ public class SearchFields {
   public static final String PARAMETERS = "parameters";
   public static final String REPOSITORY = "repository";
   public static final String ERROR_REPORT = "errorReport";
-
 }
