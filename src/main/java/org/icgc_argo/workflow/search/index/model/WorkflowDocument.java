@@ -26,8 +26,10 @@ public class WorkflowDocument {
   /** When the command started executing */
   @NonNull private Date startTime;
 
-  /** When the command stopped executing (completed, failed, or cancelled),
-   *  completeTime does not exist in ES when work flow is unfinished. */
+  /**
+   * When the command stopped executing (completed, failed, or cancelled), completeTime does not
+   * exist in ES when work flow is unfinished.
+   */
   private Date completeTime;
 
   /** The repository url */

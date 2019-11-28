@@ -101,9 +101,7 @@ public class RunsApiController implements RunsApi {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @RequestMapping(
-      value = "/",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<String> isAlive() {
     return new ResponseEntity<>("Workflow search is alive!", HttpStatus.OK);
   }

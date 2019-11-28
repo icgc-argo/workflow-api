@@ -45,37 +45,60 @@ spec:
         }
     }
     stages {
-        stage('Prepare') {
-            steps {
-                script {
-                    commit = sh(returnStdout: true, script: 'git describe --always').trim()
-                }
-                script {
-                    version = readMavenPom().getVersion()
-                }
-            }
-        }
-        stage('Test') {
-            steps {
-                container('jdk') {
-                    sh "./mvnw test"
-                }
-            }
-        }
-        stage('Build') {
-            steps {
-                container('docker') {
-                    withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
-                    }
+            stage('Prepare') {
+                steps {
                     script {
                         commit = sh(returnStdout: true, script: 'git describe --always').trim()
+                        version = readMavenPom().getVersion()
                     }
+                }
+            }
+            stage('Test') {
+                steps {
+                    container('jdk') {
+                        sh "./mvnw test"
+                    }
+                }
+            }
+            stage('Build & Publish Develop') {
+                when {
+                    branch "develop"
+                }
+                steps {
+                    container('docker') {
+                        withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            sh 'docker login -u $USERNAME -p $PASSWORD'
+                        }
 
-                    // DNS error if --network is default
-                    sh "docker build --network=host . -t icgcargo/workflow-search:${commit}"
+                        // DNS error if --network is default
+                        sh "docker build --network=host . -t icgcargo/workflow-search:edge -t icgcargo/workflow-search:${version}-${commit}"
 
-                    sh "docker push icgcargo/workflow-search:${commit}"
+                        sh "docker push icgcargo/workflow-search:${version}-${commit}"
+                        sh "docker push icgcargo/workflow-search:edge"
+                    }
+                }
+            }
+            stage('Release & Tag') {
+                when {
+                    branch "master"
+                }
+                steps {
+                    container('docker') {
+                        withCredentials([usernamePassword(credentialsId: 'argoGithub', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                            sh "git tag ${version}"
+                          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/icgc-argo/workflow-search --tags"
+                        }
+
+                        withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            sh 'docker login -u $USERNAME -p $PASSWORD'
+                        }
+
+                        // DNS error if --network is default
+                        sh "docker build --network=host . -t icgcargo/workflow-search:latest -t icgcargo/workflow-search:${version}"
+
+                        sh "docker push icgcargo/workflow-search:${version}"
+                        sh "docker push icgcargo/workflow-search:latest"
+                    }
                 }
             }
         }

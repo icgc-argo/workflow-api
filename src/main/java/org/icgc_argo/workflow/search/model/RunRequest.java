@@ -30,5 +30,4 @@ public class RunRequest {
 
   @JsonProperty("workflow_url")
   private String workflowUrl;
-
 }

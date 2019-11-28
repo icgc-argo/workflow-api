@@ -87,17 +87,17 @@ public class RunService {
     return runLog;
   }
 
-  public ServiceInfo getServiceInfo(){
+  public ServiceInfo getServiceInfo() {
     return ServiceInfo.builder()
-            .authInstructionsUrl(serviceInfoProperties.getAuthInstructionsUrl())
-            .contactInfoUrl(serviceInfoProperties.getContactInfoUrl())
-            .supportedFilesystemProtocols(serviceInfoProperties.getSupportedFilesystemProtocols())
-            .supportedWesVersions(serviceInfoProperties.getSupportedWesVersions())
-            .workflowEngineVersions(serviceInfoProperties.getWorkflowEngineVersions())
-            .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
-            .systemStateCounts(systemStateCounts())
-            .defaultWorkflowEngineParameters(serviceInfoProperties.getDefaultWorkflowEngineParameters())
-            .build();
+        .authInstructionsUrl(serviceInfoProperties.getAuthInstructionsUrl())
+        .contactInfoUrl(serviceInfoProperties.getContactInfoUrl())
+        .supportedFilesystemProtocols(serviceInfoProperties.getSupportedFilesystemProtocols())
+        .supportedWesVersions(serviceInfoProperties.getSupportedWesVersions())
+        .workflowEngineVersions(serviceInfoProperties.getWorkflowEngineVersions())
+        .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
+        .systemStateCounts(systemStateCounts())
+        .defaultWorkflowEngineParameters(serviceInfoProperties.getDefaultWorkflowEngineParameters())
+        .build();
   }
 
   private SearchResponse search(@NonNull SearchSourceBuilder builder, @NonNull String index) {
@@ -130,7 +130,7 @@ public class RunService {
   private SearchHit getWorkflowById(@NonNull String runId) {
     try {
       val searchSourceBuilder = new SearchSourceBuilder();
-      searchSourceBuilder.query(QueryBuilders.termQuery(RUN_ID, runId)).size(DEFAULT_HIT_SIZE);
+      searchSourceBuilder.query(QueryBuilders.termQuery(RUN_NAME, runId)).size(DEFAULT_HIT_SIZE);
       val searchResponse = search(searchSourceBuilder, workflowIndex);
       val hits = searchResponse.getHits().getHits();
 
@@ -173,12 +173,12 @@ public class RunService {
 
   private Optional<List<TaskDocument>> getTaskDocumentListById(@NonNull String runId) {
     val searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.termQuery(RUN_ID, runId)).size(DEFAULT_HIT_SIZE);
+    searchSourceBuilder.query(QueryBuilders.termQuery(RUN_NAME, runId)).size(DEFAULT_HIT_SIZE);
     val searchResponse = search(searchSourceBuilder, taskIndex);
     val hits = searchResponse.getHits().getHits();
 
     NotFoundException.checkNotFound(
-        hits != null && hits.length > 0, format("Cannot find run log with run id = %s", runId));
+        hits != null && hits.length > 0, format("Cannot find run log with run name = %s", runId));
     // convert hits to TaskDocument list
     List<TaskDocument> taskLogs =
         Stream.of(hits).map(Converter::convertSearchHitToTaskDocument).collect(Collectors.toList());
@@ -187,12 +187,10 @@ public class RunService {
 
   private Map<String, Long> systemStateCounts() {
     val hits = getSearchHits(workflowIndex);
-    Map<String, Long> counts = Stream.of(hits)
-            .map(hit -> hit.getSourceAsMap().get(STATE).toString())
-            .collect(Collectors.toList())
-            .stream()
+    Map<String, Long> counts =
+        Stream.of(hits).map(hit -> hit.getSourceAsMap().get(STATE).toString())
+            .collect(Collectors.toList()).stream()
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
     return counts;
   }
-
 }
