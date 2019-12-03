@@ -151,7 +151,4 @@ public interface RunsApi {
       consumes = {"application/json"},
       method = RequestMethod.GET)
   ResponseEntity<ServiceInfo> getServiceInfo();
-
-  @RequestMapping(value = "/", method = RequestMethod.GET)
-  ResponseEntity<String> isAlive();
 }
