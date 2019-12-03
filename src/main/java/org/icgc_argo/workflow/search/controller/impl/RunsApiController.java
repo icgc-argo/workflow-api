@@ -100,9 +100,4 @@ public class RunsApiController implements RunsApi {
     val response = runService.getServiceInfo();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
-
-  @RequestMapping(value = "/", method = RequestMethod.GET)
-  public ResponseEntity<String> isAlive() {
-    return new ResponseEntity<>("Workflow search is alive!", HttpStatus.OK);
-  }
 }
