@@ -100,7 +100,7 @@ public class ConverterTest {
   @Test
   public void testBuildRunLog() {
     val doc = buildWorkflowDoc();
-    val workflowTypeVersion = "pcawg-bwa-mem: 0.0.1";
+    val workflowTypeVersion = "nextflow-dna-seq-alignment: 0.0.1";
     val workflowType = "nextflow";
     val runLog = Converter.buildRunLog(doc, workflowTypeVersion, workflowType);
 
