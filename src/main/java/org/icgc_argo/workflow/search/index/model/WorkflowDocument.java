@@ -35,6 +35,9 @@ public class WorkflowDocument {
   /** The repository url */
   @NonNull private String repository;
 
+  /** The repository release/tag/branch */
+  private String revision;
+
   /** Exit code of the program */
   @NonNull private Integer exitStatus;
 
@@ -43,4 +46,13 @@ public class WorkflowDocument {
 
   /** A URL to retrieve standard error logs of the workflow run or task */
   private String errorReport;
+
+  /** Was this a resume run */
+  @NonNull private Boolean resume;
+
+  /** Did the workflow succeed */
+  @NonNull private Boolean success;
+
+  /** Workflow duration */
+  private Integer duration;
 }

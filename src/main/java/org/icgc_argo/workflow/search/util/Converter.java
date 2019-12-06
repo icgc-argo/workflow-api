@@ -61,7 +61,9 @@ public class Converter {
                     .workflowTypeVersion(workflowTypeVersion)
                     .workflowType(workflowType)
                     .workflowUrl(workflowDoc.getRepository())
+                    .workflowVersion(workflowDoc.getRevision())
                     .workflowParams(workflowDoc.getParameters())
+                    .resume(workflowDoc.getResume())
                     .build())
             // build run log
             .runLog(
@@ -73,6 +75,8 @@ public class Converter {
                     .endTime(convertEndTime(workflowDoc.getCompleteTime()))
                     .stdout("")
                     .stderr(convertErrorReport(workflowDoc.getErrorReport()))
+                    .success(workflowDoc.getSuccess())
+                    .duration(workflowDoc.getDuration())
                     .build())
             .build();
     return runLog;

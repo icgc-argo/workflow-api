@@ -107,9 +107,13 @@ public class ConverterTest {
         .completeTime(new Date())
         .state(STATE_COMPLETE)
         .repository(REPOSITORY)
+        .revision("master")
         .errorReport("No error found.")
         .exitStatus(0)
         .parameters(params)
+        .resume(false)
+        .success(true)
+        .duration(1000)
         .build();
   }
 }

@@ -37,4 +37,10 @@ public class Log {
 
   @JsonProperty("exit_code")
   private Integer exitCode;
+
+  @JsonProperty("success")
+  private Boolean success;
+
+  @JsonProperty("duration")
+  private Integer duration;
 }
