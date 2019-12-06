@@ -31,11 +31,23 @@ public class Converter {
 
   public static TaskLog taskDocumentToLog(@NonNull TaskDocument task) {
     return TaskLog.builder()
+        .taskId(task.getTaskId())
         .name(task.getName())
+        .process(task.getProcess())
+        .tag(task.getTag())
+        .container(task.getContainer())
+        .attempt(task.getAttempt())
+        .state(State.fromValue(task.getState()))
         .cmd(buildCommandLineList(task.getScript()))
-        .startTime(task.getStartTime().toString())
-        .endTime(convertEndTime(task.getCompleteTime()))
+        .submitTime(task.getSubmitTime().toString())
+        .startTime(getTimeOrEmpty(task.getStartTime()))
+        .endTime(getTimeOrEmpty(task.getCompleteTime()))
         .exitCode(task.getExit())
+        .workdir(task.getWorkdir())
+        .cpus(task.getCpus())
+        .memory(task.getMemory())
+        .duration(task.getDuration())
+        .realtime(task.getRealtime())
         // todo ticket #24 workflow-relay
         .stderr("")
         .stdout("")
@@ -53,45 +65,43 @@ public class Converter {
       @NonNull WorkflowDocument workflowDoc,
       @NonNull String workflowTypeVersion,
       @NonNull String workflowType) {
-    val runLog =
-        RunResponse.builder()
-            .runId(workflowDoc.getRunName())
-            .state(State.fromValue(workflowDoc.getState()))
-            // todo ticket #24
-            .outputs("")
-            // build RunRequest
-            .request(
-                RunRequest.builder()
-                    .workflowTypeVersion(workflowTypeVersion)
-                    .workflowType(workflowType)
-                    .workflowUrl(workflowDoc.getRepository())
-                    .workflowVersion(workflowDoc.getRevision())
-                    .workflowParams(workflowDoc.getParameters())
-                    .resume(workflowDoc.getResume())
-                    .build())
-            // build run log
-            .runLog(
-                RunLog.builder()
-                    .name(workflowDoc.getRunName())
-                    .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
-                    .exitCode(workflowDoc.getExitStatus())
-                    .startTime(workflowDoc.getStartTime().toString())
-                    .endTime(convertEndTime(workflowDoc.getCompleteTime()))
-                    .stdout("")
-                    .stderr(convertErrorReport(workflowDoc.getErrorReport()))
-                    .success(workflowDoc.getSuccess())
-                    .duration(workflowDoc.getDuration())
-                    .build())
-            .build();
-    return runLog;
+    return RunResponse.builder()
+        .runId(workflowDoc.getRunName())
+        .state(State.fromValue(workflowDoc.getState()))
+        // todo ticket #24
+        .outputs("")
+        // build RunRequest
+        .request(
+            RunRequest.builder()
+                .workflowTypeVersion(workflowTypeVersion)
+                .workflowType(workflowType)
+                .workflowUrl(workflowDoc.getRepository())
+                .workflowVersion(workflowDoc.getRevision())
+                .workflowParams(workflowDoc.getParameters())
+                .resume(workflowDoc.getResume())
+                .build())
+        // build run log
+        .runLog(
+            RunLog.builder()
+                .name(workflowDoc.getRunName())
+                .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
+                .exitCode(workflowDoc.getExitStatus())
+                .startTime(workflowDoc.getStartTime().toString())
+                .endTime(getTimeOrEmpty(workflowDoc.getCompleteTime()))
+                .stdout("")
+                .stderr(convertErrorReport(workflowDoc.getErrorReport()))
+                .success(workflowDoc.getSuccess())
+                .duration(workflowDoc.getDuration())
+                .build())
+        .build();
   }
 
   public static List<String> buildCommandLineList(@NonNull String commandLines) {
     return Arrays.asList(commandLines);
   }
 
-  public static String convertEndTime(Date endTime) {
-    return endTime == null ? "" : endTime.toString();
+  public static String getTimeOrEmpty(Date time) {
+    return time == null ? "" : time.toString();
   }
 
   public static String convertErrorReport(String errorReport) {

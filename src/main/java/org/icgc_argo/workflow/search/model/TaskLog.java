@@ -1,11 +1,11 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import lombok.*;
-
-import javax.validation.Valid;
 import java.util.List;
+import javax.validation.Valid;
+import lombok.*;
 
 /** Log and other info */
 @ApiModel(description = "Log and other info")
@@ -15,33 +15,44 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class TaskLog {
 
-  @JsonProperty("name")
+  private Integer taskId;
+
   private String name;
 
-  @JsonProperty("cmd")
-  @Valid
-  private List<String> cmd;
+  private String process;
 
-  @JsonProperty("start_time")
+  private String tag;
+
+  private String container;
+
+  private Integer attempt;
+
+  private State state;
+
+  @Valid private List<String> cmd;
+
+  private String submitTime;
+
   private String startTime;
 
-  @JsonProperty("end_time")
   private String endTime;
 
-  @JsonProperty("stdout")
   private String stdout;
 
-  @JsonProperty("stderr")
   private String stderr;
 
-  @JsonProperty("exit_code")
   private Integer exitCode;
 
-  @JsonProperty("success")
-  private Boolean success;
+  private String workdir;
 
-  @JsonProperty("duration")
+  private Integer cpus;
+
+  private Integer memory;
+
   private Integer duration;
+
+  private Integer realtime;
 }
