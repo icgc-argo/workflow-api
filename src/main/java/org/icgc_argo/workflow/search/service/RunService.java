@@ -1,14 +1,18 @@
 package org.icgc_argo.workflow.search.service;
 
 import static java.lang.String.format;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.Converter.*;
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
+import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
+import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

@@ -1,6 +1,7 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
@@ -17,23 +18,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class RunRequest {
 
-  @JsonProperty("workflow_params")
   private Object workflowParams;
 
-  @JsonProperty("workflow_type")
   private String workflowType;
 
-  @JsonProperty("workflow_type_version")
   private String workflowTypeVersion;
 
-  @JsonProperty("workflow_url")
   private String workflowUrl;
 
-  @JsonProperty("workflow_version")
   private String workflowVersion;
 
-  @JsonProperty("resume")
   private Boolean resume;
 }

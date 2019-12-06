@@ -1,6 +1,7 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
@@ -13,12 +14,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class DefaultWorkflowEngineParameter {
 
-  @JsonProperty("name")
-  @NonNull
-  private String name;
+  @NonNull private String name;
 
-  @JsonProperty("type")
   private String type;
 }

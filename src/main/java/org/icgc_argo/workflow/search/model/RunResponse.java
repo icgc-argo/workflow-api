@@ -1,6 +1,7 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import lombok.*;
 
@@ -10,23 +11,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class RunResponse {
-  @JsonProperty("run_id")
-  @NonNull
-  private String runId;
+  @NonNull private String runId;
 
-  @JsonProperty("request")
   private RunRequest request;
 
-  @JsonProperty("state")
   private State state;
 
-  @JsonProperty("run_log")
   private RunLog runLog;
 
-  @JsonProperty("task_logs")
   private List<TaskLog> taskLogs;
 
-  @JsonProperty("outputs")
   private Object outputs;
 }

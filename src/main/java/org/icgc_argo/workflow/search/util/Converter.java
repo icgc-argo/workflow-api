@@ -1,10 +1,14 @@
 package org.icgc_argo.workflow.search.util;
 
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
+import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
 import static org.icgc_argo.workflow.search.model.State.fromValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
