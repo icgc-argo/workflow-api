@@ -71,7 +71,7 @@ public class RunService {
     return convertSourceMapToRunStatus(map);
   }
 
-  public RunLog getRunLog(@NonNull String runId) {
+  public RunResponse getRunLog(@NonNull String runId) {
     val workflowDoc =
         getWorkflowDocumentById(runId)
             .orElseThrow(
@@ -167,7 +167,7 @@ public class RunService {
     }
   }
 
-  private List<Log> buildTaskLogs(@NonNull List<TaskDocument> taskList) {
+  private List<TaskLog> buildTaskLogs(@NonNull List<TaskDocument> taskList) {
     return taskList.stream().map(Converter::taskDocumentToLog).collect(Collectors.toList());
   }
 

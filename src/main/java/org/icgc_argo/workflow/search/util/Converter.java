@@ -25,8 +25,8 @@ public class Converter {
     return mapper.readValue(hit.getSourceAsString(), TaskDocument.class);
   }
 
-  public static Log taskDocumentToLog(@NonNull TaskDocument task) {
-    return Log.builder()
+  public static TaskLog taskDocumentToLog(@NonNull TaskDocument task) {
+    return TaskLog.builder()
         .name(task.getName())
         .cmd(buildCommandLineList(task.getScript()))
         .startTime(task.getStartTime().toString())
@@ -45,12 +45,12 @@ public class Converter {
         .build();
   }
 
-  public static RunLog buildRunLog(
+  public static RunResponse buildRunLog(
       @NonNull WorkflowDocument workflowDoc,
       @NonNull String workflowTypeVersion,
       @NonNull String workflowType) {
     val runLog =
-        RunLog.builder()
+        RunResponse.builder()
             .runId(workflowDoc.getRunName())
             .state(State.fromValue(workflowDoc.getState()))
             // todo ticket #24
@@ -67,7 +67,7 @@ public class Converter {
                     .build())
             // build run log
             .runLog(
-                Log.builder()
+                RunLog.builder()
                     .name(workflowDoc.getRunName())
                     .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
                     .exitCode(workflowDoc.getExitStatus())

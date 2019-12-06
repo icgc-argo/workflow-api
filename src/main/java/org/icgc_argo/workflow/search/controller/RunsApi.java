@@ -20,13 +20,13 @@ public interface RunsApi {
       nickname = "getRunLog",
       notes =
           "This endpoint provides detailed information about a given workflow run. The returned result has information about the outputs produced by this workflow (if available), a log object which allows the stderr and stdout to be retrieved, a log array so stderr/stdout for individual tasks can be retrieved, and the overall state of the workflow run (e.g. RUNNING, see the State section).",
-      response = RunLog.class,
+      response = RunResponse.class,
       tags = {
         "WorkflowExecutionService",
       })
   @ApiResponses(
       value = {
-        @ApiResponse(code = 200, message = "", response = RunLog.class),
+        @ApiResponse(code = 200, message = "", response = RunResponse.class),
         @ApiResponse(
             code = 401,
             message = "The request is unauthorized.",
@@ -49,7 +49,7 @@ public interface RunsApi {
       produces = {"application/json"},
       consumes = {"application/json"},
       method = RequestMethod.GET)
-  ResponseEntity<RunLog> getRunLog(
+  ResponseEntity<RunResponse> getRunLog(
       @ApiParam(value = "", required = true) @PathVariable("run_id") String runId);
 
   @ApiOperation(

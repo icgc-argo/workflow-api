@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.controller.RunsApi;
 import org.icgc_argo.workflow.search.model.RunListResponse;
-import org.icgc_argo.workflow.search.model.RunLog;
+import org.icgc_argo.workflow.search.model.RunResponse;
 import org.icgc_argo.workflow.search.model.RunStatus;
 import org.icgc_argo.workflow.search.model.ServiceInfo;
 import org.icgc_argo.workflow.search.service.RunService;
@@ -41,9 +41,9 @@ public class RunsApiController implements RunsApi {
         @ApiResponse(
             code = 200,
             message = "Get detailed info about a workflow run",
-            response = RunLog.class)
+            response = RunResponse.class)
       })
-  public ResponseEntity<RunLog> getRunLog(
+  public ResponseEntity<RunResponse> getRunLog(
       @ApiParam(required = true) @PathVariable("run_id") @NonNull String runId) {
     val response = runService.getRunLog(runId);
     return new ResponseEntity<>(response, HttpStatus.OK);

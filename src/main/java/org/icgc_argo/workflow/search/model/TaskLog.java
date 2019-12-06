@@ -2,9 +2,10 @@ package org.icgc_argo.workflow.search.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
-import java.util.List;
-import javax.validation.Valid;
 import lombok.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 /** Log and other info */
 @ApiModel(description = "Log and other info")
@@ -14,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class Log {
+public class TaskLog {
 
   @JsonProperty("name")
   private String name;
