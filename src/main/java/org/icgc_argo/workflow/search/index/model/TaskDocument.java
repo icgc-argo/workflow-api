@@ -1,6 +1,6 @@
 package org.icgc_argo.workflow.search.index.model;
 
-import java.util.Date;
+import java.time.Instant;
 import lombok.*;
 
 @Getter
@@ -39,13 +39,13 @@ public class TaskDocument {
   @NonNull private String state;
 
   /** When the command was submitted */
-  @NonNull private Date submitTime;
+  @NonNull private Instant submitTime;
 
   /** When the command started executing */
-  private Date startTime;
+  private Instant startTime;
 
   /** When the command stopped executing (completed, failed, or cancelled) */
-  private Date completeTime;
+  private Instant completeTime;
 
   /** Exit code of the program */
   @NonNull private Integer exit;

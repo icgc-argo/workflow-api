@@ -1,6 +1,6 @@
 package org.icgc_argo.workflow.search.index.model;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import lombok.*;
 
@@ -24,13 +24,13 @@ public class WorkflowDocument {
   @NonNull private Map<String, Object> parameters;
 
   /** When the command started executing */
-  @NonNull private Date startTime;
+  @NonNull private Instant startTime;
 
   /**
    * When the command stopped executing (completed, failed, or cancelled), completeTime does not
    * exist in ES when work flow is unfinished.
    */
-  private Date completeTime;
+  private Instant completeTime;
 
   /** The repository url */
   @NonNull private String repository;
