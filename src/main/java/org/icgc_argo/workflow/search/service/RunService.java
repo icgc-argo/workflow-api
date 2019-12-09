@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -162,9 +164,13 @@ public class RunService {
   private Optional<WorkflowDocument> getWorkflowDocumentById(@NonNull String runId) {
     try {
       val search = getWorkflowByIdAsJson(runId);
+
       val customMapper = new ObjectMapper();
       customMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      customMapper.registerModule(new JavaTimeModule());
+
       val doc = customMapper.readValue(search, WorkflowDocument.class);
+
       return Optional.of(doc);
     } catch (JsonProcessingException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());

@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -27,6 +29,7 @@ public class Converter {
   @SneakyThrows
   public static TaskDocument convertSearchHitToTaskDocument(@NonNull SearchHit hit) {
     val mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
     return mapper.readValue(hit.getSourceAsString(), TaskDocument.class);
   }
 
