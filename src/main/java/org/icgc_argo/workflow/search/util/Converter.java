@@ -5,8 +5,9 @@ import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
 import static org.icgc_argo.workflow.search.model.State.fromValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
@@ -100,8 +101,13 @@ public class Converter {
     return Arrays.asList(commandLines);
   }
 
-  public static String getTimeOrEmpty(Date time) {
-    return time == null ? "" : time.toString();
+  /**
+   * Check if time exists and that it is not zero (epoch time)
+   * @param datetime
+   * @return datetime as string
+   */
+  public static String getTimeOrEmpty(Instant datetime) {
+    return datetime == null ? "" : datetime.equals(Instant.EPOCH) ? "" : datetime.toString();
   }
 
   public static String convertErrorReport(String errorReport) {

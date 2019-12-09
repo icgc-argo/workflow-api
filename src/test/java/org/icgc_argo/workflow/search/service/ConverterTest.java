@@ -3,6 +3,7 @@ package org.icgc_argo.workflow.search.service;
 import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class ConverterTest {
             .container(TASK_CONTAINER)
             .attempt(TASK_ATTEMPT)
             .state(STATE_COMPLETE)
-            .submitTime(new Date())
+            .submitTime(Instant.now())
             .exit(0)
             .script(SCRIPT)
             .workdir(TASK_WORKDIR)
@@ -136,8 +137,8 @@ public class ConverterTest {
         .runId(RUN_ID)
         .runName(RUN_NAME)
         .commandLine(SCRIPT)
-        .startTime(new Date())
-        .completeTime(new Date())
+        .startTime(Instant.now())
+        .completeTime(Instant.now())
         .state(STATE_COMPLETE)
         .repository(REPOSITORY)
         .revision("master")
