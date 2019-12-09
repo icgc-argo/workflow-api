@@ -9,6 +9,7 @@ import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRun
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -165,9 +164,11 @@ public class RunService {
     try {
       val search = getWorkflowByIdAsJson(runId);
 
-      val customMapper = new ObjectMapper();
-      customMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      customMapper.registerModule(new JavaTimeModule());
+      val customMapper =
+          new ObjectMapper()
+              .registerModule(new JavaTimeModule())
+              .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
       val doc = customMapper.readValue(search, WorkflowDocument.class);
 

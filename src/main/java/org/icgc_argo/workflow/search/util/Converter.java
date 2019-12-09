@@ -4,14 +4,13 @@ import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
 import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
 import static org.icgc_argo.workflow.search.model.State.fromValue;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -28,8 +27,12 @@ public class Converter {
 
   @SneakyThrows
   public static TaskDocument convertSearchHitToTaskDocument(@NonNull SearchHit hit) {
-    val mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule());
+    val mapper =
+        new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     return mapper.readValue(hit.getSourceAsString(), TaskDocument.class);
   }
 
@@ -106,6 +109,7 @@ public class Converter {
 
   /**
    * Check if time exists and that it is not zero (epoch time)
+   *
    * @param datetime
    * @return datetime as string
    */

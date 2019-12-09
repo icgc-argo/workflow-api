@@ -4,7 +4,6 @@ import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRun
 import static org.junit.Assert.*;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,7 +38,6 @@ public class ConverterTest {
   private static final Integer TASK_MEM = 1024;
   private static final Integer TASK_DURATION = 2000;
   private static final Integer TASK_REALTIME = 1098;
-
 
   @Test
   public void TestConvertSourceMapToRunStatus() {
