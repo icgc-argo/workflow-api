@@ -1,6 +1,7 @@
 package org.icgc_argo.workflow.search.model;
 
-import lombok.*;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * - UNKNOWN: The state of the task is unknown. This provides a safe default for messages where this

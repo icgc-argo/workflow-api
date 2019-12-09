@@ -1,8 +1,10 @@
 package org.icgc_argo.workflow.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.*;
 
@@ -19,43 +21,22 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ServiceInfo {
 
-  @JsonProperty("auth_instructions_url")
-  @NonNull
-  private String authInstructionsUrl;
+  @NonNull private String authInstructionsUrl;
 
-  @JsonProperty("contact_info_url")
-  @NonNull
-  private String contactInfoUrl;
+  @NonNull private String contactInfoUrl;
 
-  @JsonProperty("default_workflow_engine_parameters")
-  @Valid
-  @NonNull
-  private List<DefaultWorkflowEngineParameter> defaultWorkflowEngineParameters;
+  @Valid @NonNull private List<DefaultWorkflowEngineParameter> defaultWorkflowEngineParameters;
 
-  @JsonProperty("supported_filesystem_protocols")
-  @Valid
-  @NonNull
-  private List<String> supportedFilesystemProtocols;
+  @Valid @NonNull private List<String> supportedFilesystemProtocols;
 
-  @JsonProperty("supported_wes_versions")
-  @Valid
-  @NonNull
-  private List<String> supportedWesVersions;
+  @Valid @NonNull private List<String> supportedWesVersions;
 
-  @JsonProperty("system_state_counts")
-  @Valid
-  @NonNull
-  private Map<String, Long> systemStateCounts;
+  @Valid @NonNull private Map<String, Long> systemStateCounts;
 
-  @JsonProperty("workflow_engine_versions")
-  @Valid
-  @NonNull
-  private Map<String, String> workflowEngineVersions;
+  @Valid @NonNull private Map<String, String> workflowEngineVersions;
 
-  @JsonProperty("workflow_type_versions")
-  @Valid
-  @NonNull
-  private Map<String, String> workflowTypeVersions;
+  @Valid @NonNull private Map<String, String> workflowTypeVersions;
 }
