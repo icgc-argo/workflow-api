@@ -1,8 +1,7 @@
 package org.icgc_argo.workflow.search.service;
 
 import static java.lang.String.format;
-import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
-import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
 import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
 import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 
@@ -27,6 +26,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
@@ -119,6 +119,7 @@ public class RunService {
   private SearchHit[] getSearchHits(@NonNull String index) {
     try {
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+      searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
       searchSourceBuilder.query(QueryBuilders.matchAllQuery()).size(DEFAULT_HIT_SIZE);
       val searchResponse = search(searchSourceBuilder, index);
       val hits = searchResponse.getHits().getHits();
