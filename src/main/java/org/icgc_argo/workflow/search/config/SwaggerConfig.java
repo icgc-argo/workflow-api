@@ -49,7 +49,7 @@ public class SwaggerConfig {
   @Component
   @ConfigurationProperties(prefix = "swagger")
   class SwaggerProperties {
-    /** Specify host if ego is running behind proxy. */
+    /** Specify host if Wrokflwo Search is running behind proxy. */
     @Setter @Getter private String host = "";
 
     /**
