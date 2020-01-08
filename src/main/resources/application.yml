@@ -30,4 +30,4 @@ service-info:
   workflowEngineVersions:
     nextflow: "19.10.0"
   workflowTypeVersions:
-    pcawg-bwa-mem: "0.0.1"
+    nextflow-dna-seq-alignment: "0.0.1"

@@ -16,11 +16,25 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class RunLog {
+public class TaskLog {
+
+  private Integer taskId;
 
   private String name;
 
+  private String process;
+
+  private String tag;
+
+  private String container;
+
+  private Integer attempt;
+
+  private State state;
+
   @Valid private List<String> cmd;
+
+  private String submitTime;
 
   private String startTime;
 
@@ -32,7 +46,13 @@ public class RunLog {
 
   private Integer exitCode;
 
-  private Boolean success;
+  private String workdir;
+
+  private Integer cpus;
+
+  private Integer memory;
 
   private Integer duration;
+
+  private Integer realtime;
 }

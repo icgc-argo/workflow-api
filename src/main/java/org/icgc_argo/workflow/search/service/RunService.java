@@ -2,13 +2,17 @@ package org.icgc_argo.workflow.search.service;
 
 import static java.lang.String.format;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.Converter.*;
+import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +26,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
@@ -71,7 +76,7 @@ public class RunService {
     return convertSourceMapToRunStatus(map);
   }
 
-  public RunLog getRunLog(@NonNull String runId) {
+  public RunResponse getRunLog(@NonNull String runId) {
     val workflowDoc =
         getWorkflowDocumentById(runId)
             .orElseThrow(
@@ -114,6 +119,7 @@ public class RunService {
   private SearchHit[] getSearchHits(@NonNull String index) {
     try {
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+      searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
       searchSourceBuilder.query(QueryBuilders.matchAllQuery()).size(DEFAULT_HIT_SIZE);
       val searchResponse = search(searchSourceBuilder, index);
       val hits = searchResponse.getHits().getHits();
@@ -158,16 +164,22 @@ public class RunService {
   private Optional<WorkflowDocument> getWorkflowDocumentById(@NonNull String runId) {
     try {
       val search = getWorkflowByIdAsJson(runId);
-      val customMapper = new ObjectMapper();
-      customMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+      val customMapper =
+          new ObjectMapper()
+              .registerModule(new JavaTimeModule())
+              .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+              .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
       val doc = customMapper.readValue(search, WorkflowDocument.class);
+
       return Optional.of(doc);
     } catch (JsonProcessingException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
-  private List<Log> buildTaskLogs(@NonNull List<TaskDocument> taskList) {
+  private List<TaskLog> buildTaskLogs(@NonNull List<TaskDocument> taskList) {
     return taskList.stream().map(Converter::taskDocumentToLog).collect(Collectors.toList());
   }
 
