@@ -1,9 +1,9 @@
-FROM openjdk:11-jdk
+FROM openjdk:11-jdk as builder
 WORKDIR /usr/src/app
 ADD . .
-RUN ./mvnw package
+RUN ./mvnw clean package
 
 FROM openjdk:11-jre-slim
-COPY --from=0 /usr/src/app/target/workflow-search-*-SNAPSHOT.jar /usr/bin/workflow-search.jar
+COPY --from=builder /usr/src/app/target/workflow-search-*.jar /usr/bin/workflow-search.jar
 CMD ["java", "-ea", "-jar", "/usr/bin/workflow-search.jar"]
 EXPOSE 8082/tcp
