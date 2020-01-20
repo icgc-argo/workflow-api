@@ -23,13 +23,11 @@ public class RunRequest {
 
   private Object workflowParams;
 
+  private Object workflowEngineParams;
+
   private String workflowType;
 
   private String workflowTypeVersion;
 
   private String workflowUrl;
-
-  private String workflowVersion;
-
-  private Boolean resume;
 }
