@@ -83,9 +83,8 @@ public class Converter {
                 .workflowTypeVersion(workflowTypeVersion)
                 .workflowType(workflowType)
                 .workflowUrl(workflowDoc.getRepository())
-                .workflowVersion(workflowDoc.getRevision())
                 .workflowParams(workflowDoc.getParameters())
-                .resume(workflowDoc.getResume())
+                .workflowEngineParams(workflowDoc.getEngineParameters())
                 .build())
         // build run log
         .runLog(

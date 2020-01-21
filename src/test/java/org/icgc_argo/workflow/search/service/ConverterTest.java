@@ -131,6 +131,9 @@ public class ConverterTest {
     params.put("class", "File");
     params.put("path", "ftp://ftp-private.ebi.ac.uk/upload/foivos/test.txt");
 
+    val engineParams = new HashMap<String, Object>();
+    engineParams.put("revision", "test-branch-name");
+
     return WorkflowDocument.builder()
         .runId(RUN_ID)
         .runName(RUN_NAME)
@@ -139,11 +142,10 @@ public class ConverterTest {
         .completeTime(Instant.now())
         .state(STATE_COMPLETE)
         .repository(REPOSITORY)
-        .revision("master")
         .errorReport("No error found.")
         .exitStatus(0)
         .parameters(params)
-        .resume(false)
+        .engineParameters(engineParams)
         .success(true)
         .duration(1000)
         .build();
