@@ -125,7 +125,7 @@ public class RunService {
       val hits = searchResponse.getHits().getHits();
 
       NotFoundException.checkNotFound(
-          hits != null && hits.length > 0, format("Cannot find run log."));
+          hits != null && hits.length >= 0, format("Cannot find run log."));
 
       return hits;
     } catch (NotFoundException e) {
