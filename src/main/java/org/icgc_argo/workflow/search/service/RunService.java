@@ -5,7 +5,6 @@ import static org.icgc_argo.workflow.search.model.SearchFields.*;
 import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
 import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -133,7 +132,7 @@ public class RunService {
     }
   }
 
-  private SearchHit getWorkflowById(@NonNull String runId) {
+  public SearchHit getWorkflowById(@NonNull String runId) {
     try {
       val searchSourceBuilder = new SearchSourceBuilder();
       searchSourceBuilder.query(QueryBuilders.termQuery(RUN_NAME, runId)).size(DEFAULT_HIT_SIZE);
@@ -161,7 +160,7 @@ public class RunService {
     return search;
   }
 
-  private Optional<WorkflowDocument> getWorkflowDocumentById(@NonNull String runId) {
+  public Optional<WorkflowDocument> getWorkflowDocumentById(@NonNull String runId) {
     try {
       val search = getWorkflowByIdAsJson(runId);
 
@@ -174,7 +173,7 @@ public class RunService {
       val doc = customMapper.readValue(search, WorkflowDocument.class);
 
       return Optional.of(doc);
-    } catch (JsonProcessingException e) {
+    } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }

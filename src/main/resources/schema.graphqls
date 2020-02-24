@@ -1,0 +1,25 @@
+type Run {
+    runId: String!
+    analysisId: String
+    state: String
+    workDir: String
+    #    request: RunRequest
+}
+
+scalar JSON
+type RunRequest {
+    workflowUrl: String!
+    workflowParams: JSON!
+    workflowEngineParams: WorkflowEngineParams
+}
+
+type WorkflowEngineParams {
+    revision: String
+    resume: String
+    workDir: String
+    latest: Boolean
+}
+
+type Query {
+    runById(runId: String!): Run
+}

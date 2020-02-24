@@ -17,6 +17,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.search.SearchHit;
+import org.icgc_argo.workflow.search.graphql.model.Run;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.*;
@@ -99,6 +100,22 @@ public class Converter {
                 .success(workflowDoc.getSuccess())
                 .duration(workflowDoc.getDuration())
                 .build())
+        .build();
+  }
+
+  // Graphql converter that converts index pojo WorkflowDocument to graphql pojo Run
+  public static Run buildRun(@NonNull WorkflowDocument doc) {
+    return Run.builder()
+        .runId(doc.getRunName())
+        .state(doc.getState())
+        .analysisId(
+            doc.getParameters().get("analysis_id") != null
+                ? String.valueOf(doc.getParameters().get("analysis_id"))
+                : "")
+        .workDir(
+            doc.getEngineParameters().get("workDir") != null
+                ? String.valueOf(doc.getEngineParameters().get("workDir"))
+                : "")
         .build();
   }
 
