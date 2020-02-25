@@ -37,8 +37,7 @@ graphql:
     mapping: /graphql
     enabled: true
     corsEnabled: true
-
-graphql.playground:
-  enabled: true
-  cdn:
-    enabled: false
+  playground:
+    enabled: true
+    cdn:
+      enabled: false
