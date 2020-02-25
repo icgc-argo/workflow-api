@@ -10,6 +10,9 @@ elastic:
   port: 9200
   workflowIndex: workflow
   taskIndex: task
+  username: elastic
+  password: testing
+  useAuthentication: false
 
 service-info:
   authInstructionsUrl: "https://example.com/auth"

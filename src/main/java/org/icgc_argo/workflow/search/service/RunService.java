@@ -10,9 +10,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +46,9 @@ public class RunService {
 
   private final String workflowIndex;
   private final String taskIndex;
+  private final String userName;
+  private final String password;
+  private final boolean useAuthentication;
   private final int DEFAULT_HIT_SIZE = 100;
 
   @Autowired
@@ -59,6 +60,9 @@ public class RunService {
     this.serviceInfoProperties = serviceInfoProperties;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
     this.taskIndex = elasticsearchProperties.getTaskIndex();
+    this.userName = elasticsearchProperties.getUsername();
+    this.password = elasticsearchProperties.getPassword();
+    this.useAuthentication = elasticsearchProperties.getUseAuthentication();
   }
 
   public RunListResponse listRuns() {
@@ -109,7 +113,18 @@ public class RunService {
     try {
       SearchRequest searchRequest = new SearchRequest(index);
       searchRequest.source(builder);
-      val searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      RequestOptions options;
+      if (useAuthentication) {
+        val token = Base64.getEncoder().encode((userName + ":" + password).getBytes());
+        options =
+            RequestOptions.DEFAULT
+                .toBuilder()
+                .addHeader("Authorization", Arrays.toString(token))
+                .build();
+      } else {
+        options = RequestOptions.DEFAULT;
+      }
+      val searchResponse = client.search(searchRequest, options);
       return searchResponse;
     } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
