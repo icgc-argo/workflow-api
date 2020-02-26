@@ -10,9 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class ElasticsearchProperties {
   String host;
   Integer port;
-  String workflowIndex;
-  String taskIndex;
+  Boolean useHttps;
+  Boolean useAuthentication;
   String username;
   String password;
-  Boolean useAuthentication;
+  String workflowIndex;
+  String taskIndex;
 }

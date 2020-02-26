@@ -3,16 +3,17 @@ spring:
     name: Workflow Search
 
 server:
-  port : 8082
+  port : 8080
 
 elastic:
   host: localhost
   port: 9200
-  workflowIndex: workflow
-  taskIndex: task
+  useHttps: false
+  useAuthentication: false
   username: elastic
   password: testing
-  useAuthentication: false
+  workflowIndex: workflow
+  taskIndex: task
 
 service-info:
   authInstructionsUrl: "https://example.com/auth"

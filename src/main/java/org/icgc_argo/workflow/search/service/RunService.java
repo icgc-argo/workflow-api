@@ -1,19 +1,9 @@
 package org.icgc_argo.workflow.search.service;
 
-import static java.lang.String.format;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -36,6 +26,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 
 @Slf4j
 @Service
@@ -113,19 +116,7 @@ public class RunService {
     try {
       SearchRequest searchRequest = new SearchRequest(index);
       searchRequest.source(builder);
-      RequestOptions options;
-      if (useAuthentication) {
-        val token = Base64.getEncoder().encode((userName + ":" + password).getBytes());
-        options =
-            RequestOptions.DEFAULT
-                .toBuilder()
-                .addHeader("Authorization", Arrays.toString(token))
-                .build();
-      } else {
-        options = RequestOptions.DEFAULT;
-      }
-      val searchResponse = client.search(searchRequest, options);
-      return searchResponse;
+      return client.search(searchRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
