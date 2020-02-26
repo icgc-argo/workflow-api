@@ -8,9 +8,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "elastic")
 public class ElasticsearchProperties {
-
   String host;
   Integer port;
+  Boolean useHttps;
+  Boolean useAuthentication;
+  String username;
+  String password;
   String workflowIndex;
   String taskIndex;
 }

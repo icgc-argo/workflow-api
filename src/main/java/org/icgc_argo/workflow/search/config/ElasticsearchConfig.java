@@ -2,7 +2,13 @@ package org.icgc_argo.workflow.search.config;
 
 import lombok.NonNull;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,20 +19,61 @@ public class ElasticsearchConfig {
 
   private ElasticsearchProperties properties;
 
+  private static final Integer connectTimeout = 15_000;
+  private static final Integer connectionRequestTimeout = 15_000;
+  private static final Integer socketTimeout = 15_000;
+
   @Autowired
   public ElasticsearchConfig(@NonNull ElasticsearchProperties properties) {
     this.properties = properties;
   }
 
-  @Bean
-  public RestHighLevelClient restHighLevelClient() {
+  private RestHighLevelClient secureRestHighLevelClient() {
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+    credentialsProvider.setCredentials(
+        AuthScope.ANY,
+        new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword()));
+
     return new RestHighLevelClient(
-        RestClient.builder(new HttpHost(properties.getHost(), properties.getPort()))
+        RestClient.builder(
+                new HttpHost(
+                    properties.getHost(),
+                    properties.getPort(),
+                    properties.getUseHttps() ? "https" : "http"))
             .setRequestConfigCallback(
                 config ->
                     config
-                        .setConnectTimeout(15_000)
-                        .setConnectionRequestTimeout(15_000)
-                        .setSocketTimeout(15_000)));
+                        .setConnectTimeout(connectTimeout)
+                        .setConnectionRequestTimeout(connectionRequestTimeout)
+                        .setSocketTimeout(socketTimeout))
+            .setHttpClientConfigCallback(
+                new HttpClientConfigCallback() {
+                  @Override
+                  public HttpAsyncClientBuilder customizeHttpClient(
+                      HttpAsyncClientBuilder httpClientBuilder) {
+                    return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                  }
+                }));
+  }
+
+  @Bean
+  public RestHighLevelClient restHighLevelClient() {
+
+    if (properties.getUseAuthentication()) {
+      return secureRestHighLevelClient();
+    }
+
+    return new RestHighLevelClient(
+        RestClient.builder(
+                new HttpHost(
+                    properties.getHost(),
+                    properties.getPort(),
+                    properties.getUseHttps() ? "https" : "http"))
+            .setRequestConfigCallback(
+                config ->
+                    config
+                        .setConnectTimeout(connectTimeout)
+                        .setConnectionRequestTimeout(connectionRequestTimeout)
+                        .setSocketTimeout(socketTimeout)));
   }
 }
