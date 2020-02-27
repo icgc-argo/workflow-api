@@ -47,6 +47,9 @@ public class RunService {
 
   private final String workflowIndex;
   private final String taskIndex;
+  private final String userName;
+  private final String password;
+  private final boolean useAuthentication;
   private final int DEFAULT_HIT_SIZE = 100;
 
   @Autowired
@@ -58,6 +61,9 @@ public class RunService {
     this.serviceInfoProperties = serviceInfoProperties;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
     this.taskIndex = elasticsearchProperties.getTaskIndex();
+    this.userName = elasticsearchProperties.getUsername();
+    this.password = elasticsearchProperties.getPassword();
+    this.useAuthentication = elasticsearchProperties.getUseAuthentication();
   }
 
   public RunListResponse listRuns() {
@@ -108,8 +114,7 @@ public class RunService {
     try {
       SearchRequest searchRequest = new SearchRequest(index);
       searchRequest.source(builder);
-      val searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      return searchResponse;
+      return client.search(searchRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }

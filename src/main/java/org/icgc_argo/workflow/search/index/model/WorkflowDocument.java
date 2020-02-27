@@ -30,7 +30,7 @@ public class WorkflowDocument {
 
   /**
    * When the command stopped executing (completed, failed, or cancelled), completeTime does not
-   * exist in ES when work flow is unfinished.
+   * exist in ES when workflow is unfinished.
    */
   private Instant completeTime;
 

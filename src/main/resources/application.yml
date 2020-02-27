@@ -3,11 +3,15 @@ spring:
     name: Workflow Search
 
 server:
-  port : 8082
+  port : 8080
 
 elastic:
   host: localhost
   port: 9200
+  useHttps: false
+  useAuthentication: false
+  username: elastic
+  password: testing
   workflowIndex: workflow
   taskIndex: task
 
