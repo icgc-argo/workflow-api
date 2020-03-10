@@ -1,15 +1,51 @@
-type Run {
-    runId: String!
-    analysisId: String
+type RunLog {
+    cmd: [String]
+    endTime: String
+    startTime: String
+    exitCode: Int
+    name: String
+    stderr: String
+    stdout: String
+    success: Boolean
+    duration: Int
+}
+
+type TaskLog {
+    taskId: Int
+    name: String
+    process: String
+    tag: String
+    container: String
+    attempt: Int
     state: String
-    workDir: String
-    #    request: RunRequest
+    cmd: [String]
+    submitTime: String
+    startTime: String
+    endTime: String
+    stderr: String
+    stdout: String
+    exitCode: Int
+    workdir: String
+    cpus: Int
+    memory: Int
+    duration: Int
+    realtime: Int
+}
+
+type RunResponse {
+    runId: ID!
+    state: String
+    runLog: RunLog
+    request: RunRequest
+    taskLogs: [TaskLog]
 }
 
 scalar JSON
 type RunRequest {
     workflowUrl: String!
     workflowParams: JSON!
+    workflowTypeVersion: String
+    workflowType: String
     workflowEngineParams: WorkflowEngineParams
 }
 
@@ -20,6 +56,31 @@ type WorkflowEngineParams {
     latest: Boolean
 }
 
+type RunStatus {
+    runId: String!
+    state: String!
+}
+
+type RunListResponse {
+    runs: [RunStatus]!
+}
+
+type ServiceInfo {
+    authInstructionsUrl: String!
+    contactInfoUrl: String!
+    defaultWorkflowEngineParameters: [DefaultWorkflowEngineParameter]!
+    supportedFilesystemProtocols: [String]!
+    supportedWesVersions: [String]!
+}
+
+type DefaultWorkflowEngineParameter {
+    name: String!
+    type: String
+}
+
 type Query {
-    runById(runId: String!): Run
+    runById(runId: String!): RunResponse
+    runStatus(runId: String!): RunStatus
+    listRuns(pageSize: Int = 10): RunListResponse
+    serviceInfo: ServiceInfo
 }

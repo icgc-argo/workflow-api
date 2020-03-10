@@ -29,9 +29,21 @@ public class GraphQLProvider {
 
   private RunDataFetcher runDataFetcher;
 
+  private RunStatusDataFetcher runStatusDataFetcher;
+
+  private ListRunsDataFetcher listRunsDataFetcher;
+
+  private ServiceInfoDataFetcher serviceInfoDataFetcher;
+
   @Autowired
-  public GraphQLProvider(@NonNull RunDataFetcher runDataFetcher) {
+  public GraphQLProvider(@NonNull RunDataFetcher runDataFetcher,
+                         @NonNull RunStatusDataFetcher runStatusDataFetcher,
+                         @NonNull ListRunsDataFetcher listRunsDataFetcher,
+                         @NonNull ServiceInfoDataFetcher serviceInfoDataFetcher) {
     this.runDataFetcher = runDataFetcher;
+    this.runStatusDataFetcher = runStatusDataFetcher;
+    this.listRunsDataFetcher = listRunsDataFetcher;
+    this.serviceInfoDataFetcher = serviceInfoDataFetcher;
   }
 
   @Bean
@@ -58,6 +70,9 @@ public class GraphQLProvider {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(ExtendedScalars.Json)
         .type(newTypeWiring("Query").dataFetcher("runById", runDataFetcher))
+        .type(newTypeWiring("Query").dataFetcher("runStatus", runStatusDataFetcher))
+        .type(newTypeWiring("Query").dataFetcher("listRuns", listRunsDataFetcher))
+        .type(newTypeWiring("Query").dataFetcher("serviceInfo", serviceInfoDataFetcher))
         .build();
   }
 }
