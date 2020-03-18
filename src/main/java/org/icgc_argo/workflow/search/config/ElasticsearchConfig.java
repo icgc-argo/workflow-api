@@ -1,6 +1,7 @@
 package org.icgc_argo.workflow.search.config;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class ElasticsearchConfig {
 
   private ElasticsearchProperties properties;
@@ -62,6 +64,8 @@ public class ElasticsearchConfig {
     if (properties.getUseAuthentication()) {
       return secureRestHighLevelClient();
     }
+
+    log.debug(String.format("Connecting to Elasticsearch host %s, port %s.", properties.getHost(), properties.getPort()));
 
     return new RestHighLevelClient(
         RestClient.builder(
