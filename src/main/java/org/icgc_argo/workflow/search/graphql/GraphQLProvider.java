@@ -36,10 +36,11 @@ public class GraphQLProvider {
   private ServiceInfoDataFetcher serviceInfoDataFetcher;
 
   @Autowired
-  public GraphQLProvider(@NonNull RunDataFetcher runDataFetcher,
-                         @NonNull RunStatusDataFetcher runStatusDataFetcher,
-                         @NonNull ListRunsDataFetcher listRunsDataFetcher,
-                         @NonNull ServiceInfoDataFetcher serviceInfoDataFetcher) {
+  public GraphQLProvider(
+      @NonNull RunDataFetcher runDataFetcher,
+      @NonNull RunStatusDataFetcher runStatusDataFetcher,
+      @NonNull ListRunsDataFetcher listRunsDataFetcher,
+      @NonNull ServiceInfoDataFetcher serviceInfoDataFetcher) {
     this.runDataFetcher = runDataFetcher;
     this.runStatusDataFetcher = runStatusDataFetcher;
     this.listRunsDataFetcher = listRunsDataFetcher;
