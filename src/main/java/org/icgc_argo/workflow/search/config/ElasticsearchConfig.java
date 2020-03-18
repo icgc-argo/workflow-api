@@ -65,7 +65,7 @@ public class ElasticsearchConfig {
       return secureRestHighLevelClient();
     }
 
-    log.debug(String.format("Connecting to Elasticsearch host %s, port %s.", properties.getHost(), properties.getPort()));
+    log.info(String.format("Connecting to Elasticsearch host %s, port %s.", properties.getHost(), properties.getPort()));
 
     return new RestHighLevelClient(
         RestClient.builder(
