@@ -16,7 +16,7 @@ public class ListRunsDataFetcher implements DataFetcher<RunListResponse> {
   private RunService runService;
 
   @Autowired
-  public ListRunsDataFetcher(@NonNull RunService runService){
+  public ListRunsDataFetcher(@NonNull RunService runService) {
     this.runService = runService;
   }
 

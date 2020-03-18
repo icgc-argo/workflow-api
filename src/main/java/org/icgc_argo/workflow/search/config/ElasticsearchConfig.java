@@ -28,6 +28,10 @@ public class ElasticsearchConfig {
   @Autowired
   public ElasticsearchConfig(@NonNull ElasticsearchProperties properties) {
     this.properties = properties;
+    log.info(
+        String.format(
+            "Connecting to Elasticsearch host %s, port %s.",
+            properties.getHost(), properties.getPort()));
   }
 
   private RestHighLevelClient secureRestHighLevelClient() {
@@ -64,8 +68,6 @@ public class ElasticsearchConfig {
     if (properties.getUseAuthentication()) {
       return secureRestHighLevelClient();
     }
-
-    log.info(String.format("Connecting to Elasticsearch host %s, port %s.", properties.getHost(), properties.getPort()));
 
     return new RestHighLevelClient(
         RestClient.builder(

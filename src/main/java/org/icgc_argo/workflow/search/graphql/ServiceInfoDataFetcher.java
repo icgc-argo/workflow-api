@@ -16,7 +16,7 @@ public class ServiceInfoDataFetcher implements DataFetcher<ServiceInfo> {
   private RunService runService;
 
   @Autowired
-  public ServiceInfoDataFetcher(@NonNull RunService runService){
+  public ServiceInfoDataFetcher(@NonNull RunService runService) {
     this.runService = runService;
   }
 

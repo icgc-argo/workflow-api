@@ -1,6 +1,5 @@
 package org.icgc_argo.workflow.search.graphql;
 
-
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.NonNull;
