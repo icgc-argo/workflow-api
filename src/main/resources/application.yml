@@ -2,6 +2,11 @@ spring:
   application:
     name: Workflow Search
 
+logging:
+  level:
+#    org.icgc_argo.workflow.search.config : debug
+    root: debug
+
 server:
   port : 8080
 
