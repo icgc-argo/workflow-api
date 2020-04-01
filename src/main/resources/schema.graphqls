@@ -62,7 +62,7 @@ type RunStatus {
 }
 
 type RunListResponse {
-    runs: [RunStatus]!
+    runs: [RunResponse]!
 }
 
 type ServiceInfo {
