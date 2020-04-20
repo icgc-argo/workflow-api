@@ -1,9 +1,11 @@
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.wes;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import lombok.*;
+import org.icgc_argo.workflow.search.model.State;
+import org.icgc_argo.workflow.search.model.TaskLog;
 
 @Data
 @Builder

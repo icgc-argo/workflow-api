@@ -1,86 +1,27 @@
-type RunLog {
-    cmd: [String]
-    endTime: String
-    startTime: String
-    exitCode: Int
-    name: String
-    stderr: String
-    stdout: String
-    success: Boolean
-    duration: Int
-}
-
-type TaskLog {
-    taskId: Int
-    name: String
-    process: String
-    tag: String
-    container: String
-    attempt: Int
-    state: String
-    cmd: [String]
-    submitTime: String
-    startTime: String
-    endTime: String
-    stderr: String
-    stdout: String
-    exitCode: Int
-    workdir: String
-    cpus: Int
-    memory: Int
-    duration: Int
-    realtime: Int
-}
-
-type RunResponse {
-    runId: ID!
-    state: String
-    runLog: RunLog
-    request: RunRequest
-    taskLogs: [TaskLog]
-}
-
 scalar JSON
-type RunRequest {
-    workflowUrl: String!
-    workflowParams: JSON!
-    workflowTypeVersion: String
-    workflowType: String
-    workflowEngineParams: WorkflowEngineParams
+
+type Run {
+    runId: ID!
+    runName: String
+    startTime: String
+    state: String
+    success: Boolean
+    exitStatus: Int
+    errorReport: String
+    completeTime: String
+    commandLine: String
+    engineParameters: EngineParameters
+    parameters: JSON
 }
 
-type WorkflowEngineParams {
-    revision: String
+type EngineParameters {
+    launchDir: String
+    projectDir: String
     resume: String
+    revision: String
     workDir: String
-    latest: Boolean
-}
-
-type RunStatus {
-    runId: String!
-    state: String!
-}
-
-type RunListResponse {
-    runs: [RunStatus]!
-}
-
-type ServiceInfo {
-    authInstructionsUrl: String!
-    contactInfoUrl: String!
-    defaultWorkflowEngineParameters: [DefaultWorkflowEngineParameter]!
-    supportedFilesystemProtocols: [String]!
-    supportedWesVersions: [String]!
-}
-
-type DefaultWorkflowEngineParameter {
-    name: String!
-    type: String
 }
 
 type Query {
-    runById(runId: String!): RunResponse
-    runStatus(runId: String!): RunStatus
-    listRuns(pageSize: Int = 10): RunListResponse
-    serviceInfo: ServiceInfo
+    runs(runId: String, runName: String, state: String): [Run]
 }

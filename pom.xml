@@ -114,12 +114,12 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-spring-boot-starter-webmvc</artifactId>
-            <version>2019-06-24T11-47-27-31ab4f9</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
-            <version>2019-08-31T02-34-04-3decba9</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java-kickstart</groupId>

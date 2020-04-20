@@ -20,6 +20,10 @@ import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.*;
+import org.icgc_argo.workflow.search.model.wes.RunLog;
+import org.icgc_argo.workflow.search.model.wes.RunRequest;
+import org.icgc_argo.workflow.search.model.wes.RunResponse;
+import org.icgc_argo.workflow.search.model.wes.RunStatus;
 
 @Slf4j
 @UtilityClass

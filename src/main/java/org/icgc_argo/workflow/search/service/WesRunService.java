@@ -32,6 +32,10 @@ import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.*;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
+import org.icgc_argo.workflow.search.model.wes.RunListResponse;
+import org.icgc_argo.workflow.search.model.wes.RunResponse;
+import org.icgc_argo.workflow.search.model.wes.RunStatus;
+import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +44,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
-public class RunService {
+public class WesRunService {
 
   private final RestHighLevelClient client;
   private ServiceInfoProperties serviceInfoProperties;
@@ -53,7 +57,7 @@ public class RunService {
   private final int DEFAULT_HIT_SIZE = 100;
 
   @Autowired
-  public RunService(
+  public WesRunService(
       @NonNull RestHighLevelClient client,
       @NonNull ElasticsearchProperties elasticsearchProperties,
       @NonNull ServiceInfoProperties serviceInfoProperties) {

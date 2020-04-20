@@ -14,37 +14,24 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import java.io.IOException;
 import java.net.URL;
 import javax.annotation.PostConstruct;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class GraphQLProvider {
+
+  /** State */
   private GraphQL graphQL;
 
   private GraphQLSchema graphQLSchema;
 
-  private RunDataFetcher runDataFetcher;
+  /** Dependencies */
+  private final RunsDataFetcher runsDataFetcher;
 
-  private RunStatusDataFetcher runStatusDataFetcher;
-
-  private ListRunsDataFetcher listRunsDataFetcher;
-
-  private ServiceInfoDataFetcher serviceInfoDataFetcher;
-
-  @Autowired
-  public GraphQLProvider(
-      @NonNull RunDataFetcher runDataFetcher,
-      @NonNull RunStatusDataFetcher runStatusDataFetcher,
-      @NonNull ListRunsDataFetcher listRunsDataFetcher,
-      @NonNull ServiceInfoDataFetcher serviceInfoDataFetcher) {
-    this.runDataFetcher = runDataFetcher;
-    this.runStatusDataFetcher = runStatusDataFetcher;
-    this.listRunsDataFetcher = listRunsDataFetcher;
-    this.serviceInfoDataFetcher = serviceInfoDataFetcher;
+  public GraphQLProvider(RunsDataFetcher runsDataFetcher) {
+    this.runsDataFetcher = runsDataFetcher;
   }
 
   @Bean
@@ -70,10 +57,7 @@ public class GraphQLProvider {
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(ExtendedScalars.Json)
-        .type(newTypeWiring("Query").dataFetcher("runById", runDataFetcher))
-        .type(newTypeWiring("Query").dataFetcher("runStatus", runStatusDataFetcher))
-        .type(newTypeWiring("Query").dataFetcher("listRuns", listRunsDataFetcher))
-        .type(newTypeWiring("Query").dataFetcher("serviceInfo", serviceInfoDataFetcher))
+        .type(newTypeWiring("Query").dataFetcher("runs", runsDataFetcher))
         .build();
   }
 }

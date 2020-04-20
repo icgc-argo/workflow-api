@@ -9,11 +9,11 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.controller.RunsApi;
-import org.icgc_argo.workflow.search.model.RunListResponse;
-import org.icgc_argo.workflow.search.model.RunResponse;
-import org.icgc_argo.workflow.search.model.RunStatus;
-import org.icgc_argo.workflow.search.model.ServiceInfo;
-import org.icgc_argo.workflow.search.service.RunService;
+import org.icgc_argo.workflow.search.model.wes.RunListResponse;
+import org.icgc_argo.workflow.search.model.wes.RunResponse;
+import org.icgc_argo.workflow.search.model.wes.RunStatus;
+import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
+import org.icgc_argo.workflow.search.service.WesRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +30,11 @@ import org.springframework.web.bind.annotation.RequestParam;
     tags = "WorkflowExecutionService")
 public class RunsApiController implements RunsApi {
 
-  private RunService runService;
+  private WesRunService wesRunService;
 
   @Autowired
-  public RunsApiController(RunService runService) {
-    this.runService = runService;
+  public RunsApiController(WesRunService wesRunService) {
+    this.wesRunService = wesRunService;
   }
 
   @GetMapping(value = "/runs/{run_id}")
@@ -47,7 +47,7 @@ public class RunsApiController implements RunsApi {
       })
   public ResponseEntity<RunResponse> getRunLog(
       @ApiParam(required = true) @PathVariable("run_id") @NonNull String runId) {
-    val response = runService.getRunLog(runId);
+    val response = wesRunService.getRunLog(runId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -62,7 +62,7 @@ public class RunsApiController implements RunsApi {
   public ResponseEntity<RunStatus> getRunStatus(
       @ApiParam(required = true) @PathVariable("run_id") String runId) {
 
-    val response = runService.getRunStatusById(runId);
+    val response = wesRunService.getRunStatusById(runId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -86,7 +86,7 @@ public class RunsApiController implements RunsApi {
           @RequestParam(value = "page_token", required = false)
           String pageToken) {
 
-    val response = runService.listRuns();
+    val response = wesRunService.listRuns();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -99,7 +99,7 @@ public class RunsApiController implements RunsApi {
             response = ServiceInfo.class)
       })
   public ResponseEntity<ServiceInfo> getServiceInfo() {
-    val response = runService.getServiceInfo();
+    val response = wesRunService.getServiceInfo();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

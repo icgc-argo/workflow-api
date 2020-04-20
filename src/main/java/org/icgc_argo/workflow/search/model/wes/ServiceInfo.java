@@ -1,4 +1,4 @@
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.wes;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
