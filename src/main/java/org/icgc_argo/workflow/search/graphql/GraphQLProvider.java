@@ -28,10 +28,13 @@ public class GraphQLProvider {
   private GraphQLSchema graphQLSchema;
 
   /** Dependencies */
-  private final RunsDataFetcher runsDataFetcher;
+  private final RunDataFetchers runDataFetchers;
 
-  public GraphQLProvider(RunsDataFetcher runsDataFetcher) {
-    this.runsDataFetcher = runsDataFetcher;
+  private final TaskDataFetchers taskDataFetchers;
+
+  public GraphQLProvider(RunDataFetchers runDataFetchers, TaskDataFetchers taskDataFetchers) {
+    this.runDataFetchers = runDataFetchers;
+    this.taskDataFetchers = taskDataFetchers;
   }
 
   @Bean
@@ -57,7 +60,11 @@ public class GraphQLProvider {
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(ExtendedScalars.Json)
-        .type(newTypeWiring("Query").dataFetcher("runs", runsDataFetcher))
+        .type(newTypeWiring("Query").dataFetcher("runs", runDataFetchers.getRunsDataFetcher()))
+        .type(newTypeWiring("Query").dataFetcher("tasks", taskDataFetchers.getTasksDataFetcher()))
+        .type(
+            newTypeWiring("Run").dataFetcher("tasks", taskDataFetchers.getNestedTaskDataFetcher()))
+        .type(newTypeWiring("Task").dataFetcher("run", runDataFetchers.getNestedRunDataFetcher()))
         .build();
   }
 }

@@ -13,7 +13,7 @@ import org.icgc_argo.workflow.search.model.wes.RunListResponse;
 import org.icgc_argo.workflow.search.model.wes.RunResponse;
 import org.icgc_argo.workflow.search.model.wes.RunStatus;
 import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
-import org.icgc_argo.workflow.search.service.WesRunService;
+import org.icgc_argo.workflow.search.service.wes.WesRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

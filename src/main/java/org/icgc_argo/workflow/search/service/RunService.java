@@ -9,24 +9,28 @@ import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.repository.RunRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class WorkflowService {
+public class RunService {
 
   private final RunRepository runRepository;
 
-  @Autowired
-  public WorkflowService(RunRepository runRepository) {
+  public RunService(RunRepository runRepository) {
     this.runRepository = runRepository;
   }
 
   public List<Run> getRuns(Map<String, Object> args) {
-    val getResponse = args.size() == 0 ? runRepository.getRuns() : runRepository.getRuns(args);
+    val response =
+        (args == null || args.size() == 0) ? runRepository.getRuns() : runRepository.getRuns(args);
+    val hitStream = Arrays.stream(response.getHits().getHits());
+    return hitStream.map(RunService::hitToRun).collect(toUnmodifiableList());
+  }
 
-    val hitStream = Arrays.stream(getResponse.getHits().getHits());
-    return hitStream.map(WorkflowService::hitToRun).collect(toUnmodifiableList());
+  public Run getRunById(String runId) {
+    val response = runRepository.getRuns(Map.of("runId", runId));
+    val runOpt = Arrays.stream(response.getHits().getHits()).map(RunService::hitToRun).findFirst();
+    return runOpt.orElse(null);
   }
 
   private static Run hitToRun(SearchHit hit) {

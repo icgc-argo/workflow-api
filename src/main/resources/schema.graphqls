@@ -12,6 +12,7 @@ type Run {
     commandLine: String
     engineParameters: EngineParameters
     parameters: JSON
+    tasks(taskId: String, state: String, tag: String): [Task]
 }
 
 type EngineParameters {
@@ -22,6 +23,28 @@ type EngineParameters {
     workDir: String
 }
 
+type Task {
+    taskId: ID
+    runId: String
+    runName: String
+    state: String
+    tag: String
+    container: String
+    attempt: Int
+    submitTime: String
+    startTime: String
+    completeTime: String
+    exit: Int
+    script: String
+    workdir: String
+    cpus: Int
+    memory: Int
+    duration: Int
+    realtime: Int
+    run: Run
+}
+
 type Query {
     runs(runId: String, runName: String, state: String): [Run]
+    tasks(runId: String, runName: String, state: String, tag: String, workDir: String): [Task]
 }

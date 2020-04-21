@@ -1,4 +1,4 @@
-package org.icgc_argo.workflow.search.service;
+package org.icgc_argo.workflow.search.service.wes;
 
 import static java.lang.String.format;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
@@ -30,12 +30,8 @@ import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
-import org.icgc_argo.workflow.search.model.*;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
-import org.icgc_argo.workflow.search.model.wes.RunListResponse;
-import org.icgc_argo.workflow.search.model.wes.RunResponse;
-import org.icgc_argo.workflow.search.model.wes.RunStatus;
-import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
+import org.icgc_argo.workflow.search.model.wes.*;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
