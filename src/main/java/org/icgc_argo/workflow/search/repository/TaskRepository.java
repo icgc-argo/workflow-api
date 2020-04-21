@@ -1,7 +1,7 @@
 package org.icgc_argo.workflow.search.repository;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.icgc_argo.workflow.search.model.SearchFields.START_TIME;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -39,18 +39,18 @@ public class TaskRepository {
     this.workflowIndex = elasticsearchProperties.getTaskIndex();
   }
 
-  public SearchResponse getTasks() {
+  public SearchResponse getTasks(Map<String, Object> filter, Map<String, Integer> page) {
+    final AbstractQueryBuilder<?> query =
+        (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(filter);
+
     val searchSourceBuilder = new SearchSourceBuilder();
     searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
-    searchSourceBuilder.query(matchAllQuery());
+    searchSourceBuilder.query(query);
 
-    return execute(searchSourceBuilder);
-  }
-
-  public SearchResponse getTasks(Map<String, Object> args) {
-    val searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
-    searchSourceBuilder.query(queryFromArgs(args));
+    if (page != null && page.size() != 0) {
+      searchSourceBuilder.size(page.get("size"));
+      searchSourceBuilder.from(page.get("from"));
+    }
 
     return execute(searchSourceBuilder);
   }
@@ -77,11 +77,11 @@ public class TaskRepository {
 
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
     return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
-        .put("runId", value -> new TermQueryBuilder("runId", value))
-        .put("runName", value -> new TermQueryBuilder("runName", value))
-        .put("state", value -> new TermQueryBuilder("state", value))
-        .put("tag", value -> new TermQueryBuilder("tag", value))
-        .put("workDir", value -> new TermQueryBuilder("workdir", value)) // Not that non-camelcasing
+        .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
+        .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
+        .put(STATE, value -> new TermQueryBuilder("state", value))
+        .put(TAG, value -> new TermQueryBuilder("tag", value))
+        .put(WORK_DIR, value -> new TermQueryBuilder("workdir", value)) // Note the non-camelcasing
         .build();
   }
 }

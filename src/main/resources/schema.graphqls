@@ -44,7 +44,26 @@ type Task {
     run: Run
 }
 
+input RunsFilter {
+    runId: String
+    runName: String
+    state: String
+}
+
+input TasksFilter {
+    runId: String
+    runName: String
+    state: String
+    tag: String
+    workDir: String
+}
+
+input Page {
+    size: Int!
+    from: Int!
+}
+
 type Query {
-    runs(runId: String, runName: String, state: String): [Run]
-    tasks(runId: String, runName: String, state: String, tag: String, workDir: String): [Task]
+    runs(filter: RunsFilter, page: Page): [Run]
+    tasks(filter: TasksFilter, page: Page): [Task]
 }

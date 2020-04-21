@@ -21,17 +21,17 @@ public class TaskService {
     this.taskRepository = taskRepository;
   }
 
-  public List<Task> getTasks(String runId, Map<String, Object> args) {
+  public List<Task> getTasks(String runId, Map<String, Object> filter, Map<String, Integer> page) {
     val mergedBuilder = ImmutableMap.<String, Object>builder();
     if (runId != null) {
       mergedBuilder.put("runId", runId);
     }
-    if (args != null && args.size() > 0) {
-      mergedBuilder.putAll(args);
+    if (filter != null && filter.size() > 0) {
+      mergedBuilder.putAll(filter);
     }
     val merged = mergedBuilder.build();
 
-    val response = merged.size() == 0 ? taskRepository.getTasks() : taskRepository.getTasks(merged);
+    val response = taskRepository.getTasks(merged, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
     return hitStream.map(TaskService::hitToTask).collect(toUnmodifiableList());
   }

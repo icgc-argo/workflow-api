@@ -20,15 +20,14 @@ public class RunService {
     this.runRepository = runRepository;
   }
 
-  public List<Run> getRuns(Map<String, Object> args) {
-    val response =
-        (args == null || args.size() == 0) ? runRepository.getRuns() : runRepository.getRuns(args);
+  public List<Run> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+    val response = runRepository.getRuns(filter, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
     return hitStream.map(RunService::hitToRun).collect(toUnmodifiableList());
   }
 
   public Run getRunById(String runId) {
-    val response = runRepository.getRuns(Map.of("runId", runId));
+    val response = runRepository.getRuns(Map.of("runId", runId), null);
     val runOpt = Arrays.stream(response.getHits().getHits()).map(RunService::hitToRun).findFirst();
     return runOpt.orElse(null);
   }
