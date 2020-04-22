@@ -1,86 +1,69 @@
-type RunLog {
-    cmd: [String]
-    endTime: String
+scalar JSON
+
+type Run {
+    runId: ID!
+    runName: String
     startTime: String
-    exitCode: Int
-    name: String
-    stderr: String
-    stdout: String
+    state: String
     success: Boolean
-    duration: Int
+    exitStatus: Int
+    errorReport: String
+    completeTime: String
+    commandLine: String
+    engineParameters: EngineParameters
+    parameters: JSON
+    tasks(taskId: String, state: String, tag: String): [Task]
 }
 
-type TaskLog {
-    taskId: Int
-    name: String
-    process: String
+type EngineParameters {
+    launchDir: String
+    projectDir: String
+    resume: String
+    revision: String
+    workDir: String
+}
+
+type Task {
+    taskId: ID
+    runId: String
+    runName: String
+    state: String
     tag: String
     container: String
     attempt: Int
-    state: String
-    cmd: [String]
     submitTime: String
     startTime: String
-    endTime: String
-    stderr: String
-    stdout: String
-    exitCode: Int
+    completeTime: String
+    exit: Int
+    script: String
     workdir: String
     cpus: Int
     memory: Int
     duration: Int
     realtime: Int
+    run: Run
 }
 
-type RunResponse {
-    runId: ID!
+input RunsFilter {
+    runId: String
+    runName: String
     state: String
-    runLog: RunLog
-    request: RunRequest
-    taskLogs: [TaskLog]
 }
 
-scalar JSON
-type RunRequest {
-    workflowUrl: String!
-    workflowParams: JSON!
-    workflowTypeVersion: String
-    workflowType: String
-    workflowEngineParams: WorkflowEngineParams
-}
-
-type WorkflowEngineParams {
-    revision: String
-    resume: String
+input TasksFilter {
+    runId: String
+    runName: String
+    state: String
+    tag: String
     workDir: String
-    latest: Boolean
 }
 
-type RunStatus {
-    runId: String!
-    state: String!
-}
-
-type RunListResponse {
-    runs: [RunStatus]!
-}
-
-type ServiceInfo {
-    authInstructionsUrl: String!
-    contactInfoUrl: String!
-    defaultWorkflowEngineParameters: [DefaultWorkflowEngineParameter]!
-    supportedFilesystemProtocols: [String]!
-    supportedWesVersions: [String]!
-}
-
-type DefaultWorkflowEngineParameter {
-    name: String!
-    type: String
+input Page {
+    size: Int!
+    from: Int!
 }
 
 type Query {
-    runById(runId: String!): RunResponse
-    runStatus(runId: String!): RunStatus
-    listRuns(pageSize: Int = 10): RunListResponse
-    serviceInfo: ServiceInfo
+    runs(filter: RunsFilter, page: Page): [Run]
+    tasks(filter: TasksFilter, page: Page): [Task]
 }

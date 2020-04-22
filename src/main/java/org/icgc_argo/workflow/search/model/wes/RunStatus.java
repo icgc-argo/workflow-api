@@ -1,8 +1,8 @@
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.wes;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.util.List;
+import io.swagger.annotations.ApiModel;
 import lombok.*;
 
 @Data
@@ -11,17 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@ApiModel(description = "Small description of a workflow run, returned by server during listing")
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class RunResponse {
+public class RunStatus {
+
   @NonNull private String runId;
 
-  private RunRequest request;
-
-  private State state;
-
-  private RunLog runLog;
-
-  private List<TaskLog> taskLogs;
-
-  private Object outputs;
+  @NonNull private State state;
 }

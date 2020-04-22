@@ -1,4 +1,4 @@
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.wes;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
