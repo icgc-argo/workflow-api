@@ -1,8 +1,9 @@
 package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
 import lombok.*;
 
@@ -37,18 +38,13 @@ public class Run {
   private Object parameters;
 
   @Data
+  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class EngineParameters {
-    @JsonProperty("launch_dir")
     private String launchDir;
-
-    @JsonProperty("project_dir")
     private String projectDir;
-
     private String resume;
     private String revision;
-
-    @JsonProperty("work_dir")
     private String workDir;
   }
 
