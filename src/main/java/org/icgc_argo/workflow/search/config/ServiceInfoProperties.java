@@ -3,7 +3,7 @@ package org.icgc_argo.workflow.search.config;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
-import org.icgc_argo.workflow.search.model.DefaultWorkflowEngineParameter;
+import org.icgc_argo.workflow.search.model.wes.DefaultWorkflowEngineParameter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

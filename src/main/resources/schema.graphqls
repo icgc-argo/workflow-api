@@ -1,0 +1,69 @@
+scalar JSON
+
+type Run {
+    runId: ID!
+    runName: String
+    startTime: String
+    state: String
+    success: Boolean
+    exitStatus: Int
+    errorReport: String
+    completeTime: String
+    commandLine: String
+    engineParameters: EngineParameters
+    parameters: JSON
+    tasks(taskId: String, state: String, tag: String): [Task]
+}
+
+type EngineParameters {
+    launchDir: String
+    projectDir: String
+    resume: String
+    revision: String
+    workDir: String
+}
+
+type Task {
+    taskId: ID
+    runId: String
+    runName: String
+    state: String
+    tag: String
+    container: String
+    attempt: Int
+    submitTime: String
+    startTime: String
+    completeTime: String
+    exit: Int
+    script: String
+    workdir: String
+    cpus: Int
+    memory: Int
+    duration: Int
+    realtime: Int
+    run: Run
+}
+
+input RunsFilter {
+    runId: String
+    runName: String
+    state: String
+}
+
+input TasksFilter {
+    runId: String
+    runName: String
+    state: String
+    tag: String
+    workDir: String
+}
+
+input Page {
+    size: Int!
+    from: Int!
+}
+
+type Query {
+    runs(filter: RunsFilter, page: Page): [Run]
+    tasks(filter: TasksFilter, page: Page): [Task]
+}

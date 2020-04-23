@@ -2,7 +2,7 @@ package org.icgc_argo.workflow.search.controller;
 
 import io.swagger.annotations.*;
 import javax.validation.Valid;
-import org.icgc_argo.workflow.search.model.*;
+import org.icgc_argo.workflow.search.model.wes.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

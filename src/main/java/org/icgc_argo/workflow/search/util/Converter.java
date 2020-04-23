@@ -2,7 +2,7 @@ package org.icgc_argo.workflow.search.util;
 
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
 import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
-import static org.icgc_argo.workflow.search.model.State.fromValue;
+import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
-import org.icgc_argo.workflow.search.model.*;
+import org.icgc_argo.workflow.search.model.wes.*;
 
 @Slf4j
 @UtilityClass

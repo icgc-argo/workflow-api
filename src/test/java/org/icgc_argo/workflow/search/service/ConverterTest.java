@@ -12,7 +12,7 @@ import lombok.val;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.SearchFields;
-import org.icgc_argo.workflow.search.model.State;
+import org.icgc_argo.workflow.search.model.wes.State;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.junit.Test;
 import org.junit.runner.RunWith;

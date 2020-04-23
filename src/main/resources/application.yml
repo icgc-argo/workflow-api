@@ -35,3 +35,13 @@ service-info:
     nextflow: "19.10.0"
   workflowTypeVersions:
     nextflow-dna-seq-alignment: "0.0.1"
+
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true
+    corsEnabled: true
+  playground:
+    enabled: true
+    cdn:
+      enabled: false

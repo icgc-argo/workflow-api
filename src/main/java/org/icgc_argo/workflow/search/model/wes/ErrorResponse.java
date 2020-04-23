@@ -1,21 +1,22 @@
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.wes;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
+/** An object that can optionally include information about the error. */
+@ApiModel(description = "An object that can optionally include information about the error.")
 @Data
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@ApiModel(description = "Small description of a workflow run, returned by server during listing")
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class RunStatus {
+public class ErrorResponse {
 
-  @NonNull private String runId;
+  private String msg;
 
-  @NonNull private State state;
+  private Integer statusCode;
 }
