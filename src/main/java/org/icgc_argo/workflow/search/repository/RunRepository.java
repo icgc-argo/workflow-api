@@ -14,10 +14,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
@@ -83,7 +80,7 @@ public class RunRepository {
         .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
         .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
         .put(STATE, value -> new TermQueryBuilder("state", value))
-        .put(REPOSITORY, value -> new TermQueryBuilder("repository", value))
+        .put(REPOSITORY, value -> new MatchQueryBuilder("repository", value))
         .build();
   }
 }
