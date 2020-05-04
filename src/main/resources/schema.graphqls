@@ -3,15 +3,17 @@ scalar JSON
 type Run {
     runId: ID!
     runName: String
-    startTime: String
+    repository: String
     state: String
+    parameters: JSON
+    startTime: String
+    completeTime: String
     success: Boolean
     exitStatus: Int
     errorReport: String
-    completeTime: String
+    duration: String
     commandLine: String
     engineParameters: EngineParameters
-    parameters: JSON
     tasks(taskId: String, state: String, tag: String): [Task]
 }
 
@@ -27,6 +29,8 @@ type Task {
     taskId: ID
     runId: String
     runName: String
+    name: String
+    process: String
     state: String
     tag: String
     container: String
@@ -48,6 +52,7 @@ input RunsFilter {
     runId: String
     runName: String
     state: String
+    repository: String
 }
 
 input TasksFilter {

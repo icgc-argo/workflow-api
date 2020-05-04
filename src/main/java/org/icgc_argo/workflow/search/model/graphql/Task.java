@@ -19,6 +19,10 @@ public class Task {
 
   private String runName;
 
+  private String name;
+
+  private String process;
+
   private String state;
 
   private String tag;

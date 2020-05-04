@@ -83,6 +83,7 @@ public class RunRepository {
         .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
         .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
         .put(STATE, value -> new TermQueryBuilder("state", value))
+        .put(REPOSITORY, value -> new TermQueryBuilder("repository", value))
         .build();
   }
 }
