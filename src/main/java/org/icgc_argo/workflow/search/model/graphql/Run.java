@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
-import lombok.*;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,9 +19,15 @@ public class Run {
 
   private String runName;
 
-  private String startTime;
+  private String repository;
 
   private String state;
+
+  private Object parameters;
+
+  private String startTime;
+
+  private String completeTime;
 
   private Boolean success;
 
@@ -29,13 +37,14 @@ public class Run {
 
   private String duration;
 
-  private String completeTime;
-
   private String commandLine;
 
   private EngineParameters engineParameters;
 
-  private Object parameters;
+  @SneakyThrows
+  public static Run parse(@NonNull Map<String, Object> sourceMap) {
+    return MAPPER.convertValue(sourceMap, Run.class);
+  }
 
   @Data
   @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -46,10 +55,5 @@ public class Run {
     private String resume;
     private String revision;
     private String workDir;
-  }
-
-  @SneakyThrows
-  public static Run parse(@NonNull Map<String, Object> sourceMap) {
-    return MAPPER.convertValue(sourceMap, Run.class);
   }
 }

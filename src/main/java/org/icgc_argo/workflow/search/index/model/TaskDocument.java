@@ -11,20 +11,23 @@ import lombok.*;
 @EqualsAndHashCode
 public class TaskDocument {
 
+  /** Task id */
+  @NonNull private Integer taskId;
+
   /** Workflow run ID */
   @NonNull private String runId;
 
   /** Workflow run name */
   @NonNull private String runName;
 
-  /** Task id */
-  @NonNull private Integer taskId;
-
   /** Task name */
   @NonNull private String name;
 
   /** Process name */
   @NonNull private String process;
+
+  /** The state of the task run */
+  @NonNull private String state;
 
   /** Task tag */
   private String tag;
@@ -34,9 +37,6 @@ public class TaskDocument {
 
   /** Attempt */
   @NonNull private Integer attempt;
-
-  /** The state of the task run */
-  @NonNull private String state;
 
   /** When the command was submitted */
   @NonNull private Instant submitTime;
