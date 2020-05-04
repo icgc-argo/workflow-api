@@ -39,6 +39,35 @@ public class RunRepository {
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
   }
 
+  /**
+   * For each argument, find its query producer function and apply the argument value ANDing it in a
+   * bool query
+   *
+   * @param args Argument Map from GraphQL
+   * @return Elasticsearch Bool Query containing ANDed (MUSTed) term queries
+   */
+  private static BoolQueryBuilder queryFromArgs(Map<String, Object> args) {
+    val bool = QueryBuilders.boolQuery();
+    args.forEach((key, value) -> bool.must(QUERY_RESOLVER.get(key).apply(value.toString())));
+    return bool;
+  }
+
+  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
+    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
+        .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
+        .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
+        .put(STATE, value -> new TermQueryBuilder("state", value))
+        .put(
+            REPOSITORY,
+            value -> {
+              val q = new MatchQueryBuilder("repository", value);
+              q.operator(Operator.AND);
+              q.minimumShouldMatch("80%");
+              return q;
+            })
+        .build();
+  }
+
   public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(filter);
@@ -60,27 +89,5 @@ public class RunRepository {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
     return client.search(searchRequest, RequestOptions.DEFAULT);
-  }
-
-  /**
-   * For each argument, find its query producer function and apply the argument value ANDing it in a
-   * bool query
-   *
-   * @param args Argument Map from GraphQL
-   * @return Elasticsearch Bool Query containing ANDed (MUSTed) term queries
-   */
-  private static BoolQueryBuilder queryFromArgs(Map<String, Object> args) {
-    val bool = QueryBuilders.boolQuery();
-    args.forEach((key, value) -> bool.must(QUERY_RESOLVER.get(key).apply(value.toString())));
-    return bool;
-  }
-
-  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
-    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
-        .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
-        .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
-        .put(STATE, value -> new TermQueryBuilder("state", value))
-        .put(REPOSITORY, value -> new MatchQueryBuilder("repository", value))
-        .build();
   }
 }
