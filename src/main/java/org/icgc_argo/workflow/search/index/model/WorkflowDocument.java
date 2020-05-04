@@ -18,12 +18,13 @@ public class WorkflowDocument {
   /** Workflow run name */
   @NonNull private String runName;
 
+  /** The repository url */
+  @NonNull private String repository;
+
   /** The overall state of the workflow run, mapped to WorkflowEvent - event */
   @NonNull private String state;
 
   @NonNull private Map<String, Object> parameters;
-
-  private Map<String, Object> engineParameters;
 
   /** When the command started executing */
   @NonNull private Instant startTime;
@@ -34,21 +35,20 @@ public class WorkflowDocument {
    */
   private Instant completeTime;
 
-  /** The repository url */
-  @NonNull private String repository;
+  /** Did the workflow succeed */
+  @NonNull private Boolean success;
 
   /** Exit code of the program */
   @NonNull private Integer exitStatus;
 
-  /** The command line that was executed */
-  @NonNull private String commandLine;
-
   /** A URL to retrieve standard error logs of the workflow run or task */
   private String errorReport;
 
-  /** Did the workflow succeed */
-  @NonNull private Boolean success;
-
   /** Workflow duration */
   private Integer duration;
+
+  /** The command line that was executed */
+  @NonNull private String commandLine;
+
+  private Map<String, Object> engineParameters;
 }
