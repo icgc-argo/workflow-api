@@ -201,6 +201,8 @@ public class WesRunService {
     return Optional.of(taskLogs);
   }
 
+  //  The system statistics, key is the statistic, value is the count of runs in that state.
+  //  See the State enum for the possible keys.
   private Map<String, Long> systemStateCounts() {
     val hits = getSearchHits(workflowIndex);
     Map<String, Long> counts =
