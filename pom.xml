@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>11</java.version>
+        <resource.delimiter>^</resource.delimiter>
         <springfox-version>2.9.2</springfox-version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <jackson-databind.version>2.9.10.3</jackson-databind.version>

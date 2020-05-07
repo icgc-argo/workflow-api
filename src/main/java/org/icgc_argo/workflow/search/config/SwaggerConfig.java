@@ -2,31 +2,36 @@ package org.icgc_argo.workflow.search.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.paths.RelativePathProvider;
 import springfox.documentation.spring.web.plugins.Docket;
 
-@javax.annotation.Generated(
-    value = "io.swagger.codegen.languages.SpringCodegen",
-    date = "2019-11-01T10:34:43.963-04:00")
 @Configuration
 public class SwaggerConfig {
 
+  @Value("${spring.application.name}")
+  private String appName;
+
+  @Value("${spring.application.description}")
+  private String appDescription;
+
+  @Value("${spring.application.version}")
+  private String appVersion;
+
   ApiInfo apiInfo() {
-    return new ApiInfo(
-        "Workflow Search",
-        "Workflow Search API Documentation",
-        "0.0.1",
-        "",
-        "contact@overture.bio",
-        "",
-        "");
+    return new ApiInfoBuilder()
+        .title(appName)
+        .description(appDescription)
+        .version(appVersion)
+        .build();
   }
 
   @Bean
