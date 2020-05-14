@@ -1,6 +1,6 @@
 scalar JSON
 
-type Run {
+type Run @key(fields: "runName") {
     runId: ID!
     runName: String
     repository: String
@@ -68,7 +68,7 @@ input Page {
     from: Int!
 }
 
-type Query {
+extend type Query {
     runs(filter: RunsFilter, page: Page): [Run]
     tasks(filter: TasksFilter, page: Page): [Task]
 }
