@@ -32,6 +32,12 @@ public class RunService {
     return runOpt.orElse(null);
   }
 
+  public Run getRunByName(String runName) {
+    val response = runRepository.getRuns(Map.of("runName", runName), null);
+    val runOpt = Arrays.stream(response.getHits().getHits()).map(RunService::hitToRun).findFirst();
+    return runOpt.orElse(null);
+  }
+
   private static Run hitToRun(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
     return Run.parse(sourceMap);
