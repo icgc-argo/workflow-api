@@ -1,8 +1,8 @@
 scalar JSON
 
 type Run @key(fields: "runName") {
-    runId: ID!
-    runName: String
+    runName: ID!
+    runId: String
     repository: String
     state: String
     parameters: JSON
