@@ -1,6 +1,8 @@
 spring:
   application:
-    name: Workflow Search
+    name: "Workflow Search"
+    version: ^project.version^
+    description: "Workflow Search API Documentation"
 
 server:
   port : 8080
@@ -17,24 +19,20 @@ elastic:
 
 service-info:
   authInstructionsUrl: "https://example.com/auth"
-  contactInfoUrl: "https://example.com/contact"
-  defaultWorkflowEngineParameters:
-    - defaultValue:
-      name: "defaultContainer"
-      type: "type 1"
-    - defaultValue:
-      name: "workflowVersion"
-      type: "type 2"
+  contactInfoUrl: "mailto:dcc-support@icgc.org"
   supportedFilesystemProtocols:
-    - "S3"
-    - "SCORE"
+    - "None"
   supportedWesVersions:
     - "1.0.0"
   workflowType: "nextflow"
   workflowEngineVersions:
-    nextflow: "19.10.0"
+    nextflow: "20.01.0"
   workflowTypeVersions:
-    nextflow-dna-seq-alignment: "0.0.1"
+    any-nextflow-workflow: "X.X.X"
+  defaultWorkflowEngineParameters:
+    - defaultValue:
+      name: "NA"
+      type: "NA"
 
 graphql:
   servlet:

@@ -2,19 +2,18 @@ package org.icgc_argo.workflow.search.graphql;
 
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
+import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
 import java.io.IOException;
 import java.net.URL;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +31,15 @@ public class GraphQLProvider {
 
   private final TaskDataFetchers taskDataFetchers;
 
-  public GraphQLProvider(RunDataFetchers runDataFetchers, TaskDataFetchers taskDataFetchers) {
+  private final EntityDataFetchers entityDataFetchers;
+
+  public GraphQLProvider(
+      RunDataFetchers runDataFetchers,
+      TaskDataFetchers taskDataFetchers,
+      EntityDataFetchers entityDataFetchers) {
     this.runDataFetchers = runDataFetchers;
     this.taskDataFetchers = taskDataFetchers;
+    this.entityDataFetchers = entityDataFetchers;
   }
 
   @Bean
@@ -51,10 +56,19 @@ public class GraphQLProvider {
   }
 
   private GraphQLSchema buildSchema(String sdl) {
-    TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(sdl);
-    RuntimeWiring runtimeWiring = buildWiring();
-    SchemaGenerator schemaGenerator = new SchemaGenerator();
-    return schemaGenerator.makeExecutableSchema(typeRegistry, runtimeWiring);
+    return Federation.transform(sdl, buildWiring())
+        .fetchEntities(entityDataFetchers.getDataFetcher())
+        .resolveEntityType(
+            typeResolutionEnvironment -> {
+              final Object src = typeResolutionEnvironment.getObject();
+              if (src instanceof Run) {
+                return typeResolutionEnvironment
+                    .getSchema()
+                    .getObjectType(EntityDataFetchers.RUN_ENTITY);
+              }
+              return null;
+            })
+        .build();
   }
 
   private RuntimeWiring buildWiring() {
