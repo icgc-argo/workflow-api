@@ -53,6 +53,7 @@ input RunsFilter {
     runName: String
     state: String
     repository: String
+    analysisId: String
 }
 
 input TasksFilter {
@@ -66,6 +67,11 @@ input TasksFilter {
 input Page {
     size: Int!
     from: Int!
+}
+
+type Analysis @key(fields: "analysisId") @extends {
+    analysisId: ID! @external
+    runs: [Run]
 }
 
 extend type Query {
