@@ -38,6 +38,12 @@ public class RunService {
     return runOpt.orElse(null);
   }
 
+  public List<Run> getRunByAnalysisId(String analysisId) {
+    val response = runRepository.getRuns(Map.of("analysisId", analysisId), null);
+    val hitStream = Arrays.stream(response.getHits().getHits());
+    return hitStream.map(RunService::hitToRun).collect(toUnmodifiableList());
+  }
+
   private static Run hitToRun(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
     return Run.parse(sourceMap);
