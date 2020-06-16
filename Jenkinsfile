@@ -89,7 +89,7 @@ spec:
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
                         [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-search'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-search'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'search'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
                     ])
@@ -126,7 +126,7 @@ spec:
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
                         [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-search'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-search'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'search'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
                     ])
