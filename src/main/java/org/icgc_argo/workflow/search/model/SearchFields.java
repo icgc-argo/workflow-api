@@ -1,8 +1,8 @@
 package org.icgc_argo.workflow.search.model;
 
-import static lombok.AccessLevel.PRIVATE;
-
 import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 public class SearchFields {
@@ -19,4 +19,5 @@ public class SearchFields {
   public static final String ERROR_REPORT = "errorReport";
   public static final String TAG = "tag";
   public static final String WORK_DIR = "workDir";
+  public static final String ANALYSIS_ID = "analysisId";
 }

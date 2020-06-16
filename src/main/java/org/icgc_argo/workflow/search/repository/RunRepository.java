@@ -1,11 +1,6 @@
 package org.icgc_argo.workflow.search.repository;
 
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.function.Function;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +16,24 @@ import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
+
 @Slf4j
 @Component
 public class RunRepository {
 
+  private static final List<String> ANALYSIS_SEARCH_FIELDS =
+      List.of(
+          "parameters.analysis_id",
+          "parameters.normal_aln_analysis_id",
+          "parameters.tumour_aln_analysis_id");
   private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
-
   private final RestHighLevelClient client;
   private final String workflowIndex;
 
@@ -57,6 +63,10 @@ public class RunRepository {
         .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
         .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
         .put(STATE, value -> new TermQueryBuilder("state", value))
+        .put(
+            ANALYSIS_ID,
+            value ->
+                new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new)))
         .put(
             REPOSITORY,
             value -> {
