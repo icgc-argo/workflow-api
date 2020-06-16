@@ -71,7 +71,8 @@ input Page {
 
 type Analysis @key(fields: "analysisId") @extends {
     analysisId: ID! @external
-    runs: [Run]
+    inputFor: [Run]
+    producedBy: String
 }
 
 extend type Query {
