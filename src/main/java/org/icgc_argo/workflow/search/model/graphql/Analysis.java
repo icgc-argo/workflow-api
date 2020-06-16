@@ -21,7 +21,9 @@ public class Analysis {
 
     private String analysisId;
 
-    private List<Run> runs;
+    private List<Run> inputFor;
+
+    private String producedBy;
 
     @SneakyThrows
     public static Analysis parse(@NonNull Map<String, Object> sourceMap) {

@@ -40,7 +40,7 @@ public class EntityDataFetchers {
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
                     final Object analysisId = values.get("analysisId");
                     if (analysisId instanceof String) {
-                      return new Analysis((String) analysisId, runService.getRunByAnalysisId((String) analysisId));
+                      return new Analysis((String) analysisId, runService.getRunByAnalysisId((String) analysisId), "Not Implemented!");
                     }
                   }
                   return null;
