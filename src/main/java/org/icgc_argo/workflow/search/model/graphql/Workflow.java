@@ -9,22 +9,21 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
-import java.util.List;
 import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Analysis {
+public class Workflow {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private String analysisId;
+    private String runId;
 
-    private List<Run> inputForRuns;
+    private Run run;
 
     @SneakyThrows
-    public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
-        return MAPPER.convertValue(sourceMap, Analysis.class);
+    public static Workflow parse(@NonNull Map<String, Object> sourceMap) {
+        return MAPPER.convertValue(sourceMap, Workflow.class);
     }
 }
