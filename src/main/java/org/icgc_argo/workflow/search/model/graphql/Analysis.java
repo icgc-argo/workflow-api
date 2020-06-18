@@ -21,13 +21,10 @@ public class Analysis {
 
     private String analysisId;
 
-    private List<Run> inputFor;
-
-    private String producedBy;
+    private List<Run> inputForRuns;
 
     @SneakyThrows
     public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
         return MAPPER.convertValue(sourceMap, Analysis.class);
     }
-
 }
