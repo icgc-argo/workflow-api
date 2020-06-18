@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Run;
+import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +72,11 @@ public class GraphQLProvider {
                 return typeResolutionEnvironment
                     .getSchema()
                     .getObjectType(EntityDataFetchers.ANALYSIS_ENTITY);
+              }
+              if (src instanceof Workflow) {
+                return typeResolutionEnvironment
+                    .getSchema()
+                    .getObjectType(EntityDataFetchers.WORKFLOW_ENTITY);
               }
               return null;
             })

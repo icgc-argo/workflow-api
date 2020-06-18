@@ -72,7 +72,11 @@ input Page {
 type Analysis @key(fields: "analysisId") @extends {
     analysisId: ID! @external
     inputFor: [Run]
-    producedBy: String
+}
+
+type Workflow @key(fields: "runId") @extends {
+    runId: ID! @external
+    run: Run
 }
 
 extend type Query {
