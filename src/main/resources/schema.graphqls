@@ -1,8 +1,8 @@
 scalar JSON
 
-type Run @key(fields: "runName") {
-    runName: ID!
-    runId: String
+type Run @key(fields: "runId") {
+    runId: ID!
+    sessionId: String
     repository: String
     state: String
     parameters: JSON
@@ -28,7 +28,7 @@ type EngineParameters {
 type Task {
     taskId: ID
     runId: String
-    runName: String
+    sessionId: String
     name: String
     process: String
     state: String
@@ -50,7 +50,7 @@ type Task {
 
 input RunsFilter {
     runId: String
-    runName: String
+    sessionId: String
     state: String
     repository: String
     analysisId: String
@@ -58,7 +58,7 @@ input RunsFilter {
 
 input TasksFilter {
     runId: String
-    runName: String
+    sessionId: String
     state: String
     tag: String
     workDir: String
