@@ -34,9 +34,9 @@ public class EntityDataFetchers {
             .map(
                 values -> {
                   if (RUN_ENTITY.equals(values.get("__typename"))) {
-                    final Object runName = values.get("runName");
-                    if (runName instanceof String) {
-                      return runService.getRunByName((String) runName);
+                    final Object runId = values.get("runId");
+                    if (runId instanceof String) {
+                      return runService.getRunByRunId((String) runId);
                     }
                   }
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
@@ -49,8 +49,7 @@ public class EntityDataFetchers {
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
-                      return new Workflow(
-                          (String) runId, runService.getRunByName((String) runId));
+                      return new Workflow((String) runId, runService.getRunByRunId((String) runId));
                     }
                   }
                   return null;

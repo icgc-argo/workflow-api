@@ -14,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class RunListResponse {
+public class  RunListResponse {
 
   @NonNull private List<RunStatus> runs;
 

@@ -8,6 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class RunId {
-
   @NonNull private String runId;
 }

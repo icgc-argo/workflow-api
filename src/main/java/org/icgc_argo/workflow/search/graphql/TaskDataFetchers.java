@@ -44,7 +44,7 @@ public class TaskDataFetchers {
   public DataFetcher<List<Task>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
-      val runId = ((Run) environment.getSource()).getRunId();
+      val runId = ((Run) environment.getSource()).getSessionId();
 
       return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0));
     };
