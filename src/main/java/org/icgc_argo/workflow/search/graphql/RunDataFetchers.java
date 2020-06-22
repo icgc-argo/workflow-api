@@ -43,7 +43,7 @@ public class RunDataFetchers {
   public DataFetcher<Run> getNestedRunDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
-      return runService.getRunBySessionId(task.getSessionId());
+      return runService.getRunByRunId(task.getRunId());
     };
   }
 }
