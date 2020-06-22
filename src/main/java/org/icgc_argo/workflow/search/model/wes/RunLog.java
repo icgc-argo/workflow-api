@@ -18,7 +18,7 @@ import lombok.*;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class RunLog {
 
-  private String name;
+  private String runId;
 
   @Valid private List<String> cmd;
 

@@ -1,8 +1,9 @@
 package org.icgc_argo.workflow.search.index.model;
 
+import lombok.*;
+
 import java.time.Instant;
 import java.util.Map;
-import lombok.*;
 
 @Getter
 @Builder
@@ -15,8 +16,8 @@ public class WorkflowDocument {
   /** Workflow run ID */
   @NonNull private String runId;
 
-  /** Workflow run name */
-  @NonNull private String runName;
+  /** Workflow session ID */
+  @NonNull private String sessionId;
 
   /** The repository url */
   @NonNull private String repository;

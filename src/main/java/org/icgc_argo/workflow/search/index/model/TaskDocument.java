@@ -1,7 +1,8 @@
 package org.icgc_argo.workflow.search.index.model;
 
-import java.time.Instant;
 import lombok.*;
+
+import java.time.Instant;
 
 @Getter
 @Builder
@@ -11,14 +12,14 @@ import lombok.*;
 @EqualsAndHashCode
 public class TaskDocument {
 
-  /** Task id */
-  @NonNull private Integer taskId;
-
   /** Workflow run ID */
   @NonNull private String runId;
 
-  /** Workflow run name */
-  @NonNull private String runName;
+  /** Workflow session ID */
+  @NonNull private String sessionId;
+
+  /** Task ID */
+  @NonNull private Integer taskId;
 
   /** Task name */
   @NonNull private String name;
