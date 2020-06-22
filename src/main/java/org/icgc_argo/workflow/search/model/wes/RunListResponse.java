@@ -1,8 +1,9 @@
 package org.icgc_argo.workflow.search.model.wes;
 
 import io.swagger.annotations.ApiModel;
-import java.util.List;
 import lombok.*;
+
+import java.util.List;
 
 /** The service will return a RunListResponse when receiving a successful RunListRequest. */
 @ApiModel(
@@ -14,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class  RunListResponse {
+public class RunListResponse {
 
   @NonNull private List<RunStatus> runs;
 
