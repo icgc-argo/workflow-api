@@ -1,12 +1,5 @@
 package org.icgc_argo.workflow.search.service;
 
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-import static org.junit.Assert.*;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
@@ -18,12 +11,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
+import static org.junit.Assert.*;
+
 @Slf4j
 @RunWith(SpringRunner.class)
 public class ConverterTest {
 
   private static final String RUN_ID = UUID.randomUUID().toString();
-  private static final String RUN_NAME = UUID.randomUUID().toString();
+  private static final String SESSION_ID = UUID.randomUUID().toString();
   private static final String NAME = "Task_say_hello";
   private static final String SCRIPT = "print();";
   private static final String STATE_COMPLETE = "COMPLETE";
@@ -42,11 +43,11 @@ public class ConverterTest {
   @Test
   public void TestConvertSourceMapToRunStatus() {
     val source = new HashMap<String, Object>();
-    source.put(SearchFields.RUN_NAME, this.RUN_NAME);
+    source.put(SearchFields.RUN_ID, RUN_ID);
     source.put(SearchFields.STATE, STATE_COMPLETE);
     val runStatus = convertSourceMapToRunStatus(source);
 
-    assertEquals(runStatus.getRunId(), this.RUN_NAME);
+    assertEquals(runStatus.getRunId(), RUN_ID);
     assertEquals(runStatus.getState(), State.COMPLETE);
   }
 
@@ -55,7 +56,7 @@ public class ConverterTest {
     val taskDocument =
         TaskDocument.builder()
             .runId(RUN_ID)
-            .runName(RUN_NAME)
+            .sessionId(SESSION_ID)
             .taskId(TASK_ID)
             .name(NAME)
             .process(TASK_PROCESS)
@@ -75,8 +76,8 @@ public class ConverterTest {
 
     val log = Converter.taskDocumentToLog(taskDocument);
 
-    assertEquals(log.getName(), taskDocument.getName());
     assertEquals(log.getTaskId(), taskDocument.getTaskId());
+    assertEquals(log.getName(), taskDocument.getName());
     assertEquals(log.getProcess(), taskDocument.getProcess());
     assertEquals(log.getTag(), taskDocument.getTag());
     assertEquals(log.getContainer(), taskDocument.getContainer());
@@ -103,7 +104,7 @@ public class ConverterTest {
     val workflowType = "nextflow";
     val runLog = Converter.buildRunLog(doc, workflowTypeVersion, workflowType);
 
-    assertEquals(runLog.getRunId(), RUN_NAME);
+    assertEquals(runLog.getRunId(), RUN_ID);
     assertEquals(runLog.getState().toString(), STATE_COMPLETE);
 
     val request = runLog.getRequest();
@@ -114,10 +115,11 @@ public class ConverterTest {
     assertTrue(request.getWorkflowParams() instanceof Map);
     val params = (Map) request.getWorkflowParams();
     assertEquals(params, doc.getParameters());
+    assertEquals(params, doc.getParameters());
 
     val log = runLog.getRunLog();
     assertNotNull(log);
-    assertEquals(log.getName(), RUN_NAME);
+    assertEquals(log.getRunId(), RUN_ID);
     assertTrue(log.getCmd().contains(SCRIPT));
     assertEquals(log.getStartTime(), doc.getStartTime().toString());
     assertEquals(log.getEndTime(), doc.getCompleteTime().toString());
@@ -136,7 +138,7 @@ public class ConverterTest {
 
     return WorkflowDocument.builder()
         .runId(RUN_ID)
-        .runName(RUN_NAME)
+        .sessionId(SESSION_ID)
         .commandLine(SCRIPT)
         .startTime(Instant.now())
         .completeTime(Instant.now())

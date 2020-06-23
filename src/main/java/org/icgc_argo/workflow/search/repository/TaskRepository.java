@@ -78,7 +78,7 @@ public class TaskRepository {
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
     return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
         .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
-        .put(RUN_NAME, value -> new TermQueryBuilder("runName", value))
+        .put(SESSION_ID, value -> new TermQueryBuilder("sessionId", value))
         .put(STATE, value -> new TermQueryBuilder("state", value))
         .put(TAG, value -> new TermQueryBuilder("tag", value))
         .put(WORK_DIR, value -> new TermQueryBuilder("workdir", value)) // Note the non-camelcasing

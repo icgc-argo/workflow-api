@@ -1,6 +1,6 @@
 package org.icgc_argo.workflow.search.util;
 
-import static org.icgc_argo.workflow.search.model.SearchFields.RUN_NAME;
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
 import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
 import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 
@@ -63,7 +63,7 @@ public class Converter {
 
   public static RunStatus convertSourceMapToRunStatus(@NonNull Map<String, Object> source) {
     return RunStatus.builder()
-        .runId(source.get(RUN_NAME).toString())
+        .runId(source.get(RUN_ID).toString())
         .state(fromValue(source.get(STATE).toString()))
         .build();
   }
@@ -73,7 +73,7 @@ public class Converter {
       @NonNull String workflowTypeVersion,
       @NonNull String workflowType) {
     return RunResponse.builder()
-        .runId(workflowDoc.getRunName())
+        .runId(workflowDoc.getRunId())
         .state(State.fromValue(workflowDoc.getState()))
         // todo ticket #24
         .outputs("")
@@ -89,7 +89,7 @@ public class Converter {
         // build run log
         .runLog(
             RunLog.builder()
-                .name(workflowDoc.getRunName())
+                .runId(workflowDoc.getRunId())
                 .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
                 .exitCode(workflowDoc.getExitStatus())
                 .startTime(workflowDoc.getStartTime().toString())
