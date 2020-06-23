@@ -2,22 +2,22 @@ package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
-
-  private String taskId;
-
   private String runId;
 
-  private String runName;
+  private String sessionId;
+
+  private String taskId;
 
   private String name;
 

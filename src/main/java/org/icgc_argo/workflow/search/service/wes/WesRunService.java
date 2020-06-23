@@ -140,7 +140,7 @@ public class WesRunService {
   public SearchHit getWorkflowById(@NonNull String runId) {
     try {
       val searchSourceBuilder = new SearchSourceBuilder();
-      searchSourceBuilder.query(QueryBuilders.termQuery(RUN_NAME, runId)).size(DEFAULT_HIT_SIZE);
+      searchSourceBuilder.query(QueryBuilders.termQuery(RUN_ID, runId)).size(DEFAULT_HIT_SIZE);
       val searchResponse = search(searchSourceBuilder, workflowIndex);
       val hits = searchResponse.getHits().getHits();
 
@@ -189,7 +189,7 @@ public class WesRunService {
 
   private Optional<List<TaskDocument>> getTaskDocumentListById(@NonNull String runId) {
     val searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.termQuery(RUN_NAME, runId)).size(DEFAULT_HIT_SIZE);
+    searchSourceBuilder.query(QueryBuilders.termQuery(RUN_ID, runId)).size(DEFAULT_HIT_SIZE);
     val searchResponse = search(searchSourceBuilder, taskIndex);
     val hits = searchResponse.getHits().getHits();
 

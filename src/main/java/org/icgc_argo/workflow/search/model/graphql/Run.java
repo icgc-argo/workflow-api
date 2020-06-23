@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,7 +18,7 @@ public class Run {
 
   private String runId;
 
-  private String runName;
+  private String sessionId;
 
   private String repository;
 

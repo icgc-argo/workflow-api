@@ -8,7 +8,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class SearchFields {
 
   public static final String RUN_ID = "runId";
-  public static final String RUN_NAME = "runName";
+  public static final String SESSION_ID = "sessionId";
   public static final String COMMAND_LINE = "commandLine";
   public static final String STATE = "state";
   public static final String START_TIME = "startTime";
