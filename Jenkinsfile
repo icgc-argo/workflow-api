@@ -93,6 +93,10 @@ spec:
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
                     ])
+                    sleep(time:30,unit:"SECONDS")
+                    build(job: "/provision/rdpc-gateway-restart", parameters: [
+                        [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
+                    ])
                 }
             }
             stage('Release & Tag') {
@@ -129,6 +133,10 @@ spec:
                         [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'search'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
+                    ])
+                    sleep(time:30,unit:"SECONDS")
+                    build(job: "/provision/rdpc-gateway-restart", parameters: [
+                        [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
                     ])
                 }
             }
