@@ -69,6 +69,9 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/graphql/**").permitAll()
                 .antMatchers("/actuator/**").permitAll()
             .and()
+                .authorizeRequests()
+                .anyRequest().authenticated()
+            .and()
                 .oauth2ResourceServer().jwt()
                 .decoder(jwtDecoder())
                 .jwtAuthenticationConverter(grantedAuthoritiesExtractor());
