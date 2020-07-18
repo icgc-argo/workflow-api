@@ -43,3 +43,14 @@ graphql:
     enabled: true
     cdn:
       enabled: false
+
+---
+spring.profiles: secure
+auth:
+  jwtPublicKeyUrl: "http://localhost:8081/oauth/token/public_key"
+  jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nSET ME IF YOU DONT HAVE A URL, BUT URL TAKES PRIORITY\n-----END PUBLIC KEY-----"
+  graphqlScopes:
+    queryOnly:
+      - RDPC-DEV.READ
+    queryAndMutation:
+      - RDPC-DEV.WRITE

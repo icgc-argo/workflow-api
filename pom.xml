@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.0.RELEASE</version>
+        <version>2.3.0.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.icgc_argo</groupId>
@@ -26,7 +26,7 @@
         <resource.delimiter>^</resource.delimiter>
         <springfox-version>2.9.2</springfox-version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
-        <jackson-databind.version>2.9.10.4</jackson-databind.version>
+        <jackson-databind.version>2.11.1</jackson-databind.version>
         <jackson-dataformat-yaml.version>2.3.0</jackson-dataformat-yaml.version>
     </properties>
 
@@ -39,6 +39,26 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Spring-boot security dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+            <version>5.3.3.RELEASE</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
