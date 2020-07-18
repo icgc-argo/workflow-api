@@ -83,8 +83,12 @@ public class RunRepository {
         .put(STATE, value -> new TermQueryBuilder("state", value))
         .put(
             ANALYSIS_ID,
-            value ->
-                new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new)))
+            value -> {
+              val q =
+                  new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new));
+              q.minimumShouldMatch("100%");
+              return q;
+            })
         .put(
             REPOSITORY,
             value -> {
