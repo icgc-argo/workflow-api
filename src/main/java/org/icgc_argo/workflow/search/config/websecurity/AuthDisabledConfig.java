@@ -16,30 +16,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.exceptions;
+package org.icgc_argo.workflow.search.config.websecurity;
 
-import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import lombok.NonNull;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(NOT_FOUND)
-public class NotFoundException extends RuntimeException {
-
-  public NotFoundException(@NonNull String message) {
-    super(message);
-  }
-
-  public static void checkNotFound(
-      boolean expression, @NonNull String formattedMessage, @NonNull Object... args) {
-    if (!expression) {
-      throw new NotFoundException(format(formattedMessage, args));
+@EnableWebSecurity
+@Profile("!secure")
+public class AuthDisabledConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/graphql/**").permitAll()
+                .antMatchers("/actuator/**").permitAll();
     }
-  }
-
-  public static NotFoundException buildNotFoundException(
-      @NonNull String formattedMessage, Object... args) {
-    return new NotFoundException(format(formattedMessage, args));
-  }
 }

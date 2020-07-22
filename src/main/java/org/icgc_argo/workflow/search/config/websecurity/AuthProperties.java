@@ -16,30 +16,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.exceptions;
+package org.icgc_argo.workflow.search.config.websecurity;
 
-import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import com.google.common.collect.ImmutableList;
+import lombok.Data;
+import lombok.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.context.annotation.Configuration;
 
-import lombok.NonNull;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import java.util.List;
 
-@ResponseStatus(NOT_FOUND)
-public class NotFoundException extends RuntimeException {
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "auth")
+public class AuthProperties {
 
-  public NotFoundException(@NonNull String message) {
-    super(message);
-  }
+    String jwtPublicKeyUrl;
 
-  public static void checkNotFound(
-      boolean expression, @NonNull String formattedMessage, @NonNull Object... args) {
-    if (!expression) {
-      throw new NotFoundException(format(formattedMessage, args));
+    String jwtPublicKeyStr;
+
+    GraphqlScopes graphqlScopes;
+
+    @Value
+    @ConstructorBinding
+    public static class GraphqlScopes {
+        ImmutableList<String> queryOnly;
+        ImmutableList<String> queryAndMutation;
+
+        public GraphqlScopes(List<String> queryOnly, List<String> queryAndMutation) {
+            this.queryOnly = ImmutableList.copyOf(queryOnly);
+            this.queryAndMutation = ImmutableList.copyOf(queryAndMutation);
+        }
     }
-  }
-
-  public static NotFoundException buildNotFoundException(
-      @NonNull String formattedMessage, Object... args) {
-    return new NotFoundException(format(formattedMessage, args));
-  }
 }
