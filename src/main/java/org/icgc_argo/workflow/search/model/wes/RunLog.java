@@ -21,9 +21,10 @@ package org.icgc_argo.workflow.search.model.wes;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import java.util.List;
-import javax.validation.Valid;
 import lombok.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 /** Log and other info */
 @ApiModel(description = "Log and other info")
@@ -52,5 +53,5 @@ public class RunLog {
 
   private Boolean success;
 
-  private Integer duration;
+  private Long duration;
 }
