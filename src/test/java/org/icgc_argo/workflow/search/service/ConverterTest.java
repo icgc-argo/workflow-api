@@ -57,13 +57,12 @@ public class ConverterTest {
   private static final Long TASK_MEM = 1024L;
   private static final Long TASK_DURATION = 2000L;
   private static final Long TASK_REALTIME = 1098L;
-// **** TODO enable once trace updated to support this? **** //
-//  private static final Long TASK_RSS = 1234L;
-//  private static final Long TASK_PEAK_RSS = 4567L;
-//  private static final Long TASK_VMEM = 8901L;
-//  private static final Long TASK_PEAK_VMEM = 2345L;
-//  private static final Long TASK_READ_BYTES = 6789L;
-//  private static final Long TASK_WRITE_BYTES = 10123L;
+  private static final Long TASK_RSS = 1234L;
+  private static final Long TASK_PEAK_RSS = 4567L;
+  private static final Long TASK_VMEM = 8901L;
+  private static final Long TASK_PEAK_VMEM = 2345L;
+  private static final Long TASK_READ_BYTES = 6789L;
+  private static final Long TASK_WRITE_BYTES = 10123L;
 
 
 
@@ -99,13 +98,12 @@ public class ConverterTest {
             .memory(TASK_MEM)
             .duration(TASK_DURATION)
             .realtime(TASK_REALTIME)
-//            **** TODO enable once trace updated to support this? ****
-//            .rss(TASK_RSS)
-//            .peakRss(TASK_PEAK_RSS)
-//            .vmem(TASK_VMEM)
-//            .peakVmem(TASK_PEAK_VMEM)
-//            .readBytes(TASK_READ_BYTES)
-//            .writeBytes(TASK_WRITE_BYTES)
+            .rss(TASK_RSS)
+            .peakRss(TASK_PEAK_RSS)
+            .vmem(TASK_VMEM)
+            .peakVmem(TASK_PEAK_VMEM)
+            .readBytes(TASK_READ_BYTES)
+            .writeBytes(TASK_WRITE_BYTES)
             .build();
 
     val log = Converter.taskDocumentToLog(taskDocument);
@@ -129,13 +127,12 @@ public class ConverterTest {
     assertEquals(log.getMemory(), taskDocument.getMemory());
     assertEquals(log.getDuration(), taskDocument.getDuration());
     assertEquals(log.getRealtime(), taskDocument.getRealtime());
-    // **** TODO enable once trace updated to support this? **** //
-//    assertEquals(log.getRss(), taskDocument.getRss());
-//    assertEquals(log.getPeakRss(), taskDocument.getPeakRss());
-//    assertEquals(log.getVmem(), taskDocument.getVmem());
-//    assertEquals(log.getPeakVmem(), taskDocument.getPeakVmem());
-//    assertEquals(log.getReadBytes(), taskDocument.getReadBytes());
-//    assertEquals(log.getWriteBytes(), taskDocument.getWriteBytes());
+    assertEquals(log.getRss(), taskDocument.getRss());
+    assertEquals(log.getPeakRss(), taskDocument.getPeakRss());
+    assertEquals(log.getVmem(), taskDocument.getVmem());
+    assertEquals(log.getPeakVmem(), taskDocument.getPeakVmem());
+    assertEquals(log.getReadBytes(), taskDocument.getReadBytes());
+    assertEquals(log.getWriteBytes(), taskDocument.getWriteBytes());
   }
 
   @Test
