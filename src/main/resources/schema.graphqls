@@ -46,6 +46,12 @@ type Task {
     memory: Long
     duration: Long
     realtime: Long
+    rss: Long
+    peakRss: Long
+    vmem: Long
+    peakVmem: Long
+    readBytes: Long
+    writeBytes: Long
     run: Run
 }
 
