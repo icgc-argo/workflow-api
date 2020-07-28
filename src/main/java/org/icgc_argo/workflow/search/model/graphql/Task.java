@@ -61,13 +61,42 @@ public class Task {
 
   private String workdir;
 
+  /** The cpus number request for the task execution */
   private Integer cpus;
 
-  private Integer memory;
+  /** The memory request for the task execution */
+  private Long memory;
 
-  private Integer duration;
+  /** Time elapsed to complete since the submission */
+  private Long duration;
 
-  private Integer realtime;
+  /** Task execution time i.e. delta between completion and start timestamp */
+  private Long realtime;
+
+// **** TODO enable once trace updated to support this? **** //
+//  /** Real memory (resident set) size of the process. Equivalent to `ps -o rss` */
+//  private Long rss;
+//
+//  /** Peak of real memory. This data is read from field `VmHWM` in `/proc/$pid/status file` */
+//  private Long peakRss;
+//
+//  /** Virtual memory size of the process. Equivalent to `ps -o vsize` */
+//  private Long vmem;
+//
+//  /** Peak of virtual memory. This data is read from field `VmPeak` in `/proc/$pid/status file` */
+//  private Long peakVmem;
+//
+//  /**
+//   * Number of bytes the process directly read from disk. This data is read from file
+//   * `/proc/$pid/io`
+//   */
+//  private Long readBytes;
+//
+//  /**
+//   * Number of bytes the process originally dirtied in the page-cache (assuming they will go to disk
+//   * later). This data is read from file `/proc/$pid/io`
+//   */
+//  private Long writeBytes;
 
   @SneakyThrows
   public static Task parse(@NonNull Map<String, Object> sourceMap) {

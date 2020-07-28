@@ -73,6 +73,13 @@ public class Converter {
         .memory(task.getMemory())
         .duration(task.getDuration())
         .realtime(task.getRealtime())
+//        **** TODO enable once trace updated to support this? **** //
+//        .rss(task.getRss())
+//        .peakRss(task.getPeakRss())
+//        .vmem(task.getVmem())
+//        .peakVmem(task.getPeakVmem())
+//        .readBytes(task.getReadBytes())
+//        .writeBytes(task.getWriteBytes())
         // todo ticket #24 workflow-relay
         .stderr("")
         .stdout("")
