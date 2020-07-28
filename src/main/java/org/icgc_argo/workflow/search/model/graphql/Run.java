@@ -54,7 +54,7 @@ public class Run {
 
   private String errorReport;
 
-  private String duration;
+  private Long duration;
 
   private String commandLine;
 

@@ -18,17 +18,9 @@
 
 package org.icgc_argo.workflow.search.util;
 
-import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
-import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
-import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -38,6 +30,15 @@ import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.wes.*;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
+import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
+import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 
 @Slf4j
 @UtilityClass
@@ -73,7 +74,12 @@ public class Converter {
         .memory(task.getMemory())
         .duration(task.getDuration())
         .realtime(task.getRealtime())
-        // todo ticket #24 workflow-relay
+        .rss(task.getRss())
+        .peakRss(task.getPeakRss())
+        .vmem(task.getVmem())
+        .peakVmem(task.getPeakVmem())
+        .readBytes(task.getReadBytes())
+        .writeBytes(task.getWriteBytes())
         .stderr("")
         .stdout("")
         .build();

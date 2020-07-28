@@ -75,15 +75,39 @@ public class TaskDocument {
   /** Task filesystem working directory */
   @NonNull private String workdir;
 
-  /** Task cpu usage */
+  /** The cpus number request for the task execution */
   private Integer cpus;
 
-  /** Task memory usage */
-  private Integer memory;
+  /** The memory request for the task execution */
+  private Long memory;
 
-  /** Task duration (ms) */
-  private Integer duration;
+  /** Time elapsed to complete since the submission */
+  private Long duration;
 
-  /** Task real execution time (ms) */
-  private Integer realtime;
+  /** Task execution time i.e. delta between completion and start timestamp */
+  private Long realtime;
+
+  /** Real memory (resident set) size of the process. Equivalent to `ps -o rss` */
+  private Long rss;
+
+  /** Peak of real memory. This data is read from field `VmHWM` in `/proc/$pid/status file` */
+  private Long peakRss;
+
+  /** Virtual memory size of the process. Equivalent to `ps -o vsize` */
+  private Long vmem;
+
+  /** Peak of virtual memory. This data is read from field `VmPeak` in `/proc/$pid/status file` */
+  private Long peakVmem;
+
+  /**
+   * Number of bytes the process directly read from disk. This data is read from file
+   * `/proc/$pid/io`
+   */
+  private Long readBytes;
+
+  /**
+   * Number of bytes the process originally dirtied in the page-cache (assuming they will go to disk
+   * later). This data is read from file `/proc/$pid/io`
+   */
+  private Long writeBytes;
 }

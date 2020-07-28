@@ -64,7 +64,7 @@ public class WorkflowDocument {
   private String errorReport;
 
   /** Workflow duration */
-  private Integer duration;
+  private Long duration;
 
   /** The command line that was executed */
   @NonNull private String commandLine;
