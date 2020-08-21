@@ -46,18 +46,21 @@ public class RunService {
     return Run.parse(sourceMap);
   }
 
+  @HasQueryAccess
   public List<Run> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     val response = runRepository.getRuns(filter, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
     return hitStream.map(RunService::hitToRun).collect(toUnmodifiableList());
   }
 
+  @HasQueryAccess
   public Run getRunByRunId(String runId) {
     val response = runRepository.getRuns(Map.of(RUN_ID, runId), null);
     val runOpt = Arrays.stream(response.getHits().getHits()).map(RunService::hitToRun).findFirst();
     return runOpt.orElse(null);
   }
 
+  @HasQueryAccess
   public List<Run> getRunByAnalysisId(String analysisId) {
     val response = runRepository.getRuns(Map.of(ANALYSIS_ID, analysisId), null);
     val hitStream = Arrays.stream(response.getHits().getHits());

@@ -19,17 +19,22 @@
 package org.icgc_argo.workflow.search.config.websecurity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.*;
@@ -43,12 +48,16 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 @EnableWebSecurity
 @Slf4j
 @Profile("secure")
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
 
     private final AuthProperties authProperties;
@@ -141,5 +150,26 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
 
         reader.lines().forEach(stringBuilder::append);
         return stringBuilder.toString();
+    }
+
+    @Bean
+    public Function<Authentication, Boolean> queryScopeChecker() {
+        val expectedScopes = Lists.newArrayList(
+                Iterables.concat(
+                        authProperties.getGraphqlScopes().getQueryOnly(),
+                        authProperties.getGraphqlScopes().getQueryAndMutation()
+                ));
+
+        return authentication -> {
+            val scopes =
+                    authentication.getAuthorities().stream()
+                            .map(Objects::toString)
+                            .collect(toUnmodifiableList());
+
+            val foundScopes =
+                    scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
+
+            return foundScopes.size() > 0;
+        };
     }
 }

@@ -22,11 +22,8 @@ import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
-import graphql.execution.AsyncExecutionStrategy;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -35,13 +32,10 @@ import java.net.URL;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.config.websecurity.AuthProperties;
-import org.icgc_argo.workflow.search.graphql.security.AddSecurityContextDecorator;
-import org.icgc_argo.workflow.search.graphql.security.VerifyAuthQueryExecutionDecorator;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -74,25 +68,9 @@ public class GraphQLProvider {
   }
 
   @Bean
-  @Profile("!secure")
   public GraphQL graphQL() {
     return graphQL;
   }
-
-
-    @Bean
-    @Profile("secure")
-    public GraphQL secureGraphQL() {
-        return graphQL.transform(this::toSecureGraphql);
-    }
-
-    private void toSecureGraphql(GraphQL.Builder graphQLBuilder) {
-        // For more info on `Execution Strategies` see: https://www.graphql-java.codm/documentation/v15/execution/
-        graphQLBuilder.queryExecutionStrategy(
-               new AddSecurityContextDecorator(
-                       new VerifyAuthQueryExecutionDecorator(new AsyncExecutionStrategy(), queryScopesToCheck())
-               ));
-    }
 
   @PostConstruct
   public void init() throws IOException {
@@ -138,12 +116,4 @@ public class GraphQLProvider {
         .type(newTypeWiring("Task").dataFetcher("run", runDataFetchers.getNestedRunDataFetcher()))
         .build();
   }
-
-    private ImmutableList<String> queryScopesToCheck() {
-        return ImmutableList.copyOf(
-                Iterables.concat(
-                        authProperties.getGraphqlScopes().getQueryOnly(),
-                        authProperties.getGraphqlScopes().getQueryAndMutation()
-                ));
-    }
 }

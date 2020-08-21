@@ -39,6 +39,7 @@ public class TaskService {
     this.taskRepository = taskRepository;
   }
 
+  @HasQueryAccess
   public List<Task> getTasks(String runId, Map<String, Object> filter, Map<String, Integer> page) {
     val mergedBuilder = ImmutableMap.<String, Object>builder();
     if (runId != null) {
