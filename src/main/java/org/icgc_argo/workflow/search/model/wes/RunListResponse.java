@@ -37,5 +37,5 @@ public class RunListResponse {
 
   @NonNull private List<RunStatus> runs;
 
-  private String nextPageToken;
+  private Integer nextPageToken;
 }

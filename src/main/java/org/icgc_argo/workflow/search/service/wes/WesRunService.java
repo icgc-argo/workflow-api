@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
@@ -67,11 +68,8 @@ public class WesRunService {
   private final RestHighLevelClient client;
   private final String workflowIndex;
   private final String taskIndex;
-  private final String userName;
-  private final String password;
-  private final boolean useAuthentication;
-  private final int DEFAULT_HIT_SIZE = 100;
-  private ServiceInfoProperties serviceInfoProperties;
+  private final int DEFAULT_HIT_SIZE = 10;
+  private final ServiceInfoProperties serviceInfoProperties;
 
   @Autowired
   public WesRunService(
@@ -82,18 +80,16 @@ public class WesRunService {
     this.serviceInfoProperties = serviceInfoProperties;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
     this.taskIndex = elasticsearchProperties.getTaskIndex();
-    this.userName = elasticsearchProperties.getUsername();
-    this.password = elasticsearchProperties.getPassword();
-    this.useAuthentication = elasticsearchProperties.getUseAuthentication();
   }
 
-  public RunListResponse listRuns() {
-    val hits = getSearchHits(workflowIndex);
+  public RunListResponse listRuns(Integer pageSize, Integer pageToken) {
+    val hitsPage = getSearchHits(workflowIndex, pageSize, pageToken);
     return RunListResponse.builder()
         .runs(
-            Stream.of(hits)
+            Stream.of(hitsPage.getHits())
                 .map(hit -> convertSourceMapToRunStatus(hit.getSourceAsMap()))
                 .collect(Collectors.toList()))
+        .nextPageToken(hitsPage.getNextPageToken())
         .build();
   }
 
@@ -141,21 +137,38 @@ public class WesRunService {
     }
   }
 
-  private SearchHit[] getSearchHits(@NonNull String index) {
+  private SearchHitsPage getSearchHits(@NonNull String index, Integer pageSize, Integer pageToken) {
     try {
+      val sizeToUse = pageSize == null ? DEFAULT_HIT_SIZE : pageSize;
+      val from = pageToken == null ? 0 : sizeToUse * pageToken;
+
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
       searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
-      searchSourceBuilder.query(QueryBuilders.matchAllQuery()).size(DEFAULT_HIT_SIZE);
+      searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      searchSourceBuilder.size(sizeToUse);
+      searchSourceBuilder.from(from);
+
       val searchResponse = search(searchSourceBuilder, index);
       val hits = searchResponse.getHits().getHits();
 
       NotFoundException.checkNotFound(
           hits != null && hits.length >= 0, format("Cannot find run log."));
 
-      return hits;
+      val totalHits = searchResponse.getHits().getTotalHits().value;
+      val nextPageToken = calculateNextPageToken(totalHits, from, sizeToUse, pageToken);
+
+      return new SearchHitsPage(hits, sizeToUse, nextPageToken);
     } catch (NotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
+
+  private Integer calculateNextPageToken(Long totalHits, Integer from, Integer pageSize, Integer currentPageToken) {
+    // if remaining hits can fit inside a page of size pageSize, then nextPage token is current + 1
+    if ((totalHits - from) / pageSize > 0) {
+      return currentPageToken + 1;
+    }
+    return null;
   }
 
   public SearchHit getWorkflowById(@NonNull String runId) {
@@ -251,5 +264,12 @@ public class WesRunService {
     } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
+  }
+
+  @Value
+  static class SearchHitsPage {
+    SearchHit[] hits;
+    Integer pageSize;
+    Integer nextPageToken;
   }
 }
