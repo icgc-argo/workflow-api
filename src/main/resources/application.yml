@@ -26,7 +26,7 @@ service-info:
     - "1.0.0"
   workflowType: "nextflow"
   workflowEngineVersions:
-    nextflow: "20.01.0"
+    nextflow: "20.07.1"
   workflowTypeVersions:
     any-nextflow-workflow: "X.X.X"
   defaultWorkflowEngineParameters:
