@@ -18,21 +18,9 @@
 
 package org.icgc_argo.workflow.search.service.wes;
 
-import static java.lang.String.format;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -42,6 +30,10 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
@@ -56,19 +48,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
+
 @Slf4j
 @Service
 public class WesRunService {
 
   private final RestHighLevelClient client;
-  private ServiceInfoProperties serviceInfoProperties;
-
   private final String workflowIndex;
   private final String taskIndex;
   private final String userName;
   private final String password;
   private final boolean useAuthentication;
   private final int DEFAULT_HIT_SIZE = 100;
+  private ServiceInfoProperties serviceInfoProperties;
 
   @Autowired
   public WesRunService(
@@ -122,8 +125,8 @@ public class WesRunService {
         .supportedFilesystemProtocols(serviceInfoProperties.getSupportedFilesystemProtocols())
         .supportedWesVersions(serviceInfoProperties.getSupportedWesVersions())
         .workflowEngineVersions(serviceInfoProperties.getWorkflowEngineVersions())
-        .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
         .systemStateCounts(systemStateCounts())
+        .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
         .defaultWorkflowEngineParameters(serviceInfoProperties.getDefaultWorkflowEngineParameters())
         .build();
   }
@@ -226,11 +229,27 @@ public class WesRunService {
    * @return Map of system statistics
    */
   private Map<String, Long> systemStateCounts() {
-    val hits = getSearchHits(workflowIndex);
-    Map<String, Long> counts =
-        Stream.of(hits).map(hit -> hit.getSourceAsMap().get(STATE).toString())
-            .collect(Collectors.toList()).stream()
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-    return counts;
+    SearchRequest searchRequest = new SearchRequest(workflowIndex);
+
+    val matchQueryBuilder = QueryBuilders.matchAllQuery();
+    val sourceBuilder = new SearchSourceBuilder();
+
+    AggregationBuilder aggregation = AggregationBuilders.terms("states").field(STATE);
+
+    sourceBuilder.aggregation(aggregation);
+    sourceBuilder.query(matchQueryBuilder);
+    searchRequest.source(sourceBuilder);
+
+    try {
+      val searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      Terms states = searchResponse.getAggregations().get("states");
+      return states.getBuckets().stream()
+          .collect(
+              (Collectors.toMap(
+                  MultiBucketsAggregation.Bucket::getKeyAsString,
+                  MultiBucketsAggregation.Bucket::getDocCount)));
+    } catch (IOException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
   }
 }
