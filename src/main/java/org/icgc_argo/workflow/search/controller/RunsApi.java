@@ -147,14 +147,15 @@ public interface RunsApi {
               value =
                   "OPTIONAL The preferred number of workflow runs to return in a page. If not provided, the implementation should use a default page size. The implementation must not return more items than `page_size`, but it may return fewer.  Clients should not assume that if fewer than `page_size` items are returned that all items have been returned.  The availability of additional pages is indicated by the value of `next_page_token` in the response.")
           @Valid
-          @RequestParam(value = "page_size", required = false)
-          Long pageSize,
+          @RequestParam(value = "page_size", defaultValue = "10", required = false)
+          Integer pageSize,
       @ApiParam(
+              example = "0",
               value =
                   "OPTIONAL Token to use to indicate where to start getting results. If unspecified, return the first page of results.")
           @Valid
-          @RequestParam(value = "page_token", required = false)
-          String pageToken);
+          @RequestParam(value = "page_token", defaultValue = "0", required = false)
+          Integer pageToken);
 
   @ApiOperation(
       value = "Get information about workflow execution service.",

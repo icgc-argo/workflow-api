@@ -18,22 +18,11 @@
 
 package org.icgc_argo.workflow.search.service.wes;
 
-import static java.lang.String.format;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
@@ -42,6 +31,10 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
@@ -56,19 +49,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
+
 @Slf4j
 @Service
 public class WesRunService {
 
   private final RestHighLevelClient client;
-  private ServiceInfoProperties serviceInfoProperties;
-
   private final String workflowIndex;
   private final String taskIndex;
-  private final String userName;
-  private final String password;
-  private final boolean useAuthentication;
-  private final int DEFAULT_HIT_SIZE = 100;
+  private final int DEFAULT_HIT_SIZE = 10;
+  private final ServiceInfoProperties serviceInfoProperties;
 
   @Autowired
   public WesRunService(
@@ -79,18 +80,16 @@ public class WesRunService {
     this.serviceInfoProperties = serviceInfoProperties;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
     this.taskIndex = elasticsearchProperties.getTaskIndex();
-    this.userName = elasticsearchProperties.getUsername();
-    this.password = elasticsearchProperties.getPassword();
-    this.useAuthentication = elasticsearchProperties.getUseAuthentication();
   }
 
-  public RunListResponse listRuns() {
-    val hits = getSearchHits(workflowIndex);
+  public RunListResponse listRuns(Integer pageSize, Integer pageToken) {
+    val hitsPage = getSearchHits(workflowIndex, pageSize, pageToken);
     return RunListResponse.builder()
         .runs(
-            Stream.of(hits)
+            Stream.of(hitsPage.getHits())
                 .map(hit -> convertSourceMapToRunStatus(hit.getSourceAsMap()))
                 .collect(Collectors.toList()))
+        .nextPageToken(hitsPage.getNextPageToken())
         .build();
   }
 
@@ -122,8 +121,8 @@ public class WesRunService {
         .supportedFilesystemProtocols(serviceInfoProperties.getSupportedFilesystemProtocols())
         .supportedWesVersions(serviceInfoProperties.getSupportedWesVersions())
         .workflowEngineVersions(serviceInfoProperties.getWorkflowEngineVersions())
-        .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
         .systemStateCounts(systemStateCounts())
+        .workflowTypeVersions(serviceInfoProperties.getWorkflowTypeVersions())
         .defaultWorkflowEngineParameters(serviceInfoProperties.getDefaultWorkflowEngineParameters())
         .build();
   }
@@ -138,21 +137,38 @@ public class WesRunService {
     }
   }
 
-  private SearchHit[] getSearchHits(@NonNull String index) {
+  private SearchHitsPage getSearchHits(@NonNull String index, Integer pageSize, Integer pageToken) {
     try {
+      val sizeToUse = pageSize == null ? DEFAULT_HIT_SIZE : pageSize;
+      val from = pageToken == null ? 0 : sizeToUse * pageToken;
+
       SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
       searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
-      searchSourceBuilder.query(QueryBuilders.matchAllQuery()).size(DEFAULT_HIT_SIZE);
+      searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      searchSourceBuilder.size(sizeToUse);
+      searchSourceBuilder.from(from);
+
       val searchResponse = search(searchSourceBuilder, index);
       val hits = searchResponse.getHits().getHits();
 
       NotFoundException.checkNotFound(
           hits != null && hits.length >= 0, format("Cannot find run log."));
 
-      return hits;
+      val totalHits = searchResponse.getHits().getTotalHits().value;
+      val nextPageToken = calculateNextPageToken(totalHits, from, sizeToUse, pageToken);
+
+      return new SearchHitsPage(hits, sizeToUse, nextPageToken);
     } catch (NotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
+
+  private Integer calculateNextPageToken(Long totalHits, Integer from, Integer pageSize, Integer currentPageToken) {
+    // if remaining hits can fit inside a page of size pageSize, then nextPage token is current + 1
+    if ((totalHits - from) / pageSize > 0) {
+      return currentPageToken + 1;
+    }
+    return null;
   }
 
   public SearchHit getWorkflowById(@NonNull String runId) {
@@ -226,11 +242,34 @@ public class WesRunService {
    * @return Map of system statistics
    */
   private Map<String, Long> systemStateCounts() {
-    val hits = getSearchHits(workflowIndex);
-    Map<String, Long> counts =
-        Stream.of(hits).map(hit -> hit.getSourceAsMap().get(STATE).toString())
-            .collect(Collectors.toList()).stream()
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-    return counts;
+    SearchRequest searchRequest = new SearchRequest(workflowIndex);
+
+    val matchQueryBuilder = QueryBuilders.matchAllQuery();
+    val sourceBuilder = new SearchSourceBuilder();
+
+    AggregationBuilder aggregation = AggregationBuilders.terms("states").field(STATE);
+
+    sourceBuilder.aggregation(aggregation);
+    sourceBuilder.query(matchQueryBuilder);
+    searchRequest.source(sourceBuilder);
+
+    try {
+      val searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      Terms states = searchResponse.getAggregations().get("states");
+      return states.getBuckets().stream()
+          .collect(
+              (Collectors.toMap(
+                  MultiBucketsAggregation.Bucket::getKeyAsString,
+                  MultiBucketsAggregation.Bucket::getDocCount)));
+    } catch (IOException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @Value
+  static class SearchHitsPage {
+    SearchHit[] hits;
+    Integer pageSize;
+    Integer nextPageToken;
   }
 }

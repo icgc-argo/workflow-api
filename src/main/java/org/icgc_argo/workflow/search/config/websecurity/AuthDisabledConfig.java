@@ -31,7 +31,6 @@ public class AuthDisabledConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/graphql/**").permitAll()
-                .antMatchers("/actuator/**").permitAll();
+                .anyRequest().permitAll();
     }
 }
