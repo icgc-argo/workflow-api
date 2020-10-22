@@ -18,18 +18,24 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toList;
+import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
+import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
+
 import com.apollographql.federation.graphqljava._Entity;
+import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
+import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.RunService;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
@@ -61,7 +67,7 @@ public class EntityDataFetchers {
                     final Object analysisId = values.get("analysisId");
                     if (analysisId instanceof String) {
                       return new Analysis(
-                          (String) analysisId, runService.getRunByAnalysisId((String) analysisId));
+                          (String) analysisId, inputForRunResolver((String) analysisId));
                     }
                   }
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
@@ -73,5 +79,22 @@ public class EntityDataFetchers {
                   return null;
                 })
             .collect(toList());
+  }
+
+  private DataFetcher<List<Run>> inputForRunResolver(String analysisId) {
+    return environment -> {
+      ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
+      val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
+
+      // short circuit here if can't find produced analysis for valid runId
+      if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
+        return List.of();
+      }
+
+      Map<String, Object> mergedFilter = new HashMap<>(filter);
+      mergedFilter.put(ANALYSIS_ID, analysisId);
+
+      return runService.getRuns(mergedFilter, null);
+    };
   }
 }
