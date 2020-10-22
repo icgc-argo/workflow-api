@@ -18,9 +18,18 @@
 
 package org.icgc_argo.workflow.search.util;
 
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
+import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
+import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -30,15 +39,6 @@ import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.wes.*;
-
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
-import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
-import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 
 @Slf4j
 @UtilityClass
@@ -142,5 +142,17 @@ public class Converter {
 
   public static String convertErrorReport(String errorReport) {
     return errorReport == null ? "" : errorReport;
+  }
+
+  public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
+    val newMap = ImmutableMap.<K, V>builder();
+    if (obj instanceof Map) {
+      try {
+        newMap.putAll((Map<? extends K, ? extends V>) obj);
+      } catch (ClassCastException e) {
+        log.error("Failed to cast obj to Map<K,V>");
+      }
+    }
+    return newMap.build();
   }
 }
