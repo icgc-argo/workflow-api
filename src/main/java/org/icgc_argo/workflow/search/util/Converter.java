@@ -145,14 +145,14 @@ public class Converter {
   }
 
   public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
-    val newFilter = ImmutableMap.<K, V>builder();
+    val newMap = ImmutableMap.<K, V>builder();
     if (obj instanceof Map) {
       try {
-        newFilter.putAll((Map<? extends K, ? extends V>) obj);
+        newMap.putAll((Map<? extends K, ? extends V>) obj);
       } catch (ClassCastException e) {
         log.error("Failed to cast obj to Map<K,V>");
       }
     }
-    return newFilter.build();
+    return newMap.build();
   }
 }

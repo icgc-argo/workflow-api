@@ -86,7 +86,7 @@ public class EntityDataFetchers {
       ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
       val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
 
-      // short circuit here if can't find produced analysis for valid runId
+      // short circuit here since can't find runs for invalid analysisId
       if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
         return List.of();
       }
