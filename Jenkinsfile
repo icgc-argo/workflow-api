@@ -1,4 +1,4 @@
-def dockerRepo = "ghcr.io/icgc-argo/song-search"
+def dockerRepo = "ghcr.io/icgc-argo/workflow-search"
 def githubRepo = "icgc-argo/workflow-search"
 def chartVersion = "0.2.0"
 def commit = "UNKNOWN"
