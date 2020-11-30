@@ -34,7 +34,7 @@ import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
-import org.icgc_argo.workflow.search.service.RunService;
+import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.stereotype.Component;
 
 @Slf4j

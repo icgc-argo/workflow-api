@@ -5,7 +5,7 @@ spring:
     description: "Workflow Search API Documentation"
 
 server:
-  port : 8080
+  port : 8089
 
 elastic:
   host: localhost
@@ -47,10 +47,9 @@ graphql:
 ---
 spring.profiles: secure
 auth:
-  jwtPublicKeyUrl: "http://localhost:8081/oauth/token/public_key"
-  jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nSET ME IF YOU DONT HAVE A URL, BUT URL TAKES PRIORITY\n-----END PUBLIC KEY-----"
+  jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0lOqMuPLCVusc6szklNXQL1FHhSkEgR7An+8BllBqTsRHM4bRYosseGFCbYPn8r8FsWuMDtxp0CwTyMQR2PCbJ740DdpbE1KC6jAfZxqcBete7gP0tooJtbvnA6X4vNpG4ukhtUoN9DzNOO0eqMU0Rgyy5HjERdYEWkwTNB30i9I+nHFOSj4MGLBSxNlnuo3keeomCRgtimCx+L/K3HNo0QHTG1J7RzLVAchfQT0lu3pUJ8kB+UM6/6NG+fVyysJyRZ9gadsr4gvHHckw8oUBp2tHvqBEkEdY+rt1Mf5jppt7JUV7HAPLB/qR5jhALY2FX/8MN+lPLmb/nLQQichVQIDAQAB\n-----END PUBLIC KEY-----"
   graphqlScopes:
     queryOnly:
-      - RDPC-DEV.READ
+      - RDPC-CA.READ
     queryAndMutation:
-      - RDPC-DEV.WRITE
+      - RDPC-CA.WRITE
