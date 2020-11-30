@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Task;
-import org.icgc_argo.workflow.search.service.TaskService;
+import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

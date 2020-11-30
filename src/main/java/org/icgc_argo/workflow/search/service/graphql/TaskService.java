@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.service;
+package org.icgc_argo.workflow.search.service.graphql;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
@@ -28,9 +28,11 @@ import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.graphql.Task;
 import org.icgc_argo.workflow.search.repository.TaskRepository;
+import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
 
 @Service
+@HasQueryAccess
 public class TaskService {
 
   private final TaskRepository taskRepository;
@@ -39,7 +41,6 @@ public class TaskService {
     this.taskRepository = taskRepository;
   }
 
-  @HasQueryAccess
   public List<Task> getTasks(String runId, Map<String, Object> filter, Map<String, Integer> page) {
     val mergedBuilder = ImmutableMap.<String, Object>builder();
     if (runId != null) {

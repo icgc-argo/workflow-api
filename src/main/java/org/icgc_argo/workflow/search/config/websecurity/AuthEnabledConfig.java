@@ -71,12 +71,19 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/graphql/**").permitAll()
                 .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/runs/**").permitAll()
+                .antMatchers("/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**").permitAll()
             .and()
                 .authorizeRequests()
                 .anyRequest().authenticated()
@@ -84,6 +91,27 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
                 .oauth2ResourceServer().jwt()
                 .decoder(jwtDecoder())
                 .jwtAuthenticationConverter(grantedAuthoritiesExtractor());
+    }
+
+    @Bean
+    public Function<Authentication, Boolean> queryScopeChecker() {
+        val expectedScopes = Lists.newArrayList(
+                Iterables.concat(
+                        authProperties.getGraphqlScopes().getQueryOnly(),
+                        authProperties.getGraphqlScopes().getQueryAndMutation()
+                ));
+
+        return authentication -> {
+            val scopes =
+                    authentication.getAuthorities().stream()
+                            .map(Objects::toString)
+                            .collect(toUnmodifiableList());
+
+            val foundScopes =
+                    scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
+
+            return foundScopes.size() > 0;
+        };
     }
 
     private Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
@@ -150,26 +178,5 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
 
         reader.lines().forEach(stringBuilder::append);
         return stringBuilder.toString();
-    }
-
-    @Bean
-    public Function<Authentication, Boolean> queryScopeChecker() {
-        val expectedScopes = Lists.newArrayList(
-                Iterables.concat(
-                        authProperties.getGraphqlScopes().getQueryOnly(),
-                        authProperties.getGraphqlScopes().getQueryAndMutation()
-                ));
-
-        return authentication -> {
-            val scopes =
-                    authentication.getAuthorities().stream()
-                            .map(Objects::toString)
-                            .collect(toUnmodifiableList());
-
-            val foundScopes =
-                    scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
-
-            return foundScopes.size() > 0;
-        };
     }
 }
