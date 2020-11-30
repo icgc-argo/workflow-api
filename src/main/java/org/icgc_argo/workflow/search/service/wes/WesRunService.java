@@ -43,6 +43,7 @@ import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
 import org.icgc_argo.workflow.search.model.wes.*;
+import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,7 @@ import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRun
 
 @Slf4j
 @Service
+@HasQueryAccess
 public class WesRunService {
 
   private final RestHighLevelClient client;

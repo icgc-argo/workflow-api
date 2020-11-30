@@ -16,12 +16,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.service;
+package org.icgc_argo.workflow.search.service.graphql;
 
 import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.repository.RunRepository;
+import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
 
 @Service
+@HasQueryAccess
 public class RunService {
 
   private final RunRepository runRepository;
@@ -46,21 +48,18 @@ public class RunService {
     return Run.parse(sourceMap);
   }
 
-  @HasQueryAccess
   public List<Run> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     val response = runRepository.getRuns(filter, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
     return hitStream.map(RunService::hitToRun).collect(toUnmodifiableList());
   }
 
-  @HasQueryAccess
   public Run getRunByRunId(String runId) {
     val response = runRepository.getRuns(Map.of(RUN_ID, runId), null);
     val runOpt = Arrays.stream(response.getHits().getHits()).map(RunService::hitToRun).findFirst();
     return runOpt.orElse(null);
   }
 
-  @HasQueryAccess
   public List<Run> getRunByAnalysisId(String analysisId) {
     val response = runRepository.getRuns(Map.of(ANALYSIS_ID, analysisId), null);
     val hitStream = Arrays.stream(response.getHits().getHits());

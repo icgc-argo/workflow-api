@@ -19,7 +19,7 @@
  *
  */
 
-package org.icgc_argo.workflow.search.service;
+package org.icgc_argo.workflow.search.service.annotations;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -28,5 +28,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("@queryScopeChecker.apply(authentication)")
-@interface HasQueryAccess {
+public @interface HasQueryAccess {
 }
