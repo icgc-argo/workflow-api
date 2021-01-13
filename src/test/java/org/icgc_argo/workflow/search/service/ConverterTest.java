@@ -32,10 +32,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static graphql.Assert.assertNotNull;
 import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 public class ConverterTest {
