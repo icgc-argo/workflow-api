@@ -29,9 +29,6 @@ import java.util.Map;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
-  private static final String TASK_CPUS = "cpus";
-  private static final String TASK_MEMORY = "cpus";
-
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private String runId;
