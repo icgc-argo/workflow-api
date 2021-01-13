@@ -20,7 +20,10 @@ package org.icgc_argo.workflow.search.service.graphql;
 
 import lombok.val;
 import org.elasticsearch.search.SearchHit;
+import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
 import org.icgc_argo.workflow.search.model.graphql.Run;
+import org.icgc_argo.workflow.search.model.graphql.SearchResult;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_FROM;
+import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
 
@@ -46,6 +51,30 @@ public class RunService {
   private static Run hitToRun(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
     return Run.parse(sourceMap);
+  }
+
+  public SearchResult<Run> searchRuns(
+          Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+    val response = runRepository.getRuns(filter, page, sorts);
+    val responseSearchHits = response.getHits();
+
+    val totalHits = responseSearchHits.getTotalHits().value;
+    val from = page.getOrDefault("from", ES_PAGE_DEFAULT_FROM);
+    val size = page.getOrDefault("size", ES_PAGE_DEFAULT_SIZE);
+
+    val analyses =
+            Arrays.stream(responseSearchHits.getHits())
+                    .map(RunService::hitToRun)
+                    .collect(toUnmodifiableList());
+    val nextFrom = (totalHits - from) / size > 0;
+    return new SearchResult<>(analyses, nextFrom, totalHits);
+  }
+
+  public AggregationResult aggregateAnalyses(Map<String, Object> filter) {
+    val response = runRepository.getRuns(filter, Map.of(), List.of());
+    val responseSearchHits = response.getHits();
+    val totalHits = responseSearchHits.getTotalHits().value;
+    return new AggregationResult(totalHits);
   }
 
   public List<Run> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
