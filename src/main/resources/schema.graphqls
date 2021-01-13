@@ -146,4 +146,5 @@ extend type Query {
     runs(filter: RunsFilter, page: Page, sorts: [RunSort!]): RunsSearchResult!
     aggregateRuns(filter: RunsFilter): AggregationResult!
     tasks(filter: TasksFilter, page: Page, sorts: [TaskSort!]): TasksSearchResult!
+    aggregateTasks(filter: TasksFilter): AggregationResult!
 }
