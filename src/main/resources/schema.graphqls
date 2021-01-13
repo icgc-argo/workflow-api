@@ -62,7 +62,6 @@ input RunsFilter {
     repository: String
     analysisId: String
 }
-
 input TasksFilter {
     runId: String
     sessionId: String
@@ -108,10 +107,13 @@ input RunSort {
 }
 
 enum TaskSortField {
-    objectId,
-    fileAccess,
-    dataType,
-    name
+    runId,
+    sessionId,
+    state,
+    startTime,
+    completeTime,
+    cpus,
+    memory
 }
 
 input TaskSort {

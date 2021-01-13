@@ -109,6 +109,7 @@ public class RunRepository {
   public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return getRuns(filter, page, List.of());
   }
+
   public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(QUERY_RESOLVER, filter);

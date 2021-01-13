@@ -112,6 +112,7 @@ public class GraphQLProvider {
         .type(newTypeWiring("Query").dataFetcher("runs", runDataFetchers.getRunsDataFetcher()))
         .type(newTypeWiring("Query").dataFetcher("aggregateRuns", runDataFetchers.getRunsDataFetcher()))
         .type(newTypeWiring("Query").dataFetcher("tasks", taskDataFetchers.getTasksDataFetcher()))
+        .type(newTypeWiring("Query").dataFetcher("aggregateTasks", taskDataFetchers.getAggregateTasksDataFetcher()))
         .type(
             newTypeWiring("Run").dataFetcher("tasks", taskDataFetchers.getNestedTaskDataFetcher()))
         .type(newTypeWiring("Task").dataFetcher("run", runDataFetchers.getNestedRunDataFetcher()))
