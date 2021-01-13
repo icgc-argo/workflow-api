@@ -79,7 +79,7 @@ public class RunDataFetchers {
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
       }
-      return runService.aggregateAnalyses(filter.build());
+      return runService.aggregateRuns(filter.build());
     };
   }
 

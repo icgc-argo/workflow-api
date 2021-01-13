@@ -70,7 +70,7 @@ public class RunService {
     return new SearchResult<>(analyses, nextFrom, totalHits);
   }
 
-  public AggregationResult aggregateAnalyses(Map<String, Object> filter) {
+  public AggregationResult aggregateRuns(Map<String, Object> filter) {
     val response = runRepository.getRuns(filter, Map.of(), List.of());
     val responseSearchHits = response.getHits();
     val totalHits = responseSearchHits.getTotalHits().value;
