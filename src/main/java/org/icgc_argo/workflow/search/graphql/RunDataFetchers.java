@@ -18,17 +18,20 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.model.graphql.Run;
-import org.icgc_argo.workflow.search.model.graphql.Task;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 @Slf4j
 @Component
@@ -43,18 +46,40 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<List<Run>> getRunsDataFetcher() {
+  public DataFetcher<SearchResult<Run>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
       val filter = ImmutableMap.<String, Object>builder();
       val page = ImmutableMap.<String, Integer>builder();
+      val sorts = ImmutableList.<Sort>builder();
 
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
         if (args.get("page") != null) page.putAll((Map<String, Integer>) args.get("page"));
+        if (args.get("sorts") != null) {
+          val rawSorts = (List<Object>) args.get("sorts");
+          sorts.addAll(
+                  rawSorts.stream()
+                          .map(sort -> convertValue(sort, Sort.class))
+                          .collect(toUnmodifiableList()));
+        }
       }
-      return runService.getRuns(filter.build(), page.build());
+      return runService.searchRuns(filter.build(), page.build(), sorts.build());
+    };
+  }
+
+  @SuppressWarnings("unchecked")
+  public DataFetcher<AggregationResult> getAggregateAnalysesDataFetcher() {
+    return environment -> {
+      val args = environment.getArguments();
+
+      val filter = ImmutableMap.<String, Object>builder();
+
+      if (args != null) {
+        if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
+      }
+      return runService.aggregateRuns(filter.build());
     };
   }
 

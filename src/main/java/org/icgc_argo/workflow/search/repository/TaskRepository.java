@@ -19,9 +19,14 @@
 package org.icgc_argo.workflow.search.repository;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.search.sort.SortOrder.DESC;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
 import com.google.common.collect.ImmutableMap;
+
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.NonNull;
@@ -34,8 +39,11 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +53,8 @@ public class TaskRepository {
 
   private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
+
+  private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
 
   private final RestHighLevelClient client;
   private final String workflowIndex;
@@ -56,13 +66,23 @@ public class TaskRepository {
     this.client = client;
     this.workflowIndex = elasticsearchProperties.getTaskIndex();
   }
-
   public SearchResponse getTasks(Map<String, Object> filter, Map<String, Integer> page) {
+    return getTasks(filter, page, List.of());
+  }
+
+  public SearchResponse getTasks(Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     final AbstractQueryBuilder<?> query =
-        (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(filter);
+        (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(QUERY_RESOLVER, filter);
 
     val searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.sort(START_TIME, SortOrder.DESC);
+
+    if (sorts.isEmpty()) {
+      searchSourceBuilder.sort(SORT_BUILDER_RESOLVER.get(START_TIME).order(DESC));
+    } else {
+      val sortBuilders = sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts);
+      sortBuilders.forEach(searchSourceBuilder::sort);
+    }
+
     searchSourceBuilder.query(query);
 
     if (page != null && page.size() != 0) {
@@ -80,19 +100,6 @@ public class TaskRepository {
     return client.search(searchRequest, RequestOptions.DEFAULT);
   }
 
-  /**
-   * For each argument, find its query producer function and apply the argument value ANDing it in a
-   * bool query
-   *
-   * @param args Argument Map from GraphQL
-   * @return Elasticsearch Bool Query containing ANDed (MUSTed) term queries
-   */
-  private static BoolQueryBuilder queryFromArgs(Map<String, Object> args) {
-    val bool = QueryBuilders.boolQuery();
-    args.forEach((key, value) -> bool.must(QUERY_RESOLVER.get(key).apply(value.toString())));
-    return bool;
-  }
-
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
     return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
         .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
@@ -101,5 +108,17 @@ public class TaskRepository {
         .put(TAG, value -> new TermQueryBuilder("tag", value))
         .put(WORK_DIR, value -> new TermQueryBuilder("workdir", value)) // Note the non-camelcasing
         .build();
+  }
+
+  private static Map<String, FieldSortBuilder> sortPathMap() {
+    return ImmutableMap.<String, FieldSortBuilder>builder()
+         .put(RUN_ID, SortBuilders.fieldSort("runId"))
+         .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
+         .put(STATE, SortBuilders.fieldSort("state"))
+         .put(START_TIME, SortBuilders.fieldSort("startTime"))
+         .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
+         .put(CPUS, SortBuilders.fieldSort("cpus"))
+         .put(MEMORY, SortBuilders.fieldSort("memory"))
+         .build();
   }
 }

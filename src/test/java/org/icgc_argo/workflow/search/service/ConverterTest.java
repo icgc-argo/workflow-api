@@ -25,9 +25,7 @@ import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
 import org.icgc_argo.workflow.search.model.SearchFields;
 import org.icgc_argo.workflow.search.model.wes.State;
 import org.icgc_argo.workflow.search.util.Converter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -35,10 +33,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-@RunWith(SpringRunner.class)
 public class ConverterTest {
 
   private static final String RUN_ID = UUID.randomUUID().toString();

@@ -16,28 +16,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model;
+package org.icgc_argo.workflow.search.model.graphql;
 
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
-import static lombok.AccessLevel.PRIVATE;
+import java.util.List;
 
-@NoArgsConstructor(access = PRIVATE)
-public class SearchFields {
+@Value
+public class SearchResult<T> {
+  List<T> content;
+  Info info;
 
-  public static final String RUN_ID = "runId";
-  public static final String SESSION_ID = "sessionId";
-  public static final String COMMAND_LINE = "commandLine";
-  public static final String STATE = "state";
-  public static final String START_TIME = "startTime";
-  public static final String COMPLETE_TIME = "completeTime";
-  public static final String EXIT_STATUS = "exitStatus";
-  public static final String PARAMETERS = "parameters";
-  public static final String REPOSITORY = "repository";
-  public static final String ERROR_REPORT = "errorReport";
-  public static final String TAG = "tag";
-  public static final String WORK_DIR = "workDir";
-  public static final String ANALYSIS_ID = "analysisId";
-  public static final String CPUS = "cpus";
-  public static final String MEMORY = "memory";
+  public SearchResult(List<T> content, Boolean hasNextFrom, Long totalHits) {
+    this.content = content;
+    this.info = new Info(hasNextFrom, totalHits, content.size());
+  }
+
+  @Value
+  public static class Info {
+    Boolean hasNextFrom;
+    Long totalHits;
+    Integer contentCount;
+  }
 }

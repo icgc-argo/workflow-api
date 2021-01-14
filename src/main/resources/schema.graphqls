@@ -88,7 +88,63 @@ type Workflow @key(fields: "runId") @extends {
     run: Run
 }
 
+enum SortOrder {
+    asc,
+    desc
+}
+
+enum RunSortField {
+    runId,
+    sessionId,
+    state,
+    startTime,
+    completeTime,
+    repository
+}
+
+input RunSort {
+    fieldName: RunSortField!
+    order: SortOrder!
+}
+
+enum TaskSortField {
+    runId,
+    sessionId,
+    state,
+    startTime,
+    completeTime,
+    cpus,
+    memory
+}
+
+input TaskSort {
+    fieldName: TaskSortField!
+    order: SortOrder!
+}
+
+type SearchResultInfo {
+    contentCount: String!
+    hasNextFrom: String!
+    totalHits: String!
+}
+
+type RunsSearchResult {
+    content: [Run!]
+    info: SearchResultInfo!
+}
+
+type TasksSearchResult {
+    content: [Task!]
+    info: SearchResultInfo!
+}
+
+type AggregationResult {
+    totalHits: String!
+}
+
 extend type Query {
-    runs(filter: RunsFilter, page: Page): [Run]
-    tasks(filter: TasksFilter, page: Page): [Task]
+    runs(filter: RunsFilter, page: Page, sorts: [RunSort!]): RunsSearchResult!
+    aggregateRuns(filter: RunsFilter): AggregationResult!
+    tasks(filter: TasksFilter, page: Page, sorts: [TaskSort!]): TasksSearchResult!
+    aggregateTasks(filter: TasksFilter): AggregationResult!
 }

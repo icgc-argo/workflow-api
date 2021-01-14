@@ -18,18 +18,21 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.model.graphql.Run;
-import org.icgc_argo.workflow.search.model.graphql.Task;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 @Slf4j
 @Component
@@ -44,19 +47,40 @@ public class TaskDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<List<Task>> getTasksDataFetcher() {
+  public DataFetcher<SearchResult<Task>> getTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
       val filter = ImmutableMap.<String, Object>builder();
       val page = ImmutableMap.<String, Integer>builder();
+      val sorts = ImmutableList.<Sort>builder();
 
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
         if (args.get("page") != null) page.putAll((Map<String, Integer>) args.get("page"));
+        if (args.get("sorts") != null) {
+          val rawSorts = (List<Object>) args.get("sorts");
+          sorts.addAll(
+                  rawSorts.stream()
+                          .map(sort -> convertValue(sort, Sort.class))
+                          .collect(toUnmodifiableList()));
+        }
       }
+      return taskService.searchRuns(filter.build(), page.build(), sorts.build());
+    };
+  }
 
-      return taskService.getTasks(null, filter.build(), page.build());
+  @SuppressWarnings("unchecked")
+  public DataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
+    return environment -> {
+      val args = environment.getArguments();
+
+      val filter = ImmutableMap.<String, Object>builder();
+
+      if (args != null) {
+        if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
+      }
+      return taskService.aggregateTasks(filter.build());
     };
   }
 
