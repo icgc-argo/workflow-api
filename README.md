@@ -19,28 +19,39 @@ Search API for getting workflow run information.
     
     `GET /service-info`
 
-## Build
+If using `secure` profile include Authorization header with token: `{ Authorization: Bearer $JWT }`
 
-With maven:
-```bash
-mvn clean package
-```
+## Graphql
 
-With docker:
-```bash 
-docker build .
-```
+* Graphql Endpoint:
+ 
+    `POST /graphql`
 
-## Run
+* With `secure` enabled
 
-```bash
-java -jar workflow-search-0.0.1-SNAPSHOT.jar
-```
+    Include Authorization header with token: `{ Authorization: Bearer $JWT }`
 
-With Docker:
-```bash
-docker run icgcargo/workflow-search
-```
+* full schema can be found here: `./src/main/resources/schema.graphql`
+
+## Configuration
+
+Configuration is setup in `./src/main/resources/application.yaml`
+
+#### Elasticsearch
+This service requires two elastic search index, `workflowIndex` and `taskIndex`. 
+
+The mappings for these indices can be found from Maestro's mapping: 
+
+workflow - https://github.com/icgc-argo/workflow-relay/blob/develop/src/main/resources/run_log_mapping.json
+
+task - https://github.com/icgc-argo/workflow-relay/blob/develop/src/main/resources/task_log_mapping.json
+
+Configure other es properties as required.
+
+#### Secure profile
+ There is a `secure` profile that enables Oauth2 scope based authorization on requests. 
+ 
+ Configure `jwtPublicKeyUrl` (or `jwtPublicKeyStr` for dev setup) in conjunction with the JWT issuer. Also configure the expected scopes as needed.
 
 ## Test
 
@@ -48,3 +59,29 @@ docker run icgcargo/workflow-search
 mvn clean test
 ```
 
+## Build
+With maven:
+```bash
+mvn clean package
+```
+With docker:
+```bash 
+docker build . -t icgcargo/workflow-search:test
+```
+
+## Run
+Maven with app default and secure profile:
+```bash
+mvn spring-boot:run
+```
+```bash
+mvn -Dspring-boot.run.profiles=secure spring-boot:run
+```
+
+Docker with app default and secure profile:
+```bash
+docker run icgcargo/song-search:test
+```
+```bash
+docker run -e "SPRING_PROFILES_ACTIVE=secure" icgcargo/workflow-search:test
+```
