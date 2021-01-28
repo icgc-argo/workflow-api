@@ -1,5 +1,14 @@
 # workflow-search
-Search API for getting workflow run information.
+This service exposes a REST API, which in combination with [workflow-management's](https://github.com/icgc-argo/workflow-management) API, is WES compliant for getting runs and service information. There is also a Graphql API for querying workflow runs and tasks information. Data fetching for both APIs is backed by elasticsearch (filter, paging, & sorting).
+
+## Tech Stack
+- Java 11
+- SpringBoot
+- Spring Security
+- Springfox Swagger
+- Elasticsearch
+- Graphql-java
+- Apollo Federation
 
 ## REST API Endpoints
 
@@ -27,13 +36,11 @@ If using `secure` profile, include token in authorization header: `{ Authorizati
 
     `POST /graphql`
 
-* full schema can be found here: 
-
-`./src/main/resources/schema.graphql`
+* full schema can be found here:  `./src/main/resources/schema.graphql`
 
 If using `secure` profile, include token in authorization header: `{ Authorization: Bearer $JWT }`
 
-#### Apollo Federation support
+#### Apollo Federation support:
 This service has support for Apollo Federation which extends certain gql types found in [song-search](https://github.com/icgc-argo/song-search).
  
 With a service like [rdpc-gateway](https://github.com/icgc-argo/rdpc-gateway) the schemas from these two services can be federated into a larger schema that joins the entities.  
