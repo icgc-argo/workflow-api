@@ -132,7 +132,7 @@ public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
 
         val scopes = scopesBuilder.build();
 
-        log.info("JWT scopes: " + scopes);
+        log.debug("JWT scopes: " + scopes);
 
         return scopes.stream()
                        .map(SimpleGrantedAuthority::new)
