@@ -19,34 +19,33 @@
 package org.icgc_argo.workflow.search.config.websecurity;
 
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import lombok.Data;
 import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "auth")
 public class AuthProperties {
 
-    String jwtPublicKeyUrl;
+  String jwtPublicKeyUrl;
 
-    String jwtPublicKeyStr;
+  String jwtPublicKeyStr;
 
-    GraphqlScopes graphqlScopes;
+  GraphqlScopes graphqlScopes;
 
-    @Value
-    @ConstructorBinding
-    public static class GraphqlScopes {
-        ImmutableList<String> queryOnly;
-        ImmutableList<String> queryAndMutation;
+  @Value
+  @ConstructorBinding
+  public static class GraphqlScopes {
+    ImmutableList<String> queryOnly;
+    ImmutableList<String> queryAndMutation;
 
-        public GraphqlScopes(List<String> queryOnly, List<String> queryAndMutation) {
-            this.queryOnly = ImmutableList.copyOf(queryOnly);
-            this.queryAndMutation = ImmutableList.copyOf(queryAndMutation);
-        }
+    public GraphqlScopes(List<String> queryOnly, List<String> queryAndMutation) {
+      this.queryOnly = ImmutableList.copyOf(queryOnly);
+      this.queryAndMutation = ImmutableList.copyOf(queryAndMutation);
     }
+  }
 }

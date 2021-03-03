@@ -26,6 +26,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
@@ -40,7 +41,7 @@ public class Analysis {
 
   private String analysisId;
 
-  private DataFetcher<List<Run>> inputForRunsFetcher;
+  private DataFetcher<CompletableFuture<List<Run>>> inputForRunsFetcher;
 
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
@@ -49,6 +50,6 @@ public class Analysis {
 
   @SneakyThrows
   public List<Run> getInputForRuns(DataFetchingEnvironment env) {
-    return inputForRunsFetcher.get(env);
+    return inputForRunsFetcher.get(env).get();
   }
 }

@@ -20,18 +20,13 @@ package org.icgc_argo.workflow.search.config;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
-import org.elasticsearch.client.RestHighLevelClient;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.client.ClientConfiguration;
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
+import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients;
 
 @Configuration
 @Slf4j
@@ -52,52 +47,22 @@ public class ElasticsearchConfig {
             properties.getHost(), properties.getPort()));
   }
 
-  private RestHighLevelClient secureRestHighLevelClient() {
-    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-    credentialsProvider.setCredentials(
-        AuthScope.ANY,
-        new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword()));
-
-    return new RestHighLevelClient(
-        RestClient.builder(
-                new HttpHost(
-                    properties.getHost(),
-                    properties.getPort(),
-                    properties.getUseHttps() ? "https" : "http"))
-            .setRequestConfigCallback(
-                config ->
-                    config
-                        .setConnectTimeout(connectTimeout)
-                        .setConnectionRequestTimeout(connectionRequestTimeout)
-                        .setSocketTimeout(socketTimeout))
-            .setHttpClientConfigCallback(
-                new HttpClientConfigCallback() {
-                  @Override
-                  public HttpAsyncClientBuilder customizeHttpClient(
-                      HttpAsyncClientBuilder httpClientBuilder) {
-                    return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                  }
-                }));
-  }
-
   @Bean
-  public RestHighLevelClient restHighLevelClient() {
+  public ReactiveElasticsearchClient reactiveEsClient() {
+    val hostAndPort = properties.getHost() + ":" + properties.getPort();
+    val configurationBuilder = ClientConfiguration.builder().connectedTo(hostAndPort);
 
-    if (properties.getUseAuthentication()) {
-      return secureRestHighLevelClient();
+    if (properties.getUseHttps()) {
+      configurationBuilder.usingSsl();
     }
 
-    return new RestHighLevelClient(
-        RestClient.builder(
-                new HttpHost(
-                    properties.getHost(),
-                    properties.getPort(),
-                    properties.getUseHttps() ? "https" : "http"))
-            .setRequestConfigCallback(
-                config ->
-                    config
-                        .setConnectTimeout(connectTimeout)
-                        .setConnectionRequestTimeout(connectionRequestTimeout)
-                        .setSocketTimeout(socketTimeout)));
+    if (properties.getUseAuthentication()) {
+      configurationBuilder.withBasicAuth(properties.getUsername(), properties.getPassword());
+    }
+
+    configurationBuilder.withConnectTimeout(connectTimeout);
+    configurationBuilder.withSocketTimeout(socketTimeout);
+
+    return ReactiveRestClients.create(configurationBuilder.build());
   }
 }

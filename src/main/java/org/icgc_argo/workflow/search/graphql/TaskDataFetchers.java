@@ -18,21 +18,21 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 @Slf4j
 @Component
@@ -47,7 +47,7 @@ public class TaskDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<SearchResult<Task>> getTasksDataFetcher() {
+  public DataFetcher<CompletableFuture<SearchResult<Task>>> getTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -61,17 +61,17 @@ public class TaskDataFetchers {
         if (args.get("sorts") != null) {
           val rawSorts = (List<Object>) args.get("sorts");
           sorts.addAll(
-                  rawSorts.stream()
-                          .map(sort -> convertValue(sort, Sort.class))
-                          .collect(toUnmodifiableList()));
+              rawSorts.stream()
+                  .map(sort -> convertValue(sort, Sort.class))
+                  .collect(toUnmodifiableList()));
         }
       }
-      return taskService.searchRuns(filter.build(), page.build(), sorts.build());
+      return taskService.searchRuns(filter.build(), page.build(), sorts.build()).toFuture();
     };
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
+  public DataFetcher<CompletableFuture<AggregationResult>> getAggregateTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -80,16 +80,16 @@ public class TaskDataFetchers {
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
       }
-      return taskService.aggregateTasks(filter.build());
+      return taskService.aggregateTasks(filter.build()).toFuture();
     };
   }
 
-  public DataFetcher<List<Task>> getNestedTaskDataFetcher() {
+  public DataFetcher<CompletableFuture<List<Task>>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
       val runId = ((Run) environment.getSource()).getRunId();
 
-      return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0));
+      return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0)).toFuture();
     };
   }
 }

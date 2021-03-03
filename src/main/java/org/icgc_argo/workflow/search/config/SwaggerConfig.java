@@ -29,7 +29,7 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.paths.RelativePathProvider;
+import springfox.documentation.spring.web.paths.DefaultPathProvider;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
@@ -60,9 +60,9 @@ public class SwaggerConfig {
         .build()
         .host(properties.host)
         .pathProvider(
-            new RelativePathProvider(null) {
+            new DefaultPathProvider() {
               @Override
-              public String getApplicationBasePath() {
+              public String getDocumentationPath() {
                 return properties.getBaseUrl();
               }
             })

@@ -18,28 +18,12 @@
 
 package org.icgc_argo.workflow.search.config.websecurity;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.security.KeyFactory;
@@ -50,133 +34,156 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import reactor.core.publisher.Mono;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
-
-@EnableWebSecurity
+@EnableWebFluxSecurity
 @Slf4j
 @Profile("secure")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class AuthEnabledConfig extends WebSecurityConfigurerAdapter {
+@EnableReactiveMethodSecurity
+public class AuthEnabledConfig {
 
-    private final AuthProperties authProperties;
+  private final AuthProperties authProperties;
 
-    private final ResourceLoader resourceLoader;
+  private final ResourceLoader resourceLoader;
 
-    @Autowired
-    public AuthEnabledConfig(AuthProperties authProperties, ResourceLoader resourceLoader) {
-        this.authProperties = authProperties;
-        this.resourceLoader = resourceLoader;
-    }
+  @Autowired
+  public AuthEnabledConfig(AuthProperties authProperties, ResourceLoader resourceLoader) {
+    this.authProperties = authProperties;
+    this.resourceLoader = resourceLoader;
+  }
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/graphql/**").permitAll()
-                .antMatchers("/actuator/**").permitAll()
-                .antMatchers("/runs/**").permitAll()
-                .antMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**").permitAll()
-            .and()
-                .authorizeRequests()
-                .anyRequest().authenticated()
-            .and()
-                .oauth2ResourceServer().jwt()
-                .decoder(jwtDecoder())
-                .jwtAuthenticationConverter(grantedAuthoritiesExtractor());
-    }
+  @Bean
+  public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
+    http.csrf()
+        .disable()
+        .authorizeExchange()
+        .pathMatchers("/graphql/**")
+        .permitAll()
+        .pathMatchers("/actuator/**")
+        .permitAll()
+        .pathMatchers("/runs/**")
+        .permitAll()
+        .pathMatchers(
+            "/v2/api-docs",
+            "/configuration/ui",
+            "/swagger-resources/**",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**")
+        .permitAll()
+        .and()
+        .authorizeExchange()
+        .anyExchange()
+        .authenticated()
+        .and()
+        .oauth2ResourceServer()
+        .jwt()
+        .jwtDecoder(jwtDecoder())
+        .jwtAuthenticationConverter(grantedAuthoritiesExtractor());
+    return http.build();
+  }
 
-    @Bean
-    public Function<Authentication, Boolean> queryScopeChecker() {
-        val expectedScopes = Lists.newArrayList(
-                Iterables.concat(
-                        authProperties.getGraphqlScopes().getQueryOnly(),
-                        authProperties.getGraphqlScopes().getQueryAndMutation()
-                ));
+  @Bean
+  public Function<Authentication, Boolean> queryScopeChecker() {
+    val expectedScopes =
+        Lists.newArrayList(
+            Iterables.concat(
+                authProperties.getGraphqlScopes().getQueryOnly(),
+                authProperties.getGraphqlScopes().getQueryAndMutation()));
 
-        return authentication -> {
-            val scopes =
-                    authentication.getAuthorities().stream()
-                            .map(Objects::toString)
-                            .collect(toUnmodifiableList());
+    return authentication -> {
+      val scopes =
+          authentication.getAuthorities().stream()
+              .map(Objects::toString)
+              .collect(toUnmodifiableList());
 
-            val foundScopes =
-                    scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
+      val foundScopes =
+          scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
 
-            return foundScopes.size() > 0;
-        };
-    }
+      return foundScopes.size() > 0;
+    };
+  }
 
-    private Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(this.jwtToGrantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
-    }
+  private Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
+    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+        this.jwtToGrantedAuthoritiesConverter);
+    return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+  }
 
-    private final Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter = (jwt) -> {
+  private final Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter =
+      (jwt) -> {
         val scopesBuilder = ImmutableList.<String>builder();
 
         try {
-            val context = (Map<String, Object>) jwt.getClaims().get("context");
-            scopesBuilder.addAll((Collection<String>) context.get("scope"));
+          val context = (Map<String, Object>) jwt.getClaims().get("context");
+          scopesBuilder.addAll((Collection<String>) context.get("scope"));
         } catch (Exception e) {
-            log.error("Unable to extract scopes from JWT");
+          log.error("Unable to extract scopes from JWT");
         }
 
         val scopes = scopesBuilder.build();
 
         log.debug("JWT scopes: " + scopes);
 
-        return scopes.stream()
-                       .map(SimpleGrantedAuthority::new)
-                       .collect(toList());
-    };
+        return scopes.stream().map(SimpleGrantedAuthority::new).collect(toList());
+      };
 
-    @SneakyThrows
-    private JwtDecoder jwtDecoder() {
-        String publicKeyStr;
+  @SneakyThrows
+  private ReactiveJwtDecoder jwtDecoder() {
+    String publicKeyStr;
 
-        val publicKeyUrl = authProperties.getJwtPublicKeyUrl();
-        if (publicKeyUrl != null && !publicKeyUrl.isEmpty()) {
-            publicKeyStr = fetchJWTPublicKey(publicKeyUrl);
-        } else {
-            publicKeyStr = authProperties.getJwtPublicKeyStr();
-        }
-
-        val publicKeyContent = publicKeyStr
-                                       .replaceAll("\\n", "")
-                                       .replace("-----BEGIN PUBLIC KEY-----", "")
-                                       .replace("-----END PUBLIC KEY-----", "");
-
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-
-        X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
-        RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
-
-        return NimbusJwtDecoder.withPublicKey(publicKey).build();
-
+    val publicKeyUrl = authProperties.getJwtPublicKeyUrl();
+    if (publicKeyUrl != null && !publicKeyUrl.isEmpty()) {
+      publicKeyStr = fetchJWTPublicKey(publicKeyUrl);
+    } else {
+      publicKeyStr = authProperties.getJwtPublicKeyStr();
     }
 
-    /**
-     * Call EGO server for public key to use when verifying JWTs
-     */
-    @SneakyThrows
-    private String fetchJWTPublicKey(String publicKeyUrl) {
-        log.info("Fetching EGO public key");
-        val publicKeyResource = resourceLoader.getResource(publicKeyUrl);
+    val publicKeyContent =
+        publicKeyStr
+            .replaceAll("\\n", "")
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "");
 
-        val stringBuilder = new StringBuilder();
-        val reader = new BufferedReader(
-                new InputStreamReader(publicKeyResource.getInputStream()));
+    KeyFactory kf = KeyFactory.getInstance("RSA");
 
-        reader.lines().forEach(stringBuilder::append);
-        return stringBuilder.toString();
-    }
+    X509EncodedKeySpec keySpecX509 =
+        new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
+    RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
+
+    return NimbusReactiveJwtDecoder.withPublicKey(publicKey).build();
+  }
+
+  /** Call EGO server for public key to use when verifying JWTs */
+  @SneakyThrows
+  private String fetchJWTPublicKey(String publicKeyUrl) {
+    log.info("Fetching EGO public key");
+    val publicKeyResource = resourceLoader.getResource(publicKeyUrl);
+
+    val stringBuilder = new StringBuilder();
+    val reader = new BufferedReader(new InputStreamReader(publicKeyResource.getInputStream()));
+
+    reader.lines().forEach(stringBuilder::append);
+    return stringBuilder.toString();
+  }
 }

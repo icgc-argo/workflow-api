@@ -29,6 +29,7 @@ import graphql.schema.DataFetcher;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
@@ -36,6 +37,7 @@ import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -60,7 +62,7 @@ public class EntityDataFetchers {
                   if (RUN_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
-                      return runService.getRunByRunId((String) runId);
+                      return runService.getRunByRunId((String) runId).toFuture();
                     }
                   }
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
@@ -73,7 +75,10 @@ public class EntityDataFetchers {
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
-                      return new Workflow((String) runId, runService.getRunByRunId((String) runId));
+                      return runService
+                          .getRunByRunId((String) runId)
+                          .map(run -> new Workflow(run.getRunId(), run))
+                          .toFuture();
                     }
                   }
                   return null;
@@ -81,20 +86,20 @@ public class EntityDataFetchers {
             .collect(toList());
   }
 
-  private DataFetcher<List<Run>> inputForRunResolver(String analysisId) {
+  private DataFetcher<CompletableFuture<List<Run>>> inputForRunResolver(String analysisId) {
     return environment -> {
       ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
       val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
 
       // short circuit here since can't find runs for invalid analysisId
       if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
-        return List.of();
+        return Mono.<List<Run>>empty().toFuture();
       }
 
       Map<String, Object> mergedFilter = new HashMap<>(filter);
       mergedFilter.put(ANALYSIS_ID, analysisId);
 
-      return runService.getRuns(mergedFilter, null);
+      return runService.getRuns(mergedFilter, null).toFuture();
     };
   }
 }

@@ -18,20 +18,21 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 @Slf4j
 @Component
@@ -46,7 +47,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<SearchResult<Run>> getRunsDataFetcher() {
+  public DataFetcher<CompletableFuture<SearchResult<Run>>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -60,17 +61,17 @@ public class RunDataFetchers {
         if (args.get("sorts") != null) {
           val rawSorts = (List<Object>) args.get("sorts");
           sorts.addAll(
-                  rawSorts.stream()
-                          .map(sort -> convertValue(sort, Sort.class))
-                          .collect(toUnmodifiableList()));
+              rawSorts.stream()
+                  .map(sort -> convertValue(sort, Sort.class))
+                  .collect(toUnmodifiableList()));
         }
       }
-      return runService.searchRuns(filter.build(), page.build(), sorts.build());
+      return runService.searchRuns(filter.build(), page.build(), sorts.build()).toFuture();
     };
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<AggregationResult> getAggregateAnalysesDataFetcher() {
+  public DataFetcher<CompletableFuture<AggregationResult>> getAggregateRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -79,14 +80,14 @@ public class RunDataFetchers {
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
       }
-      return runService.aggregateRuns(filter.build());
+      return runService.aggregateRuns(filter.build()).toFuture();
     };
   }
 
-  public DataFetcher<Run> getNestedRunDataFetcher() {
+  public DataFetcher<CompletableFuture<Run>> getNestedRunDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
-      return runService.getRunByRunId(task.getRunId());
+      return runService.getRunByRunId(task.getRunId()).toFuture();
     };
   }
 }

@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflow.search.graphql;
 
+import static graphql.Scalars.GraphQLLong;
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import com.apollographql.federation.graphqljava.Federation;
@@ -57,10 +58,10 @@ public class GraphQLProvider {
   private final AuthProperties authProperties;
 
   public GraphQLProvider(
-          RunDataFetchers runDataFetchers,
-          TaskDataFetchers taskDataFetchers,
-          EntityDataFetchers entityDataFetchers,
-          AuthProperties authProperties) {
+      RunDataFetchers runDataFetchers,
+      TaskDataFetchers taskDataFetchers,
+      EntityDataFetchers entityDataFetchers,
+      AuthProperties authProperties) {
     this.runDataFetchers = runDataFetchers;
     this.taskDataFetchers = taskDataFetchers;
     this.entityDataFetchers = entityDataFetchers;
@@ -108,11 +109,16 @@ public class GraphQLProvider {
 
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
+        .scalar(GraphQLLong)
         .scalar(ExtendedScalars.Json)
         .type(newTypeWiring("Query").dataFetcher("runs", runDataFetchers.getRunsDataFetcher()))
-        .type(newTypeWiring("Query").dataFetcher("aggregateRuns", runDataFetchers.getRunsDataFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("aggregateRuns", runDataFetchers.getAggregateRunsDataFetcher()))
         .type(newTypeWiring("Query").dataFetcher("tasks", taskDataFetchers.getTasksDataFetcher()))
-        .type(newTypeWiring("Query").dataFetcher("aggregateTasks", taskDataFetchers.getAggregateTasksDataFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("aggregateTasks", taskDataFetchers.getAggregateTasksDataFetcher()))
         .type(
             newTypeWiring("Run").dataFetcher("tasks", taskDataFetchers.getNestedTaskDataFetcher()))
         .type(newTypeWiring("Task").dataFetcher("run", runDataFetchers.getNestedRunDataFetcher()))
