@@ -19,9 +19,8 @@
 package org.icgc_argo.workflow.search.model.wes;
 
 import io.swagger.annotations.ApiModel;
-import lombok.*;
-
 import java.util.List;
+import lombok.*;
 
 /** The service will return a RunListResponse when receiving a successful RunListRequest. */
 @ApiModel(

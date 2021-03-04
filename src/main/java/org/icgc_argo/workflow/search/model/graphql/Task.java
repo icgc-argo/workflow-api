@@ -20,11 +20,10 @@ package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-
-import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

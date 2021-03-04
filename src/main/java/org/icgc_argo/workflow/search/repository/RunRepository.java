@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,9 @@ import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -133,6 +137,35 @@ public class RunRepository {
     }
 
     return execute(searchSourceBuilder);
+  }
+
+  /**
+   * The system statistics, key is the statistic, value is the count of runs in that state. See the
+   * State enum for the possible keys.
+   *
+   * @return Map of system statistics
+   */
+  public Mono<Map<String, Long>> getAggregatedRunStateCounts() {
+    val searchRequest = new SearchRequest(workflowIndex);
+    val matchQueryBuilder = QueryBuilders.matchAllQuery();
+    val sourceBuilder = new SearchSourceBuilder();
+    val aggregation = AggregationBuilders.terms("states").field(STATE);
+
+    sourceBuilder.aggregation(aggregation);
+    sourceBuilder.query(matchQueryBuilder);
+    searchRequest.source(sourceBuilder);
+
+    return client
+        .searchForResponse(searchRequest)
+        .map(
+            searchResponse -> {
+              Terms states = searchResponse.getAggregations().get("states");
+              return states.getBuckets().stream()
+                  .collect(
+                      (Collectors.toMap(
+                          MultiBucketsAggregation.Bucket::getKeyAsString,
+                          MultiBucketsAggregation.Bucket::getDocCount)));
+            });
   }
 
   @SneakyThrows

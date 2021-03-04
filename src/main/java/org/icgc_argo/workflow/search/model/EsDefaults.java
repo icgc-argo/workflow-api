@@ -21,9 +21,9 @@
 
 package org.icgc_argo.workflow.search.model;
 
-import lombok.NoArgsConstructor;
-
 import static lombok.AccessLevel.PRIVATE;
+
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = PRIVATE)
 public class EsDefaults {

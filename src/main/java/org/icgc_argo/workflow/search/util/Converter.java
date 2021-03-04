@@ -38,6 +38,8 @@ import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
 import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
+import org.icgc_argo.workflow.search.model.graphql.Run;
+import org.icgc_argo.workflow.search.model.graphql.Task;
 import org.icgc_argo.workflow.search.model.wes.*;
 
 @Slf4j
@@ -85,10 +87,72 @@ public class Converter {
         .build();
   }
 
+  public static TaskLog taskDocumentToLog(@NonNull Task task) {
+    return TaskLog.builder()
+        .taskId(Integer.parseInt(task.getTaskId()))
+        .name(task.getName())
+        .process(task.getProcess())
+        .tag(task.getTag())
+        .container(task.getContainer())
+        .attempt(task.getAttempt())
+        .state(State.fromValue(task.getState()))
+        .cmd(buildCommandLineList(task.getScript()))
+        .submitTime(task.getSubmitTime())
+        .startTime(task.getStartTime())
+        .endTime(task.getCompleteTime())
+        .exitCode(task.getExit())
+        .workdir(task.getWorkdir())
+        .cpus(task.getCpus())
+        .memory(task.getMemory())
+        .duration(task.getDuration())
+        .realtime(task.getRealtime())
+        .rss(task.getRss())
+        .peakRss(task.getPeakRss())
+        .vmem(task.getVmem())
+        .peakVmem(task.getPeakVmem())
+        .readBytes(task.getReadBytes())
+        .writeBytes(task.getWriteBytes())
+        .stderr("")
+        .stdout("")
+        .build();
+  }
+
   public static RunStatus convertSourceMapToRunStatus(@NonNull Map<String, Object> source) {
     return RunStatus.builder()
         .runId(source.get(RUN_ID).toString())
         .state(fromValue(source.get(STATE).toString()))
+        .build();
+  }
+
+  public static RunResponse buildRunLog(
+      @NonNull Run workflowDoc, @NonNull String workflowTypeVersion, @NonNull String workflowType) {
+    return RunResponse.builder()
+        .runId(workflowDoc.getRunId())
+        .state(State.fromValue(workflowDoc.getState()))
+        // todo ticket #24
+        .outputs("")
+        // build RunRequest
+        .request(
+            RunRequest.builder()
+                .workflowTypeVersion(workflowTypeVersion)
+                .workflowType(workflowType)
+                .workflowUrl(workflowDoc.getRepository())
+                .workflowParams(workflowDoc.getParameters())
+                .workflowEngineParams(workflowDoc.getEngineParameters())
+                .build())
+        // build run log
+        .runLog(
+            RunLog.builder()
+                .runId(workflowDoc.getRunId())
+                .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
+                .exitCode(workflowDoc.getExitStatus())
+                .startTime(workflowDoc.getStartTime())
+                .endTime(workflowDoc.getCompleteTime())
+                .stdout("")
+                .stderr(convertErrorReport(workflowDoc.getErrorReport()))
+                .success(workflowDoc.getSuccess())
+                .duration(workflowDoc.getDuration())
+                .build())
         .build();
   }
 

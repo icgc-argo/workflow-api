@@ -76,6 +76,10 @@ public class TaskService {
             });
   }
 
+  public Mono<List<Task>> getTasks(String runId) {
+    return getTasks(runId, null, null);
+  }
+
   // maybe Flux<Task>??
   public Mono<List<Task>> getTasks(
       String runId, Map<String, Object> filter, Map<String, Integer> page) {

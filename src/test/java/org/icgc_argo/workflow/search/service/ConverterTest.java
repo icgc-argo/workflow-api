@@ -18,6 +18,15 @@
 
 package org.icgc_argo.workflow.search.service;
 
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.index.model.TaskDocument;
@@ -26,16 +35,6 @@ import org.icgc_argo.workflow.search.model.SearchFields;
 import org.icgc_argo.workflow.search.model.wes.State;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 public class ConverterTest {
@@ -62,8 +61,6 @@ public class ConverterTest {
   private static final Long TASK_PEAK_VMEM = 2345L;
   private static final Long TASK_READ_BYTES = 6789L;
   private static final Long TASK_WRITE_BYTES = 10123L;
-
-
 
   @Test
   public void TestConvertSourceMapToRunStatus() {

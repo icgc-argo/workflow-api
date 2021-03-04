@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import reactor.core.publisher.Mono;
 
 @Api(
     value = "WorkflowExecutionService",
@@ -44,7 +45,10 @@ public interface RunsApi {
       })
   @ApiResponses(
       value = {
-        @ApiResponse(code = 200, message = "", response = RunResponse.class),
+        @ApiResponse(
+            code = 200,
+            message = "Get detailed info about a workflow run",
+            response = RunResponse.class),
         @ApiResponse(
             code = 401,
             message = "The request is unauthorized.",
@@ -67,7 +71,7 @@ public interface RunsApi {
       produces = {"application/json"},
       consumes = {"application/json"},
       method = RequestMethod.GET)
-  ResponseEntity<RunResponse> getRunLog(
+  Mono<ResponseEntity<RunResponse>> getRunLog(
       @ApiParam(value = "", required = true) @PathVariable("run_id") String runId);
 
   @ApiOperation(
@@ -81,7 +85,10 @@ public interface RunsApi {
       })
   @ApiResponses(
       value = {
-        @ApiResponse(code = 200, message = "", response = RunStatus.class),
+        @ApiResponse(
+            code = 200,
+            message = "Get quick status info about a workflow run",
+            response = RunStatus.class),
         @ApiResponse(
             code = 401,
             message = "The request is unauthorized.",
@@ -104,7 +111,7 @@ public interface RunsApi {
       produces = {"application/json"},
       consumes = {"application/json"},
       method = RequestMethod.GET)
-  ResponseEntity<RunStatus> getRunStatus(
+  Mono<ResponseEntity<RunStatus>> getRunStatus(
       @ApiParam(value = "", required = true) @PathVariable("run_id") String runId);
 
   @ApiOperation(
@@ -118,7 +125,7 @@ public interface RunsApi {
       })
   @ApiResponses(
       value = {
-        @ApiResponse(code = 200, message = "", response = RunListResponse.class),
+        @ApiResponse(code = 200, message = "List Run Results", response = RunListResponse.class),
         @ApiResponse(
             code = 400,
             message = "The request is malformed.",
@@ -141,7 +148,7 @@ public interface RunsApi {
       produces = {"application/json"},
       consumes = {"application/json"},
       method = RequestMethod.GET)
-  ResponseEntity<RunListResponse> listRuns(
+  Mono<ResponseEntity<RunListResponse>> listRuns(
       @ApiParam(
               example = "10",
               value =
@@ -169,5 +176,5 @@ public interface RunsApi {
       produces = {"application/json"},
       consumes = {"application/json"},
       method = RequestMethod.GET)
-  ResponseEntity<ServiceInfo> getServiceInfo();
+  Mono<ResponseEntity<ServiceInfo>> getServiceInfo();
 }

@@ -53,7 +53,7 @@ public class SwaggerConfig {
   }
 
   @Bean
-  public Docket productApi(SwaggerProperties properties) {
+  public Docket api(SwaggerProperties properties) {
     return new Docket(DocumentationType.SWAGGER_2)
         .select()
         .apis(RequestHandlerSelectors.basePackage("org.icgc_argo.workflow.search.controller"))

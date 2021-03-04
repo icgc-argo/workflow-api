@@ -18,9 +18,8 @@
 
 package org.icgc_argo.workflow.search.index.model;
 
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Getter
 @Builder

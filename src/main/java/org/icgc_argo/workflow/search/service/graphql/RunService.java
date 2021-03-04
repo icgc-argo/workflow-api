@@ -37,6 +37,7 @@ import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -77,6 +78,10 @@ public class RunService {
             });
   }
 
+  public Mono<Map<String, Long>> getAggregatedRunStateCounts() {
+    return runRepository.getAggregatedRunStateCounts();
+  }
+
   // maybe return Flux<Run>?
   public Mono<List<Run>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return runRepository
@@ -88,12 +93,10 @@ public class RunService {
   public Mono<Run> getRunByRunId(String runId) {
     return runRepository
         .getRuns(Map.of(RUN_ID, runId), null)
-        .map(
-            response ->
-                Arrays.stream(response.getHits().getHits())
-                    .map(RunService::hitToRun)
-                    .findFirst()
-                    .orElse(null));
+        .map(response -> response.getHits().getHits())
+        .flatMapMany(Flux::fromArray)
+        .next()
+        .map(RunService::hitToRun);
   }
 
   private static Run hitToRun(SearchHit hit) {
