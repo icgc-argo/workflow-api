@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
@@ -50,7 +50,7 @@ public class TaskDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public MonoDataFetcher<SearchResult<Task>> getTasksDataFetcher() {
+  public AsyncDataFetcher<SearchResult<Task>> getTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -69,12 +69,12 @@ public class TaskDataFetchers {
                   .collect(toUnmodifiableList()));
         }
       }
-      return taskService.searchRuns(filter.build(), page.build(), sorts.build());
+      return taskService.searchTasks(filter.build(), page.build(), sorts.build());
     };
   }
 
   @SuppressWarnings("unchecked")
-  public MonoDataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
+  public AsyncDataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -87,7 +87,7 @@ public class TaskDataFetchers {
     };
   }
 
-  public MonoDataFetcher<List<Task>> getNestedTaskDataFetcher() {
+  public AsyncDataFetcher<List<Task>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
       val runId = ((Run) environment.getSource()).getRunId();

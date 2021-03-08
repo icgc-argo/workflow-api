@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
@@ -53,7 +53,7 @@ public class EntityDataFetchers {
     this.runService = runService;
   }
 
-  public MonoDataFetcher getDataFetcher() {
+  public AsyncDataFetcher getDataFetcher() {
     return environment ->
         Flux.fromStream(
                 environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream())
@@ -86,14 +86,14 @@ public class EntityDataFetchers {
             .collectList();
   }
 
-  private MonoDataFetcher<List<Run>> inputForRunResolver(String analysisId) {
+  private AsyncDataFetcher<List<Run>> inputForRunResolver(String analysisId) {
     return environment -> {
       ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
       val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
 
       // short circuit here since can't find runs for invalid analysisId
       if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
-        return Mono.<List<Run>>empty();
+        return Mono.empty();
       }
 
       Map<String, Object> mergedFilter = new HashMap<>(filter);

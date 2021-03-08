@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
 
 @Data
@@ -41,7 +41,7 @@ public class Analysis {
 
   private String analysisId;
 
-  private MonoDataFetcher<List<Run>> inputForRunsFetcher;
+  private AsyncDataFetcher<List<Run>> inputForRunsFetcher;
 
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {

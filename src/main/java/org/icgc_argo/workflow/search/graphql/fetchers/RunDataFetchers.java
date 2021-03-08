@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
@@ -50,7 +50,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public MonoDataFetcher<SearchResult<Run>> getRunsDataFetcher() {
+  public AsyncDataFetcher<SearchResult<Run>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -74,7 +74,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public MonoDataFetcher<AggregationResult> getAggregateRunsDataFetcher() {
+  public AsyncDataFetcher<AggregationResult> getAggregateRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -87,7 +87,7 @@ public class RunDataFetchers {
     };
   }
 
-  public MonoDataFetcher<Run> getNestedRunDataFetcher() {
+  public AsyncDataFetcher<Run> getNestedRunDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
       return runService.getRunByRunId(task.getRunId());

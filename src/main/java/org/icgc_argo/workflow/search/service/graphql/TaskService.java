@@ -47,7 +47,7 @@ public class TaskService {
     this.taskRepository = taskRepository;
   }
 
-  public Mono<SearchResult<Task>> searchRuns(
+  public Mono<SearchResult<Task>> searchTasks(
       Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     return taskRepository
         .getTasks(filter, page, sorts)
@@ -58,12 +58,12 @@ public class TaskService {
               val from = page.getOrDefault("from", ES_PAGE_DEFAULT_FROM);
               val size = page.getOrDefault("size", ES_PAGE_DEFAULT_SIZE);
 
-              val analyses =
+              val tasks =
                   Arrays.stream(responseSearchHits.getHits())
                       .map(TaskService::hitToTask)
                       .collect(toUnmodifiableList());
               val nextFrom = (totalHits - from) / size > 0;
-              return new SearchResult<>(analyses, nextFrom, totalHits);
+              return new SearchResult<>(tasks, nextFrom, totalHits);
             });
   }
 

@@ -29,12 +29,12 @@ import reactor.core.publisher.Mono;
  * An extension of the DataFetcher functional interface used to describe lambda taking
  * DataFetchingEnviornment and returning a Mono (applyMonoDataFetcher). The DataFetcher's get
  * function is defaulted to a function which executes the applyMonoDataFetcher and adds any gql
- * context into the subscriber context.
+ * context into the subscriber context and returns the CompletableFuture.
  *
  * @param <T>
  */
 @FunctionalInterface
-public interface MonoDataFetcher<T> extends DataFetcher {
+public interface AsyncDataFetcher<T> extends DataFetcher {
   Mono<T> applyMonoDataFetcher(DataFetchingEnvironment env);
 
   default CompletableFuture<T> get(DataFetchingEnvironment environment) {
