@@ -75,14 +75,14 @@ public class AuthEnabledConfig {
         .pathMatchers("/actuator/**")
         .permitAll()
         // WES-API endpoints
-        .pathMatchers("/runs**", "/service-info")
+        .pathMatchers("/runs/**", "/service-info")
         .permitAll()
         .pathMatchers(
             "/v2/api-docs",
             "/configuration/ui",
             "/swagger-resources/**",
             "/configuration/security",
-            "/swagger-ui.html",
+            "/swagger-ui/**",
             "/webjars/**")
         .permitAll()
         .and()
@@ -121,28 +121,28 @@ public class AuthEnabledConfig {
   private Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
     JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
     jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
-        this.jwtToGrantedAuthoritiesConverter);
+        jwtToGrantedAuthoritiesConverter());
     return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
   }
 
-  private final Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter =
-      (jwt) -> {
-        val scopesBuilder = ImmutableList.<String>builder();
+  private Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter()  {
+    return (jwt) -> {
+      val scopesBuilder = ImmutableList.<String>builder();
 
-        try {
-          val context = (Map<String, Object>) jwt.getClaims().get("context");
-          scopesBuilder.addAll((Collection<String>) context.get("scope"));
-        } catch (Exception e) {
-          log.error("Unable to extract scopes from JWT");
-        }
+      try {
+        val context = (Map<String, Object>) jwt.getClaims().get("context");
+        scopesBuilder.addAll((Collection<String>) context.get("scope"));
+      } catch (Exception e) {
+        log.error("Unable to extract scopes from JWT");
+      }
 
-        val scopes = scopesBuilder.build();
+      val scopes = scopesBuilder.build();
 
-        log.debug("JWT scopes: " + scopes);
+      log.debug("JWT scopes: " + scopes);
 
-        return scopes.stream().map(SimpleGrantedAuthority::new).collect(toList());
-      };
-
+      return scopes.stream().map(SimpleGrantedAuthority::new).collect(toList());
+    };
+  }
   @SneakyThrows
   private ReactiveJwtDecoder jwtDecoder() {
     String publicKeyStr;

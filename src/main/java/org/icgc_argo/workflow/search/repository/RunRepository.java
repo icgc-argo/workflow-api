@@ -42,7 +42,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
-import org.icgc_argo.workflow.search.config.elasticsearch.ElasticsearchProperties;
+import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
