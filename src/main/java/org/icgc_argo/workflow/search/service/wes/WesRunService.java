@@ -41,14 +41,14 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 /**
- * The WesApiService is just a shim over the graphql services, used to convert the responses from
+ * The WesRunService is just a shim over the graphql services, used to convert the responses from
  * them to wes standard objects. All logic regarding repository query, security etc. is handled in
  * those services.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WesApiService {
+public class WesRunService {
   @NonNull private final ServiceInfoProperties serviceInfoProperties;
   @NonNull private final RunService runService;
   @NonNull private final TaskService taskService;

@@ -21,12 +21,12 @@ package org.icgc_argo.workflow.search.controller.impl;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflow.search.controller.WesApi;
+import org.icgc_argo.workflow.search.controller.RunsApi;
 import org.icgc_argo.workflow.search.model.wes.RunListResponse;
 import org.icgc_argo.workflow.search.model.wes.RunResponse;
 import org.icgc_argo.workflow.search.model.wes.RunStatus;
 import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
-import org.icgc_argo.workflow.search.service.wes.WesApiService;
+import org.icgc_argo.workflow.search.service.wes.WesRunService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,34 +36,34 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class WesApiController implements WesApi {
+public class RunsApiController implements RunsApi {
 
-  private final WesApiService wesApiService;
+  private final WesRunService wesRunService;
 
   @GetMapping(value = "/runs/{run_id}")
   public Mono<ResponseEntity<RunResponse>> getRunLog(@NonNull String runId) {
-    return wesApiService
+    return wesRunService
         .getRunLog(runId)
         .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
   }
 
   @GetMapping(value = "/runs/{run_id}/status")
   public Mono<ResponseEntity<RunStatus>> getRunStatus(@NonNull String runId) {
-    return wesApiService
+    return wesRunService
         .getRunStatusById(runId)
         .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
   }
 
   @GetMapping(value = "/runs")
   public Mono<ResponseEntity<RunListResponse>> listRuns(Integer pageSize, Integer pageToken) {
-    return wesApiService
+    return wesRunService
         .listRuns(pageSize, pageToken)
         .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
   }
 
   @GetMapping(value = "/service-info")
   public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
-    return wesApiService
+    return wesRunService
         .getServiceInfo()
         .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
   }

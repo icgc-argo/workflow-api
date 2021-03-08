@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
     value = "WorkflowExecutionService",
     description = "the runs API",
     tags = "WorkflowExecutionService")
-public interface WesApi {
+public interface RunsApi {
 
   @ApiOperation(
       value = "Get detailed info about a workflow run.",
