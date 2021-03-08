@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.icgc_argo.workflow.search.model.common.Run;
 
 @Data
 @AllArgsConstructor

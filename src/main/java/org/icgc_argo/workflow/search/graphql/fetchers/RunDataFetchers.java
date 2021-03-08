@@ -16,20 +16,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.graphql;
+package org.icgc_argo.workflow.search.graphql.fetchers;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
+import org.icgc_argo.workflow.search.model.graphql.SearchResult;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,7 +50,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<CompletableFuture<SearchResult<Run>>> getRunsDataFetcher() {
+  public MonoDataFetcher<SearchResult<Run>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -66,12 +69,12 @@ public class RunDataFetchers {
                   .collect(toUnmodifiableList()));
         }
       }
-      return runService.searchRuns(filter.build(), page.build(), sorts.build()).toFuture();
+      return runService.searchRuns(filter.build(), page.build(), sorts.build());
     };
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<CompletableFuture<AggregationResult>> getAggregateRunsDataFetcher() {
+  public MonoDataFetcher<AggregationResult> getAggregateRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -80,14 +83,14 @@ public class RunDataFetchers {
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
       }
-      return runService.aggregateRuns(filter.build()).toFuture();
+      return runService.aggregateRuns(filter.build());
     };
   }
 
-  public DataFetcher<CompletableFuture<Run>> getNestedRunDataFetcher() {
+  public MonoDataFetcher<Run> getNestedRunDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
-      return runService.getRunByRunId(task.getRunId()).toFuture();
+      return runService.getRunByRunId(task.getRunId());
     };
   }
 }

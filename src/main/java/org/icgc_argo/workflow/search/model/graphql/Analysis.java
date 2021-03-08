@@ -22,15 +22,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.icgc_argo.workflow.search.graphql.MonoDataFetcher;
+import org.icgc_argo.workflow.search.model.common.Run;
 
 @Data
 @AllArgsConstructor
@@ -41,7 +41,7 @@ public class Analysis {
 
   private String analysisId;
 
-  private DataFetcher<CompletableFuture<List<Run>>> inputForRunsFetcher;
+  private MonoDataFetcher<List<Run>> inputForRunsFetcher;
 
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {

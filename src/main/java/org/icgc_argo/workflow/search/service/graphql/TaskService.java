@@ -29,9 +29,11 @@ import java.util.Map;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
+import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
+import org.icgc_argo.workflow.search.model.graphql.SearchResult;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.repository.TaskRepository;
-import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -80,7 +82,6 @@ public class TaskService {
     return getTasks(runId, null, null);
   }
 
-  // maybe Flux<Task>??
   public Mono<List<Task>> getTasks(
       String runId, Map<String, Object> filter, Map<String, Integer> page) {
     val mergedBuilder = ImmutableMap.<String, Object>builder();

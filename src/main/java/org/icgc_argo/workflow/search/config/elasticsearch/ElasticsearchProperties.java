@@ -19,12 +19,22 @@
  *
  */
 
-package org.icgc_argo.workflow.search.service.annotations;
+package org.icgc_argo.workflow.search.config.elasticsearch;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import org.springframework.security.access.prepost.PreAuthorize;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("@queryScopeChecker.apply(authentication)")
-public @interface HasQueryAccess {}
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "elastic")
+public class ElasticsearchProperties {
+  String host;
+  Integer port;
+  Boolean useHttps;
+  Boolean useAuthentication;
+  String username;
+  String password;
+  String workflowIndex;
+  String taskIndex;
+}

@@ -19,6 +19,7 @@
 package org.icgc_argo.workflow.search.service.wes;
 
 import static java.lang.String.format;
+import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
 
@@ -30,30 +31,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
+import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
-import org.icgc_argo.workflow.search.model.graphql.Task;
 import org.icgc_argo.workflow.search.model.wes.*;
-import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.icgc_argo.workflow.search.util.Converter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+/**
+ * The WesApiService is just a shim over the graphql services, used to convert the responses from
+ * them to wes standard objects. All logic regarding repository query, security etc. is handled in
+ * those services.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@HasQueryAccess
-public class WesRunService {
-
-  private static final int DEFAULT_HIT_SIZE = 10;
-
+public class WesApiService {
   @NonNull private final ServiceInfoProperties serviceInfoProperties;
   @NonNull private final RunService runService;
   @NonNull private final TaskService taskService;
 
   public Mono<RunListResponse> listRuns(Integer pageSize, Integer pageToken) {
-    val sizeToUse = pageSize == null ? DEFAULT_HIT_SIZE : pageSize;
+    val sizeToUse = pageSize == null ? ES_PAGE_DEFAULT_SIZE : pageSize;
     val from = pageToken == null ? 0 : sizeToUse * pageToken;
     val page = Map.of("from", from, "size", sizeToUse);
     return runService

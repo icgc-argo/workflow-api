@@ -34,10 +34,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
@@ -55,21 +55,15 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import reactor.core.publisher.Mono;
 
-@EnableWebFluxSecurity
 @Slf4j
 @Profile("secure")
+@EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
+@RequiredArgsConstructor
 public class AuthEnabledConfig {
 
   private final AuthProperties authProperties;
-
   private final ResourceLoader resourceLoader;
-
-  @Autowired
-  public AuthEnabledConfig(AuthProperties authProperties, ResourceLoader resourceLoader) {
-    this.authProperties = authProperties;
-    this.resourceLoader = resourceLoader;
-  }
 
   @Bean
   public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
@@ -80,7 +74,8 @@ public class AuthEnabledConfig {
         .permitAll()
         .pathMatchers("/actuator/**")
         .permitAll()
-        .pathMatchers("/runs/**")
+        // WES-API endpoints
+        .pathMatchers("/runs**", "/service-info")
         .permitAll()
         .pathMatchers(
             "/v2/api-docs",

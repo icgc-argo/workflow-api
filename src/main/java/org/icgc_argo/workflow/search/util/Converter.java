@@ -22,42 +22,24 @@ import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
 import static org.icgc_argo.workflow.search.model.SearchFields.STATE;
 import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.elasticsearch.search.SearchHit;
-import org.icgc_argo.workflow.search.index.model.TaskDocument;
-import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
-import org.icgc_argo.workflow.search.model.graphql.Run;
-import org.icgc_argo.workflow.search.model.graphql.Task;
+import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.wes.*;
 
 @Slf4j
 @UtilityClass
 public class Converter {
 
-  @SneakyThrows
-  public static TaskDocument convertSearchHitToTaskDocument(@NonNull SearchHit hit) {
-    val mapper =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    return mapper.readValue(hit.getSourceAsString(), TaskDocument.class);
-  }
-
-  public static TaskLog taskDocumentToLog(@NonNull TaskDocument task) {
+  public static TaskLog taskDocumentToLog(@NonNull Task task) {
     return TaskLog.builder()
         .taskId(task.getTaskId())
         .name(task.getName())
@@ -68,36 +50,6 @@ public class Converter {
         .state(State.fromValue(task.getState()))
         .cmd(buildCommandLineList(task.getScript()))
         .submitTime(task.getSubmitTime().toString())
-        .startTime(getTimeOrEmpty(task.getStartTime()))
-        .endTime(getTimeOrEmpty(task.getCompleteTime()))
-        .exitCode(task.getExit())
-        .workdir(task.getWorkdir())
-        .cpus(task.getCpus())
-        .memory(task.getMemory())
-        .duration(task.getDuration())
-        .realtime(task.getRealtime())
-        .rss(task.getRss())
-        .peakRss(task.getPeakRss())
-        .vmem(task.getVmem())
-        .peakVmem(task.getPeakVmem())
-        .readBytes(task.getReadBytes())
-        .writeBytes(task.getWriteBytes())
-        .stderr("")
-        .stdout("")
-        .build();
-  }
-
-  public static TaskLog taskDocumentToLog(@NonNull Task task) {
-    return TaskLog.builder()
-        .taskId(Integer.parseInt(task.getTaskId()))
-        .name(task.getName())
-        .process(task.getProcess())
-        .tag(task.getTag())
-        .container(task.getContainer())
-        .attempt(task.getAttempt())
-        .state(State.fromValue(task.getState()))
-        .cmd(buildCommandLineList(task.getScript()))
-        .submitTime(task.getSubmitTime())
         .startTime(task.getStartTime())
         .endTime(task.getCompleteTime())
         .exitCode(task.getExit())
@@ -148,40 +100,6 @@ public class Converter {
                 .exitCode(workflowDoc.getExitStatus())
                 .startTime(workflowDoc.getStartTime())
                 .endTime(workflowDoc.getCompleteTime())
-                .stdout("")
-                .stderr(convertErrorReport(workflowDoc.getErrorReport()))
-                .success(workflowDoc.getSuccess())
-                .duration(workflowDoc.getDuration())
-                .build())
-        .build();
-  }
-
-  public static RunResponse buildRunLog(
-      @NonNull WorkflowDocument workflowDoc,
-      @NonNull String workflowTypeVersion,
-      @NonNull String workflowType) {
-    return RunResponse.builder()
-        .runId(workflowDoc.getRunId())
-        .state(State.fromValue(workflowDoc.getState()))
-        // todo ticket #24
-        .outputs("")
-        // build RunRequest
-        .request(
-            RunRequest.builder()
-                .workflowTypeVersion(workflowTypeVersion)
-                .workflowType(workflowType)
-                .workflowUrl(workflowDoc.getRepository())
-                .workflowParams(workflowDoc.getParameters())
-                .workflowEngineParams(workflowDoc.getEngineParameters())
-                .build())
-        // build run log
-        .runLog(
-            RunLog.builder()
-                .runId(workflowDoc.getRunId())
-                .cmd(buildCommandLineList(workflowDoc.getCommandLine()))
-                .exitCode(workflowDoc.getExitStatus())
-                .startTime(workflowDoc.getStartTime().toString())
-                .endTime(getTimeOrEmpty(workflowDoc.getCompleteTime()))
                 .stdout("")
                 .stderr(convertErrorReport(workflowDoc.getErrorReport()))
                 .success(workflowDoc.getSuccess())

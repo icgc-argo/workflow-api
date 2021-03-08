@@ -31,54 +31,42 @@ import graphql.schema.idl.RuntimeWiring;
 import java.io.IOException;
 import java.net.URL;
 import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflow.search.config.websecurity.AuthProperties;
+import lombok.val;
+import org.icgc_argo.workflow.search.graphql.fetchers.EntityDataFetchers;
+import org.icgc_argo.workflow.search.graphql.fetchers.RunDataFetchers;
+import org.icgc_argo.workflow.search.graphql.fetchers.TaskDataFetchers;
+import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
-import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GraphQLProvider {
-
   /** State */
   private GraphQL graphQL;
-
-  private GraphQLSchema graphQLSchema;
 
   /** Dependencies */
   private final RunDataFetchers runDataFetchers;
 
   private final TaskDataFetchers taskDataFetchers;
-
   private final EntityDataFetchers entityDataFetchers;
-
-  private final AuthProperties authProperties;
-
-  public GraphQLProvider(
-      RunDataFetchers runDataFetchers,
-      TaskDataFetchers taskDataFetchers,
-      EntityDataFetchers entityDataFetchers,
-      AuthProperties authProperties) {
-    this.runDataFetchers = runDataFetchers;
-    this.taskDataFetchers = taskDataFetchers;
-    this.entityDataFetchers = entityDataFetchers;
-    this.authProperties = authProperties;
-  }
-
-  @Bean
-  public GraphQL graphQL() {
-    return graphQL;
-  }
 
   @PostConstruct
   public void init() throws IOException {
     URL url = Resources.getResource("schema.graphqls");
     String sdl = Resources.toString(url, Charsets.UTF_8);
-    graphQLSchema = buildSchema(sdl);
+    val graphQLSchema = buildSchema(sdl);
     this.graphQL = GraphQL.newGraphQL(graphQLSchema).build();
+  }
+
+  @Bean
+  public GraphQL graphQL() {
+    return graphQL;
   }
 
   private GraphQLSchema buildSchema(String sdl) {

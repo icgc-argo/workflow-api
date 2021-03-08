@@ -30,12 +30,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
+import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
-import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.repository.RunRepository;
-import org.icgc_argo.workflow.search.service.annotations.HasQueryAccess;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -82,7 +81,6 @@ public class RunService {
     return runRepository.getAggregatedRunStateCounts();
   }
 
-  // maybe return Flux<Run>?
   public Mono<List<Run>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return runRepository
         .getRuns(filter, page)
