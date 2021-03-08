@@ -74,7 +74,7 @@ public class Run {
 
   private EngineParameters engineParameters;
 
-  //  @SneakyThrows
+  @SneakyThrows
   public static Run parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Run.class);
   }
