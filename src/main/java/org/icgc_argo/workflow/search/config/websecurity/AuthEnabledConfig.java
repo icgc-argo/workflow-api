@@ -29,18 +29,11 @@ import java.io.InputStreamReader;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -128,7 +121,7 @@ public class AuthEnabledConfig {
     return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
   }
 
-  private Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter()  {
+  private Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter() {
     return (jwt) -> {
       val scopesBuilder = ImmutableList.<String>builder();
 
@@ -146,6 +139,7 @@ public class AuthEnabledConfig {
       return scopes.stream().map(SimpleGrantedAuthority::new).collect(toList());
     };
   }
+
   @SneakyThrows
   private ReactiveJwtDecoder jwtDecoder() {
     String publicKeyStr;
@@ -192,12 +186,12 @@ public class AuthEnabledConfig {
     @Override
     public Boolean apply(Authentication authentication) {
       val scopes =
-              authentication.getAuthorities().stream()
-                      .map(Objects::toString)
-                      .collect(toUnmodifiableList());
+          authentication.getAuthorities().stream()
+              .map(Objects::toString)
+              .collect(toUnmodifiableList());
 
       val foundScopes =
-              scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
+          scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
 
       return foundScopes.size() > 0;
     }

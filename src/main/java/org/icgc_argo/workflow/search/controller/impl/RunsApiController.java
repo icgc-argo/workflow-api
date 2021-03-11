@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @Controller
@@ -45,34 +44,22 @@ public class RunsApiController implements RunsApi {
 
   @GetMapping(value = "/runs/{run_id}")
   public Mono<ResponseEntity<RunResponse>> getRunLog(@NonNull String runId) {
-    return wesRunService
-        .getRunLog(runId)
-        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    return wesRunService.getRunLog(runId).map(this::respondOk);
   }
 
   @GetMapping(value = "/runs/{run_id}/status")
   public Mono<ResponseEntity<RunStatus>> getRunStatus(@NonNull String runId) {
-    return wesRunService
-        .getRunStatusById(runId)
-        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    return wesRunService.getRunStatusById(runId).map(this::respondOk);
   }
 
   @GetMapping(value = "/runs")
   public Mono<ResponseEntity<RunListResponse>> listRuns(Integer pageSize, Integer pageToken) {
-    return wesRunService
-        .listRuns(pageSize, pageToken)
-        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    return wesRunService.listRuns(pageSize, pageToken).map(this::respondOk);
   }
 
   @GetMapping(value = "/service-info")
   public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
-    return wesRunService
-        .getServiceInfo()
-        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
-  public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
-    return wesRunService
-        .getServiceInfo()
-        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    return wesRunService.getServiceInfo().map(this::respondOk);
   }
 
   @PostMapping(value = "/runs")
