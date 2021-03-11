@@ -25,7 +25,6 @@ import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFr
 import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
 import com.google.common.collect.ImmutableMap;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -35,17 +34,16 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -56,23 +54,27 @@ public class TaskRepository {
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
 
-  private final RestHighLevelClient client;
+  private final ReactiveElasticsearchClient client;
   private final String workflowIndex;
 
   @Autowired
   public TaskRepository(
-      @NonNull RestHighLevelClient client,
+      @NonNull ReactiveElasticsearchClient client,
       @NonNull ElasticsearchProperties elasticsearchProperties) {
     this.client = client;
     this.workflowIndex = elasticsearchProperties.getTaskIndex();
   }
-  public SearchResponse getTasks(Map<String, Object> filter, Map<String, Integer> page) {
+
+  public Mono<SearchResponse> getTasks(Map<String, Object> filter, Map<String, Integer> page) {
     return getTasks(filter, page, List.of());
   }
 
-  public SearchResponse getTasks(Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+  public Mono<SearchResponse> getTasks(
+      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     final AbstractQueryBuilder<?> query =
-        (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(QUERY_RESOLVER, filter);
+        (filter == null || filter.size() == 0)
+            ? matchAllQuery()
+            : queryFromArgs(QUERY_RESOLVER, filter);
 
     val searchSourceBuilder = new SearchSourceBuilder();
 
@@ -94,10 +96,10 @@ public class TaskRepository {
   }
 
   @SneakyThrows
-  private SearchResponse execute(@NonNull SearchSourceBuilder builder) {
+  private Mono<SearchResponse> execute(@NonNull SearchSourceBuilder builder) {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
-    return client.search(searchRequest, RequestOptions.DEFAULT);
+    return client.searchForResponse(searchRequest);
   }
 
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
@@ -112,13 +114,13 @@ public class TaskRepository {
 
   private static Map<String, FieldSortBuilder> sortPathMap() {
     return ImmutableMap.<String, FieldSortBuilder>builder()
-         .put(RUN_ID, SortBuilders.fieldSort("runId"))
-         .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
-         .put(STATE, SortBuilders.fieldSort("state"))
-         .put(START_TIME, SortBuilders.fieldSort("startTime"))
-         .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
-         .put(CPUS, SortBuilders.fieldSort("cpus"))
-         .put(MEMORY, SortBuilders.fieldSort("memory"))
-         .build();
+        .put(RUN_ID, SortBuilders.fieldSort("runId"))
+        .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
+        .put(STATE, SortBuilders.fieldSort("state"))
+        .put(START_TIME, SortBuilders.fieldSort("startTime"))
+        .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
+        .put(CPUS, SortBuilders.fieldSort("cpus"))
+        .put(MEMORY, SortBuilders.fieldSort("memory"))
+        .build();
   }
 }

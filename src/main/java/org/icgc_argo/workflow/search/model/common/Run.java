@@ -16,49 +16,52 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.index.model;
+package org.icgc_argo.workflow.search.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.Map;
 import lombok.*;
 
-import java.time.Instant;
-import java.util.Map;
-
-@Getter
+@Data
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-public class WorkflowDocument {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Run {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   /** Workflow run ID */
   @NonNull private String runId;
 
   /** Workflow session ID */
-  @NonNull private String sessionId;
+  private String sessionId;
 
   /** The repository url */
   @NonNull private String repository;
 
   /** The overall state of the workflow run, mapped to WorkflowEvent - event */
-  @NonNull private String state;
+  @NonNull String state;
 
-  @NonNull private Map<String, Object> parameters;
+  private Object parameters;
 
   /** When the command started executing */
-  @NonNull private Instant startTime;
+  private String startTime;
 
   /**
    * When the command stopped executing (completed, failed, or cancelled), completeTime does not
    * exist in ES when workflow is unfinished.
    */
-  private Instant completeTime;
+  private String completeTime;
 
   /** Did the workflow succeed */
-  @NonNull private Boolean success;
+  private Boolean success;
 
   /** Exit code of the program */
-  @NonNull private Integer exitStatus;
+  private Integer exitStatus;
 
   /** A URL to retrieve standard error logs of the workflow run or task */
   private String errorReport;
@@ -67,7 +70,26 @@ public class WorkflowDocument {
   private Long duration;
 
   /** The command line that was executed */
-  @NonNull private String commandLine;
+  private String commandLine;
 
-  private Map<String, Object> engineParameters;
+  private EngineParameters engineParameters;
+
+  @SneakyThrows
+  public static Run parse(@NonNull Map<String, Object> sourceMap) {
+    return MAPPER.convertValue(sourceMap, Run.class);
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class EngineParameters {
+    private String launchDir;
+    private String projectDir;
+    private String resume;
+    private String revision;
+    private String workDir;
+  }
 }

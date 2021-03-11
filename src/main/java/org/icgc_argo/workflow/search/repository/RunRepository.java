@@ -18,36 +18,39 @@
 
 package org.icgc_argo.workflow.search.repository;
 
-import com.google.common.collect.ImmutableMap;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
-import org.icgc_argo.workflow.search.model.graphql.Sort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.DESC;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
 import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
 import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.icgc_argo.workflow.search.config.ElasticsearchProperties;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
 @Slf4j
-@Component
+@Repository
 public class RunRepository {
 
   private static final List<String> ANALYSIS_SEARCH_FIELDS =
@@ -60,12 +63,12 @@ public class RunRepository {
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
 
-  private final RestHighLevelClient client;
+  private final ReactiveElasticsearchClient client;
   private final String workflowIndex;
 
   @Autowired
   public RunRepository(
-      @NonNull RestHighLevelClient client,
+      @NonNull ReactiveElasticsearchClient client,
       @NonNull ElasticsearchProperties elasticsearchProperties) {
     this.client = client;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
@@ -97,22 +100,25 @@ public class RunRepository {
 
   private static Map<String, FieldSortBuilder> sortPathMap() {
     return ImmutableMap.<String, FieldSortBuilder>builder()
-                   .put(RUN_ID, SortBuilders.fieldSort("runId"))
-                   .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
-                   .put(STATE, SortBuilders.fieldSort("state"))
-                   .put(START_TIME, SortBuilders.fieldSort("startTime"))
-                   .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
-                   .put(REPOSITORY, SortBuilders.fieldSort("repository"))
-                   .build();
+        .put(RUN_ID, SortBuilders.fieldSort("runId"))
+        .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
+        .put(STATE, SortBuilders.fieldSort("state"))
+        .put(START_TIME, SortBuilders.fieldSort("startTime"))
+        .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
+        .put(REPOSITORY, SortBuilders.fieldSort("repository"))
+        .build();
   }
 
-  public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+  public Mono<SearchResponse> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return getRuns(filter, page, List.of());
   }
 
-  public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+  public Mono<SearchResponse> getRuns(
+      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     final AbstractQueryBuilder<?> query =
-        (filter == null || filter.size() == 0) ? matchAllQuery() : queryFromArgs(QUERY_RESOLVER, filter);
+        (filter == null || filter.size() == 0)
+            ? matchAllQuery()
+            : queryFromArgs(QUERY_RESOLVER, filter);
 
     val searchSourceBuilder = new SearchSourceBuilder();
 
@@ -133,10 +139,39 @@ public class RunRepository {
     return execute(searchSourceBuilder);
   }
 
+  /**
+   * The system statistics, key is the statistic, value is the count of runs in that state. See the
+   * State enum for the possible keys.
+   *
+   * @return Map of system statistics
+   */
+  public Mono<Map<String, Long>> getAggregatedRunStateCounts() {
+    val searchRequest = new SearchRequest(workflowIndex);
+    val matchQueryBuilder = QueryBuilders.matchAllQuery();
+    val sourceBuilder = new SearchSourceBuilder();
+    val aggregation = AggregationBuilders.terms("states").field(STATE);
+
+    sourceBuilder.aggregation(aggregation);
+    sourceBuilder.query(matchQueryBuilder);
+    searchRequest.source(sourceBuilder);
+
+    return client
+        .searchForResponse(searchRequest)
+        .map(
+            searchResponse -> {
+              Terms states = searchResponse.getAggregations().get("states");
+              return states.getBuckets().stream()
+                  .collect(
+                      (Collectors.toMap(
+                          MultiBucketsAggregation.Bucket::getKeyAsString,
+                          MultiBucketsAggregation.Bucket::getDocCount)));
+            });
+  }
+
   @SneakyThrows
-  private SearchResponse execute(@NonNull SearchSourceBuilder builder) {
+  private Mono<SearchResponse> execute(@NonNull SearchSourceBuilder builder) {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
-    return client.search(searchRequest, RequestOptions.DEFAULT);
+    return client.searchForResponse(searchRequest);
   }
 }

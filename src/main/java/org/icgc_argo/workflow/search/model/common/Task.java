@@ -16,17 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.graphql;
+package org.icgc_argo.workflow.search.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-
 import java.util.Map;
+import lombok.*;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
 
@@ -35,7 +35,7 @@ public class Task {
 
   private String sessionId;
 
-  private String taskId;
+  private Integer taskId;
 
   private String name;
 

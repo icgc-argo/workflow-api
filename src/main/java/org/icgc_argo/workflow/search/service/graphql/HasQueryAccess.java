@@ -16,25 +16,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.service.graphql;
 
-import io.swagger.annotations.ApiModel;
-import java.util.List;
-import lombok.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-/** The service will return a RunListResponse when receiving a successful RunListRequest. */
-@ApiModel(
-    description =
-        "The service will return a RunListResponse when receiving a successful RunListRequest.")
-@Data
-@Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-public class RunListResponse {
-
-  @NonNull private List<RunStatus> runs;
-
-  private Integer nextPageToken;
-}
+@Retention(RetentionPolicy.RUNTIME)
+@PreAuthorize("@queryScopeChecker.apply(authentication)")
+public @interface HasQueryAccess {}

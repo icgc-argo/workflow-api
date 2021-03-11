@@ -21,10 +21,9 @@ package org.icgc_argo.workflow.search.model.wes;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import lombok.*;
-
-import javax.validation.Valid;
 import java.util.List;
+import javax.validation.Valid;
+import lombok.*;
 
 /** Log and other info */
 @ApiModel(description = "Log and other info")
