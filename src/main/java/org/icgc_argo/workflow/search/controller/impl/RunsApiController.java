@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Controller
@@ -64,6 +65,10 @@ public class RunsApiController implements RunsApi {
   }
 
   @GetMapping(value = "/service-info")
+  public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
+    return wesRunService
+        .getServiceInfo()
+        .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
   public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
     return wesRunService
         .getServiceInfo()

@@ -37,6 +37,10 @@ import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.paths.DefaultPathProvider;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+
 @Configuration
 public class SwaggerConfig {
 
@@ -74,6 +78,15 @@ public class SwaggerConfig {
               }
             })
         .apiInfo(apiInfo());
+  }
+  private List<SecurityScheme> securitySchemes() {
+    return singletonList(new ApiKey("JWT", "Authorization", "header"));
+  }
+
+  private List<SecurityContext> securityContexts() {
+    AuthorizationScope[] authorizationScopes = { new AuthorizationScope("global", "accessEverything")};
+    val securityRefs = singletonList(new SecurityReference("JWT", authorizationScopes));
+    return List.of(SecurityContext.builder().securityReferences(securityRefs).build());
   }
 
   private List<SecurityScheme> securitySchemes() {

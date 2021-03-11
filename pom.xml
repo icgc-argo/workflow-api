@@ -150,6 +150,7 @@
             <groupId>com.apollographql.federation</groupId>
             <artifactId>federation-graphql-java-support</artifactId>
             <version>0.5.0</version>
+            <version>0.5.0</version>
         </dependency>
 
         <!-- RabbitMQ -->
@@ -170,7 +171,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <plugins>
             <plugin>
