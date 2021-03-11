@@ -22,7 +22,11 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.toJsonString;
+import static org.icgc_argo.workflow.search.util.WesUtils.generateWesRunId;
 
+import com.pivotal.rabbitmq.source.Sender;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +35,14 @@ import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.wes.RunId;
+import org.icgc_argo.workflow.search.rabbitmq.schema.EngineParams;
+import org.icgc_argo.workflow.search.rabbitmq.schema.RunState;
+import org.icgc_argo.workflow.search.rabbitmq.schema.WfMgmtRunMsg;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -41,11 +50,29 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-@HasQueryAccess
 public class RunService {
 
   private final RunRepository runRepository;
+  private final Sender<WfMgmtRunMsg> sender;
 
+  @HasQueryAndMutationAccess
+  public Mono<RunId> startRun(RunRequest runRequest) {
+    val runId = generateWesRunId();
+    return Mono.just(createWfMgmtRunMsg(runId, runRequest, RunState.QUEUED))
+        .flatMap(sender::send)
+        .map(o -> new RunId(runId));
+  }
+
+  @HasQueryAndMutationAccess
+  public Mono<RunId> cancelRun(String runId) {
+    return getRunByRunId(runId)
+        .map(run -> createWfMgmtRunMsg(run.getRunId(), RunState.CANCELING))
+        .flatMap(sender::send)
+        .map(o -> new RunId(runId))
+        .switchIfEmpty(Mono.error(new Exception("Can't cancel non existing run.")));
+  }
+
+  @HasQueryAccess
   public Mono<SearchResult<Run>> searchRuns(
       Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     return runRepository
@@ -66,6 +93,7 @@ public class RunService {
             });
   }
 
+  @HasQueryAccess
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     return runRepository
         .getRuns(filter, Map.of(), List.of())
@@ -77,10 +105,12 @@ public class RunService {
             });
   }
 
+  @HasQueryAccess
   public Mono<Map<String, Long>> getAggregatedRunStateCounts() {
     return runRepository.getAggregatedRunStateCounts();
   }
 
+  @HasQueryAccess
   public Mono<List<Run>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return runRepository
         .getRuns(filter, page)
@@ -88,17 +118,54 @@ public class RunService {
         .map(hitStream -> hitStream.map(RunService::hitToRun).collect(toUnmodifiableList()));
   }
 
+  @HasQueryAccess
   public Mono<Run> getRunByRunId(String runId) {
     return runRepository
         .getRuns(Map.of(RUN_ID, runId), null)
         .map(response -> response.getHits().getHits())
         .flatMapMany(Flux::fromArray)
         .next()
-        .map(RunService::hitToRun);
+        .map(RunService::hitToRun)
+        .switchIfEmpty(Mono.empty());
   }
 
   private static Run hitToRun(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
     return Run.parse(sourceMap);
+  }
+
+  private static WfMgmtRunMsg createWfMgmtRunMsg(
+      String runId, RunRequest runRequest, RunState state) {
+
+    val requestWep = runRequest.getWorkflowEngineParams();
+    val msgWep =
+        EngineParams.newBuilder()
+            .setLatest(requestWep.getLatest())
+            .setDefaultContainer(requestWep.getDefaultContainer())
+            .setLaunchDir(requestWep.getLaunchDir())
+            .setRevision(requestWep.getRevision())
+            .setProjectDir(requestWep.getProjectDir())
+            .setWorkDir(requestWep.getWorkDir());
+
+    if (requestWep.getResume() != null) {
+      msgWep.setResume(requestWep.getResume().toString());
+    }
+    return WfMgmtRunMsg.newBuilder()
+        .setRunId(runId)
+        .setState(state)
+        .setWorkflowUrl(runRequest.getWorkflowUrl())
+        .setWorkflowParamsJsonStr(toJsonString(runRequest.getWorkflowParams()))
+        .setWorkflowEngineParams(msgWep.build())
+        .setTimestamp(Instant.now().toEpochMilli())
+        .build();
+  }
+
+  private static WfMgmtRunMsg createWfMgmtRunMsg(String runId, RunState state) {
+    return WfMgmtRunMsg.newBuilder()
+        .setRunId(runId)
+        .setTimestamp(Instant.now().toEpochMilli())
+        .setState(state)
+        .setWorkflowEngineParams(EngineParams.newBuilder().build())
+        .build();
   }
 }

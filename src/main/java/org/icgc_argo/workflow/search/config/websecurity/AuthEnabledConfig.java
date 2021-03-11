@@ -29,10 +29,7 @@ import java.io.InputStreamReader;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -98,24 +95,19 @@ public class AuthEnabledConfig {
   }
 
   @Bean
+  public Function<Authentication, Boolean> queryAndMutationScopeChecker() {
+    val expectedScopes = authProperties.getGraphqlScopes().getQueryAndMutation();
+    return new ScopeChecker(expectedScopes);
+  }
+
+  @Bean
   public Function<Authentication, Boolean> queryScopeChecker() {
     val expectedScopes =
         Lists.newArrayList(
             Iterables.concat(
                 authProperties.getGraphqlScopes().getQueryOnly(),
                 authProperties.getGraphqlScopes().getQueryAndMutation()));
-
-    return authentication -> {
-      val scopes =
-          authentication.getAuthorities().stream()
-              .map(Objects::toString)
-              .collect(toUnmodifiableList());
-
-      val foundScopes =
-          scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
-
-      return foundScopes.size() > 0;
-    };
+    return new ScopeChecker(expectedScopes);
   }
 
   private Converter<Jwt, Mono<AbstractAuthenticationToken>> grantedAuthoritiesExtractor() {
@@ -181,5 +173,23 @@ public class AuthEnabledConfig {
 
     reader.lines().forEach(stringBuilder::append);
     return stringBuilder.toString();
+  }
+
+  @RequiredArgsConstructor
+  static class ScopeChecker implements Function<Authentication, Boolean> {
+    private final List<String> expectedScopes;
+
+    @Override
+    public Boolean apply(Authentication authentication) {
+      val scopes =
+              authentication.getAuthorities().stream()
+                      .map(Objects::toString)
+                      .collect(toUnmodifiableList());
+
+      val foundScopes =
+              scopes.stream().filter(expectedScopes::contains).collect(toUnmodifiableList());
+
+      return foundScopes.size() > 0;
+    }
   }
 }

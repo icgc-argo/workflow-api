@@ -34,6 +34,7 @@
     <properties>
         <java.version>11</java.version>
         <resource.delimiter>^</resource.delimiter>
+        <reactor-rabbitmq-streams.version>0.0.8</reactor-rabbitmq-streams.version>
         <springfox.version>3.0.0</springfox.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <jackson-databind.version>2.11.1</jackson-databind.version>
@@ -163,7 +164,7 @@
             <dependency>
                 <groupId>com.pivotal.rabbitmq</groupId>
                 <artifactId>reactor-rabbitmq-streams</artifactId>
-                <version>0.0.8</version>
+                <version>${reactor-rabbitmq-streams.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

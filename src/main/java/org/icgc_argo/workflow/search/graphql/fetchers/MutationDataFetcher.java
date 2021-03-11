@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflow.search.graphql.fetchers;
 
+import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 import com.google.common.collect.ImmutableMap;
@@ -29,7 +30,7 @@ import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.GqlRunRequest;
 import org.icgc_argo.workflow.search.model.wes.RunId;
-import org.icgc_argo.workflow.search.service.graphql.Messenger;
+import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,12 +41,12 @@ public class MutationDataFetcher {
   @NonNull private final AsyncDataFetcher<RunId> startRunResolver;
 
   @Autowired
-  public MutationDataFetcher(Messenger messenger) {
+  public MutationDataFetcher(RunService runService) {
     cancelRunResolver =
         env -> {
           val args = env.getArguments();
-          String runId = String.valueOf(args.get("runId"));
-          return messenger.cancel(runId);
+          String runId = String.valueOf(args.get(RUN_ID));
+          return runService.cancelRun(runId);
         };
 
     startRunResolver =
@@ -54,11 +55,12 @@ public class MutationDataFetcher {
 
           val requestMap = ImmutableMap.<String, Object>builder();
 
-          if (args.get("request") != null)
+          if (args.get("request") != null) {
             requestMap.putAll((Map<String, Object>) args.get("request"));
+          }
 
           RunRequest runRequest = convertValue(requestMap.build(), GqlRunRequest.class);
-          return messenger.run(runRequest);
+          return runService.startRun(runRequest);
         };
   }
 

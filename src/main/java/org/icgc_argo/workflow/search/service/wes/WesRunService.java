@@ -35,7 +35,6 @@ import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
 import org.icgc_argo.workflow.search.model.wes.*;
-import org.icgc_argo.workflow.search.service.graphql.Messenger;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.icgc_argo.workflow.search.util.Converter;
@@ -54,7 +53,6 @@ public class WesRunService {
   @NonNull private final ServiceInfoProperties serviceInfoProperties;
   @NonNull private final RunService runService;
   @NonNull private final TaskService taskService;
-  @NonNull private final Messenger messenger;
 
   public Mono<RunListResponse> listRuns(Integer pageSize, Integer pageToken) {
     val sizeToUse = pageSize == null ? ES_PAGE_DEFAULT_SIZE : pageSize;
@@ -134,11 +132,11 @@ public class WesRunService {
   }
 
   public Mono<RunId> run(RunRequest runRequest) {
-    return messenger.run(runRequest);
+    return runService.startRun(runRequest);
   }
 
   public Mono<RunId> cancel(String runId) {
-    return messenger.cancel(runId);
+    return runService.cancelRun(runId);
   }
 
   private Integer calculateNextPageToken(
