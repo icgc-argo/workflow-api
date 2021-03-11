@@ -20,12 +20,10 @@ package org.icgc_argo.workflow.search.controller;
 
 import io.swagger.annotations.*;
 import javax.validation.Valid;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.wes.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @Api(
@@ -177,4 +175,71 @@ public interface RunsApi {
       consumes = {"application/json"},
       method = RequestMethod.GET)
   Mono<ResponseEntity<ServiceInfo>> getServiceInfo();
+
+  @ApiOperation(
+      value = "Run a workflow",
+      nickname = "runs",
+      notes =
+          "This endpoint creates a new workflow run and returns a runId to monitor its progress.\n\n"
+              + "The workflow_attachment is part of the GA4GH WES API Standard however we currently not supporting it as of this release.\n\n"
+              + "The workflow_url is the workflow GitHub repository URL (ex. icgc-argo/nextflow-dna-seq-alignment) that is accessible by the WES endpoint.\n\n"
+              + "The workflow_params JSON object specifies the input parameters for a workflow. The exact format of the JSON object depends on the conventions of the workflow.\n\n"
+              + "The workflow_engine_parameters JSON object specifies additional run-time arguments to the workflow engine (ie. specific workflow version, resuming a workflow, etc.)"
+              + "The workflow_type is the type of workflow language, currently this WES API supports \"nextflow\" only.\n\n"
+              + "The workflow_type_version is the version of the workflow language to run the workflow against and must be one supported by this WES instance.\n",
+      response = RunId.class,
+      tags = {
+        "WorkflowExecutionService",
+      })
+  @ApiResponses(
+      value = {
+        @ApiResponse(code = 200, message = "", response = RunId.class),
+        @ApiResponse(
+            code = 401,
+            message = "The request is unauthorized.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 403,
+            message = "The requester is not authorized to perform this action.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 404,
+            message = "The requested workflow run not found.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 500,
+            message = "An unexpected error occurred.",
+            response = ErrorResponse.class)
+      })
+  Mono<ResponseEntity<RunId>> postRun(@Valid @RequestBody RunRequest runRequest);
+
+  @ApiOperation(
+      value = "Cancel a running workflow",
+      nickname = "cancel run",
+      notes = " ",
+      response = RunId.class,
+      tags = {
+        "WorkflowExecutionService",
+      })
+  @ApiResponses(
+      value = {
+        @ApiResponse(code = 200, message = "", response = RunId.class),
+        @ApiResponse(
+            code = 401,
+            message = "The request is unauthorized.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 403,
+            message = "The requester is not authorized to perform this action.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 404,
+            message = "The requested workflow run not found.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 500,
+            message = "An unexpected error occurred.",
+            response = ErrorResponse.class)
+      })
+  Mono<ResponseEntity<RunId>> cancelRun(@Valid @RequestBody String runId);
 }

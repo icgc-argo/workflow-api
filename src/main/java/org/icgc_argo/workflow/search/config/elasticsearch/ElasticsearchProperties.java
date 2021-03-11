@@ -16,21 +16,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.util;
+package org.icgc_argo.workflow.search.config.elasticsearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-public class JacksonUtils {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  @SneakyThrows
-  public static String toJsonString(Object o) {
-    return OBJECT_MAPPER.writeValueAsString(o);
-  }
-
-  @SneakyThrows
-  public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-    return OBJECT_MAPPER.convertValue(fromValue, toValueType);
-  }
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "elastic")
+public class ElasticsearchProperties {
+  String host;
+  Integer port;
+  Boolean useHttps;
+  Boolean useAuthentication;
+  String username;
+  String password;
+  String workflowIndex;
+  String taskIndex;
 }

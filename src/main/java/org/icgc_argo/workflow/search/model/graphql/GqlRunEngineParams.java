@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -16,22 +16,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.config;
+package org.icgc_argo.workflow.search.model.graphql;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.icgc_argo.workflow.search.model.common.RunEngineParams;
 
-@Data
-@Configuration
-@ConfigurationProperties(prefix = "elastic")
-public class ElasticsearchProperties {
-  String host;
-  Integer port;
-  Boolean useHttps;
-  Boolean useAuthentication;
-  String username;
-  String password;
-  String workflowIndex;
-  String taskIndex;
-}
+// This class is just a place holder for RunEngineParams to be parsed as camel case
+@JsonNaming()
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GqlRunEngineParams extends RunEngineParams {}

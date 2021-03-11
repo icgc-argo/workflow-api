@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import lombok.*;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 
 @Data
 @Builder

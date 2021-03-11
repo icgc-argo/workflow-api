@@ -142,6 +142,34 @@ type AggregationResult {
     totalHits: String!
 }
 
+type RunsResponse {
+    runId: ID
+}
+
+input WorkflowEngineParams {
+  defaultContainer: String
+  revision: String
+  resume: ID
+  launchDir: String
+  projectDir: String
+  workDir: String
+  latest: Boolean
+}
+
+input RunsRequest {
+  workflowUrl: String!
+  workflowEngineParams: WorkflowEngineParams
+  workflowParams: JSON
+  workflowType: String
+  workflowTypeVersion: String
+  tags: JSON
+}
+
+type Mutation {
+     startRun(request: RunsRequest!): RunsResponse
+     cancelRun(runId: ID!): RunsResponse
+}
+
 extend type Query {
     runs(filter: RunsFilter, page: Page, sorts: [RunSort!]): RunsSearchResult!
     aggregateRuns(filter: RunsFilter): AggregationResult!

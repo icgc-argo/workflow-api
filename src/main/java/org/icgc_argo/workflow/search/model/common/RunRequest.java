@@ -16,12 +16,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import lombok.*;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * To execute a workflow, send a run request including all the details needed to begin downloading
@@ -30,22 +36,17 @@ import lombok.*;
 @ApiModel(
     description =
         "To execute a workflow, send a run request including all the details needed to begin downloading and executing a given workflow.")
-@Data
-@Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+@Data
 public class RunRequest {
-
-  private Object workflowParams;
-
-  private Object workflowEngineParams;
-
-  private String workflowType;
-
-  private String workflowTypeVersion;
-
   private String workflowUrl;
+  private Map<String, Object> workflowParams = new HashMap<>();
+  private RunEngineParams workflowEngineParams = new RunEngineParams();
+  private String workflowType;
+  private String workflowTypeVersion;
+  private Map<String, Object> tags;
 }

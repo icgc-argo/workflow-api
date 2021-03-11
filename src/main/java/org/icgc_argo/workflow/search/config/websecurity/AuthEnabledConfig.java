@@ -125,7 +125,7 @@ public class AuthEnabledConfig {
     return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
   }
 
-  private Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter()  {
+  private Converter<Jwt, Collection<GrantedAuthority>> jwtToGrantedAuthoritiesConverter() {
     return (jwt) -> {
       val scopesBuilder = ImmutableList.<String>builder();
 
@@ -143,6 +143,7 @@ public class AuthEnabledConfig {
       return scopes.stream().map(SimpleGrantedAuthority::new).collect(toList());
     };
   }
+
   @SneakyThrows
   private ReactiveJwtDecoder jwtDecoder() {
     String publicKeyStr;

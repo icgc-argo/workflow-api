@@ -18,19 +18,21 @@
 
 package org.icgc_argo.workflow.search.controller.impl;
 
+import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.controller.RunsApi;
-import org.icgc_argo.workflow.search.model.wes.RunListResponse;
-import org.icgc_argo.workflow.search.model.wes.RunResponse;
-import org.icgc_argo.workflow.search.model.wes.RunStatus;
-import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
+import org.icgc_argo.workflow.search.model.wes.*;
 import org.icgc_argo.workflow.search.service.wes.WesRunService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -66,5 +68,19 @@ public class RunsApiController implements RunsApi {
     return wesRunService
         .getServiceInfo()
         .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+  }
+
+  @PostMapping(value = "/runs")
+  public Mono<ResponseEntity<RunId>> postRun(@Valid @RequestBody RunRequest runRequest) {
+    return wesRunService.run(runRequest).map(this::respondOk);
+  }
+
+  @PostMapping(value = "/{run_id}/cancel")
+  public Mono<ResponseEntity<RunId>> cancelRun(@Valid @PathVariable("run_id") String runId) {
+    return wesRunService.cancel(runId).map(this::respondOk);
+  }
+
+  private <T> ResponseEntity<T> respondOk(T response) {
+    return new ResponseEntity<T>(response, HttpStatus.OK);
   }
 }

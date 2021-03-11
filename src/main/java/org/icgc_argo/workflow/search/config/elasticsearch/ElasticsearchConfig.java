@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.config;
+package org.icgc_argo.workflow.search.config.elasticsearch;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

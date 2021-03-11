@@ -20,8 +20,6 @@ package org.icgc_argo.workflow.search.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
 import lombok.*;
 
@@ -46,7 +44,7 @@ public class Run {
   /** The overall state of the workflow run, mapped to WorkflowEvent - event */
   @NonNull String state;
 
-  private Object parameters;
+  private Map<String, Object> parameters;
 
   /** When the command started executing */
   private String startTime;
@@ -72,24 +70,10 @@ public class Run {
   /** The command line that was executed */
   private String commandLine;
 
-  private EngineParameters engineParameters;
+  private RunEngineParams engineParameters;
 
   @SneakyThrows
   public static Run parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Run.class);
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class EngineParameters {
-    private String launchDir;
-    private String projectDir;
-    private String resume;
-    private String revision;
-    private String workDir;
   }
 }

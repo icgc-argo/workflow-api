@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.fetchers.EntityDataFetchers;
+import org.icgc_argo.workflow.search.graphql.fetchers.MutationDataFetcher;
 import org.icgc_argo.workflow.search.graphql.fetchers.RunDataFetchers;
 import org.icgc_argo.workflow.search.graphql.fetchers.TaskDataFetchers;
 import org.icgc_argo.workflow.search.model.common.Run;
@@ -55,6 +56,7 @@ public class GraphQLProvider {
 
   private final TaskDataFetchers taskDataFetchers;
   private final EntityDataFetchers entityDataFetchers;
+  private final MutationDataFetcher mutationDataFetcher;
 
   @PostConstruct
   public void init() throws IOException {
@@ -99,6 +101,7 @@ public class GraphQLProvider {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(GraphQLLong)
         .scalar(ExtendedScalars.Json)
+        .type(newTypeWiring("Mutation").dataFetchers(mutationDataFetcher.get()))
         .type(newTypeWiring("Query").dataFetcher("runs", runDataFetchers.getRunsDataFetcher()))
         .type(
             newTypeWiring("Query")

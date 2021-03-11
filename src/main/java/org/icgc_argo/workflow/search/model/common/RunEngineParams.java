@@ -16,21 +16,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.util;
+package org.icgc_argo.workflow.search.model.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.annotations.ApiModel;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class JacksonUtils {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  @SneakyThrows
-  public static String toJsonString(Object o) {
-    return OBJECT_MAPPER.writeValueAsString(o);
-  }
-
-  @SneakyThrows
-  public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-    return OBJECT_MAPPER.convertValue(fromValue, toValueType);
-  }
+@ApiModel(description = "Describes valid workflow engine parameters (part of RunRequest)")
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
+@Builder
+@Data
+@AllArgsConstructor
+public class RunEngineParams {
+  private String defaultContainer;
+  private String revision;
+  private UUID resume;
+  private String launchDir;
+  private String projectDir;
+  private String workDir;
+  private Boolean latest;
 }
