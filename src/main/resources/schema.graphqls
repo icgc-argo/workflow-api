@@ -19,11 +19,24 @@ type Run @key(fields: "runId") {
 }
 
 type EngineParameters {
+    defaultContainer: String
     launchDir: String
     projectDir: String
     resume: String
     revision: String
     workDir: String
+    latest: Boolean
+}
+
+# RequestEngineParameters is EngineParameters, but gql requires distinct input and type
+input RequestEngineParameters {
+    defaultContainer: String
+    launchDir: String
+    projectDir: String
+    resume: String
+    revision: String
+    workDir: String
+    latest: Boolean
 }
 
 type Task {
@@ -146,19 +159,9 @@ type RunsResponse {
     runId: ID
 }
 
-input WorkflowEngineParams {
-  defaultContainer: String
-  revision: String
-  resume: ID
-  launchDir: String
-  projectDir: String
-  workDir: String
-  latest: Boolean
-}
-
 input RunsRequest {
   workflowUrl: String!
-  workflowEngineParams: WorkflowEngineParams
+  workflowEngineParams: RequestEngineParameters
   workflowParams: JSON
   workflowType: String
   workflowTypeVersion: String

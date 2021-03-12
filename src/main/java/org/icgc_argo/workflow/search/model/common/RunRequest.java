@@ -24,10 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * To execute a workflow, send a run request including all the details needed to begin downloading
@@ -36,12 +33,12 @@ import lombok.NoArgsConstructor;
 @ApiModel(
     description =
         "To execute a workflow, send a run request including all the details needed to begin downloading and executing a given workflow.")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-@Data
 public class RunRequest {
   private String workflowUrl;
   private Map<String, Object> workflowParams = new HashMap<>();

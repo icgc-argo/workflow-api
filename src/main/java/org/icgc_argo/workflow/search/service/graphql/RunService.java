@@ -125,8 +125,7 @@ public class RunService {
         .map(response -> response.getHits().getHits())
         .flatMapMany(Flux::fromArray)
         .next()
-        .map(RunService::hitToRun)
-        .switchIfEmpty(Mono.empty());
+        .map(RunService::hitToRun);
   }
 
   private static Run hitToRun(SearchHit hit) {
