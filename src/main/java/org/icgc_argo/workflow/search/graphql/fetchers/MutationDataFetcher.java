@@ -29,7 +29,7 @@ import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.GqlRunRequest;
-import org.icgc_argo.workflow.search.model.wes.RunId;
+import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

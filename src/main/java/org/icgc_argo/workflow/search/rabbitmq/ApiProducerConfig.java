@@ -60,7 +60,7 @@ public class ApiProducerConfig {
   private Boolean initializeRunReq;
 
   private final RabbitEndpointService rabbit;
-  private final OnDemandSource<SenderDto> sink = new OnDemandSource<>("apiSource");
+  private final OnDemandSource<SenderDTO> sink = new OnDemandSource<>("apiSource");
 
   private Disposable apiProducer;
 
@@ -94,7 +94,7 @@ public class ApiProducerConfig {
   }
 
   @Bean
-  public Sender<SenderDto> sender() {
+  public Sender<SenderDTO> sender() {
     return sink;
   }
 

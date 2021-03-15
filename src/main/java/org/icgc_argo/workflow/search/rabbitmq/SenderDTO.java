@@ -16,15 +16,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.rabbitmq;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 
-@Data
 @Builder
-@ToString
-@AllArgsConstructor
-@EqualsAndHashCode
-public class RunId {
-  @NonNull private String runId;
+@Getter
+public class SenderDTO {
+  String runId;
+  boolean cancelRequest;
+  RunRequest runRequest;
 }

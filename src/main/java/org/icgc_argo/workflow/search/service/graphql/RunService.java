@@ -37,8 +37,8 @@ import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
-import org.icgc_argo.workflow.search.model.wes.RunId;
-import org.icgc_argo.workflow.search.rabbitmq.SenderDto;
+import org.icgc_argo.workflow.search.model.common.RunId;
+import org.icgc_argo.workflow.search.rabbitmq.SenderDTO;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -49,12 +49,12 @@ import reactor.core.publisher.Mono;
 public class RunService {
 
   private final RunRepository runRepository;
-  private final Sender<SenderDto> sender;
+  private final Sender<SenderDTO> sender;
 
   @HasQueryAndMutationAccess
   public Mono<RunId> startRun(RunRequest runRequest) {
     val runId = generateWesRunId();
-    return Mono.just(SenderDto.builder().runId(runId).runRequest(runRequest).build())
+    return Mono.just(SenderDTO.builder().runId(runId).runRequest(runRequest).build())
         .flatMap(sender::send)
         .map(o -> new RunId(runId));
   }
@@ -62,7 +62,7 @@ public class RunService {
   @HasQueryAndMutationAccess
   public Mono<RunId> cancelRun(String runId) {
     return getRunByRunId(runId)
-        .map(run -> SenderDto.builder().runId(runId).cancelRequest(true).build())
+        .map(run -> SenderDTO.builder().runId(runId).cancelRequest(true).build())
         .flatMap(sender::send)
         .map(o -> new RunId(runId))
         .switchIfEmpty(Mono.error(new Exception("Can't cancel non existing run.")));

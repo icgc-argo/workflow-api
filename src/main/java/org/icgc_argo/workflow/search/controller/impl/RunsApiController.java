@@ -23,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.controller.RunsApi;
+import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.wes.*;
 import org.icgc_argo.workflow.search.service.wes.WesRunService;

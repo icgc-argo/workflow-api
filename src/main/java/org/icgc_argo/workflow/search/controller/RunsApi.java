@@ -20,6 +20,8 @@ package org.icgc_argo.workflow.search.controller;
 
 import io.swagger.annotations.*;
 import javax.validation.Valid;
+
+import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.wes.*;
 import org.springframework.http.ResponseEntity;
