@@ -18,17 +18,23 @@
 
 package org.icgc_argo.workflow.search.rabbitmq;
 
+import static org.icgc_argo.workflow.search.util.JacksonUtils.toJsonString;
+
 import com.pivotal.rabbitmq.RabbitEndpointService;
 import com.pivotal.rabbitmq.source.OnDemandSource;
 import com.pivotal.rabbitmq.source.Sender;
 import com.pivotal.rabbitmq.stream.TransactionalProducerStream;
 import com.pivotal.rabbitmq.topology.ExchangeType;
+import java.time.Instant;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.config.rabbitmq.RabbitSchemaConfig;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
+import org.icgc_argo.workflow.search.rabbitmq.schema.EngineParams;
+import org.icgc_argo.workflow.search.rabbitmq.schema.RunState;
 import org.icgc_argo.workflow.search.rabbitmq.schema.WfMgmtRunMsg;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -41,17 +47,20 @@ import reactor.core.Disposable;
 @Configuration
 @RequiredArgsConstructor
 public class ApiProducerConfig {
-  @Value("${api.producer.topology.queueName}")
+  @Value("${api.producer.queueName}")
   private String queueName;
 
-  @Value("${api.producer.topology.topicExchangeName}")
+  @Value("${api.producer.topicExchangeName}")
   private String topicExchangeName;
 
-  @Value("${api.producer.topology.topicRoutingKeys}")
+  @Value("${api.producer.topicRoutingKeys}")
   private String[] topicRoutingKeys;
 
+  @Value("${api.producer.initializeRunReq}")
+  private Boolean initializeRunReq;
+
   private final RabbitEndpointService rabbit;
-  private final OnDemandSource<WfMgmtRunMsg> sink = new OnDemandSource<>("apiSource");
+  private final OnDemandSource<SenderDto> sink = new OnDemandSource<>("apiSource");
 
   private Disposable apiProducer;
 
@@ -62,7 +71,22 @@ public class ApiProducerConfig {
 
   private Disposable createWfMgmtRunMsgProducer() {
     return createTransProducerStream(rabbit, topicExchangeName, queueName, topicRoutingKeys)
-        .send(sink.source())
+        .send(
+            sink.source()
+                .map(
+                    tx -> {
+                      val senderDto = tx.get();
+                      if (senderDto.isCancelRequest()) {
+                        return tx.map(
+                            createWfMgmtRunMsg(senderDto.getRunId(), RunState.CANCELING));
+                      } else {
+                        return tx.map(
+                            createWfMgmtRunMsg(
+                                senderDto.getRunId(),
+                                senderDto.getRunRequest(),
+                                initializeRunReq ? RunState.INITIALIZING : RunState.QUEUED));
+                      }
+                    }))
         .subscribe(
             tx -> {
               log.debug("ApiProducer sent WfMgmtRunMsg: {}", tx.get());
@@ -71,7 +95,7 @@ public class ApiProducerConfig {
   }
 
   @Bean
-  public Sender<WfMgmtRunMsg> sender() {
+  public Sender<SenderDto> sender() {
     return sink;
   }
 
@@ -101,7 +125,42 @@ public class ApiProducerConfig {
         .then();
   }
 
-  static Function<WfMgmtRunMsg, String> routingKeySelector() {
+  private static Function<WfMgmtRunMsg, String> routingKeySelector() {
     return msg -> msg.getState().toString();
+  }
+
+  private static WfMgmtRunMsg createWfMgmtRunMsg(
+      String runId, RunRequest runRequest, RunState state) {
+
+    val requestWep = runRequest.getWorkflowEngineParams();
+    val msgWep =
+        EngineParams.newBuilder()
+            .setLatest(requestWep.getLatest())
+            .setDefaultContainer(requestWep.getDefaultContainer())
+            .setLaunchDir(requestWep.getLaunchDir())
+            .setRevision(requestWep.getRevision())
+            .setProjectDir(requestWep.getProjectDir())
+            .setWorkDir(requestWep.getWorkDir());
+
+    if (requestWep.getResume() != null) {
+      msgWep.setResume(requestWep.getResume().toString());
+    }
+    return WfMgmtRunMsg.newBuilder()
+        .setRunId(runId)
+        .setState(state)
+        .setWorkflowUrl(runRequest.getWorkflowUrl())
+        .setWorkflowParamsJsonStr(toJsonString(runRequest.getWorkflowParams()))
+        .setWorkflowEngineParams(msgWep.build())
+        .setTimestamp(Instant.now().toEpochMilli())
+        .build();
+  }
+
+  private static WfMgmtRunMsg createWfMgmtRunMsg(String runId, RunState state) {
+    return WfMgmtRunMsg.newBuilder()
+        .setRunId(runId)
+        .setTimestamp(Instant.now().toEpochMilli())
+        .setState(state)
+        .setWorkflowEngineParams(EngineParams.newBuilder().build())
+        .build();
   }
 }
