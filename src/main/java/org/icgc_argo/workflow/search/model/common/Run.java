@@ -70,7 +70,7 @@ public class Run {
   /** The command line that was executed */
   private String commandLine;
 
-  private RunEngineParams engineParameters;
+  private EngineParameters engineParameters;
 
   @SneakyThrows
   public static Run parse(@NonNull Map<String, Object> sourceMap) {

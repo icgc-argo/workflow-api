@@ -28,5 +28,5 @@ import org.icgc_argo.workflow.search.model.common.RunRequest;
 @JsonNaming()
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GqlRunRequest extends RunRequest {
-  private GqlRunEngineParams workflowEngineParams = new GqlRunEngineParams();
+  private GqlEngineParameters workflowEngineParams = new GqlEngineParameters();
 }

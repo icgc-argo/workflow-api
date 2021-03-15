@@ -20,9 +20,9 @@ package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import org.icgc_argo.workflow.search.model.common.RunEngineParams;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
 
-// This class is just a place holder for RunEngineParams to be parsed as camel case
+// This class is just a place holder for EngineParameters to be parsed as camel case
 @JsonNaming()
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GqlRunEngineParams extends RunEngineParams {}
+public class GqlEngineParameters extends EngineParameters {}

@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @AllArgsConstructor
-public class RunEngineParams {
+public class EngineParameters {
   private String defaultContainer;
   private String revision;
   private UUID resume;

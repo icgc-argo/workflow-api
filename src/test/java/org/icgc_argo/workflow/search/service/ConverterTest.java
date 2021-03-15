@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.model.SearchFields;
 import org.icgc_argo.workflow.search.model.common.Run;
-import org.icgc_argo.workflow.search.model.common.RunEngineParams;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.wes.State;
 import org.icgc_argo.workflow.search.util.Converter;
@@ -166,7 +166,7 @@ public class ConverterTest {
     params.put("class", "File");
     params.put("path", "ftp://ftp-private.ebi.ac.uk/upload/foivos/test.txt");
 
-    val engineParams = RunEngineParams.builder().revision("test-branch-name").build();
+    val engineParams = EngineParameters.builder().revision("test-branch-name").build();
 
     return Run.builder()
         .runId(RUN_ID)

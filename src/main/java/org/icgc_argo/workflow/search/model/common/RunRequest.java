@@ -42,7 +42,7 @@ import lombok.*;
 public class RunRequest {
   private String workflowUrl;
   private Map<String, Object> workflowParams = new HashMap<>();
-  private RunEngineParams workflowEngineParams = new RunEngineParams();
+  private EngineParameters workflowEngineParams = new EngineParameters();
   private String workflowType;
   private String workflowTypeVersion;
   private Map<String, Object> tags;
