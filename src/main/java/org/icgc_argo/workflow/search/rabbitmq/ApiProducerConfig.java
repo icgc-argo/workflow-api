@@ -77,8 +77,7 @@ public class ApiProducerConfig {
                     tx -> {
                       val senderDto = tx.get();
                       if (senderDto.isCancelRequest()) {
-                        return tx.map(
-                            createWfMgmtRunMsg(senderDto.getRunId(), RunState.CANCELING));
+                        return tx.map(createWfMgmtRunMsg(senderDto.getRunId(), RunState.CANCELING));
                       } else {
                         return tx.map(
                             createWfMgmtRunMsg(

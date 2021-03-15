@@ -55,7 +55,8 @@ rabbit:
       username: user
       password: pass
 
-api.producer.topology:
-  queueName: "gatekeeper-in-queue"
-  topicExchangeName: "gatekeeper-in"
+api.producer:
+  queueName: "mgmt-in-default"
+  topicExchangeName: "mgmt-in"
   topicRoutingKeys:  "#" # comma separated Array of keys
+  initializeRunReq: true
