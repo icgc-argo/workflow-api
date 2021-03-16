@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +37,7 @@ import lombok.NoArgsConstructor;
 public class EngineParameters {
   private String defaultContainer;
   private String revision;
-  private UUID resume;
+  private String resume;
   private String launchDir;
   private String projectDir;
   private String workDir;
