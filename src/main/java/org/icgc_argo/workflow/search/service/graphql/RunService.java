@@ -22,7 +22,9 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
+import static org.icgc_argo.workflow.search.util.WesUtils.generateWesRunId;
 
+import com.pivotal.rabbitmq.source.Sender;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +33,12 @@ import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.common.RunId;
+import org.icgc_argo.workflow.search.rabbitmq.SenderDTO;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -41,11 +46,29 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-@HasQueryAccess
 public class RunService {
 
   private final RunRepository runRepository;
+  private final Sender<SenderDTO> sender;
 
+  @HasQueryAndMutationAccess
+  public Mono<RunId> startRun(RunRequest runRequest) {
+    val runId = generateWesRunId();
+    return Mono.just(SenderDTO.builder().runId(runId).runRequest(runRequest).build())
+        .flatMap(sender::send)
+        .map(o -> new RunId(runId));
+  }
+
+  @HasQueryAndMutationAccess
+  public Mono<RunId> cancelRun(String runId) {
+    return getRunByRunId(runId)
+        .map(run -> SenderDTO.builder().runId(runId).cancelRequest(true).build())
+        .flatMap(sender::send)
+        .map(o -> new RunId(runId))
+        .switchIfEmpty(Mono.error(new Exception("Can't cancel non existing run.")));
+  }
+
+  @HasQueryAccess
   public Mono<SearchResult<Run>> searchRuns(
       Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     return runRepository
@@ -66,6 +89,7 @@ public class RunService {
             });
   }
 
+  @HasQueryAccess
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     return runRepository
         .getRuns(filter, Map.of(), List.of())
@@ -77,10 +101,12 @@ public class RunService {
             });
   }
 
+  @HasQueryAccess
   public Mono<Map<String, Long>> getAggregatedRunStateCounts() {
     return runRepository.getAggregatedRunStateCounts();
   }
 
+  @HasQueryAccess
   public Mono<List<Run>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return runRepository
         .getRuns(filter, page)
@@ -88,6 +114,7 @@ public class RunService {
         .map(hitStream -> hitStream.map(RunService::hitToRun).collect(toUnmodifiableList()));
   }
 
+  @HasQueryAccess
   public Mono<Run> getRunByRunId(String runId) {
     return runRepository
         .getRuns(Map.of(RUN_ID, runId), null)

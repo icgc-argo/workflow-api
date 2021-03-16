@@ -16,6 +16,16 @@
 
     <repositories>
         <repository>
+            <id>rabbitmq-maven-milestones</id>
+            <url>https://packagecloud.io/rabbitmq/maven-milestones/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
         </repository>
@@ -24,6 +34,7 @@
     <properties>
         <java.version>11</java.version>
         <resource.delimiter>^</resource.delimiter>
+        <reactor-rabbitmq-streams.version>0.0.8</reactor-rabbitmq-streams.version>
         <springfox.version>3.0.0</springfox.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <jackson-databind.version>2.11.1</jackson-databind.version>
@@ -141,10 +152,46 @@
             <version>0.5.0</version>
         </dependency>
 
+        <!-- RabbitMQ -->
+        <dependency>
+            <groupId>com.pivotal.rabbitmq</groupId>
+            <artifactId>reactor-rabbitmq-streams-autoconfigure</artifactId>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.pivotal.rabbitmq</groupId>
+                <artifactId>reactor-rabbitmq-streams</artifactId>
+                <version>${reactor-rabbitmq-streams.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>1.10.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/resources/avro/</sourceDirectory>
+                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                            <!-- Set stringType to generate Java String instead of CharSequence -->
+                            <stringType>String</stringType>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

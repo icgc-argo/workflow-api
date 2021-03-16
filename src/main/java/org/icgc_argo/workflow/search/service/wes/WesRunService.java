@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
+import org.icgc_argo.workflow.search.model.common.RunId;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.exceptions.NotFoundException;
 import org.icgc_argo.workflow.search.model.wes.*;
@@ -128,6 +130,14 @@ public class WesRunService {
                     .defaultWorkflowEngineParameters(
                         serviceInfoProperties.getDefaultWorkflowEngineParameters())
                     .build());
+  }
+
+  public Mono<RunId> run(RunRequest runRequest) {
+    return runService.startRun(runRequest);
+  }
+
+  public Mono<RunId> cancel(String runId) {
+    return runService.cancelRun(runId);
   }
 
   private Integer calculateNextPageToken(

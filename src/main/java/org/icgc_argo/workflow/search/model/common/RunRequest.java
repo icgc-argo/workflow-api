@@ -16,22 +16,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.config;
+package org.icgc_argo.workflow.search.model.common;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.annotations.ApiModel;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.*;
 
+/**
+ * To execute a workflow, send a run request including all the details needed to begin downloading
+ * and executing a given workflow.
+ */
+@ApiModel(
+    description =
+        "To execute a workflow, send a run request including all the details needed to begin downloading and executing a given workflow.")
 @Data
-@Configuration
-@ConfigurationProperties(prefix = "elastic")
-public class ElasticsearchProperties {
-  String host;
-  Integer port;
-  Boolean useHttps;
-  Boolean useAuthentication;
-  String username;
-  String password;
-  String workflowIndex;
-  String taskIndex;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class RunRequest {
+  private String workflowUrl;
+  private Map<String, Object> workflowParams = new HashMap<>();
+  private EngineParameters workflowEngineParams = new EngineParameters();
+  private String workflowType;
+  private String workflowTypeVersion;
+  private Map<String, Object> tags;
 }

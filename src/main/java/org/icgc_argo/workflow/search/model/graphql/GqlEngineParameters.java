@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -16,15 +16,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.model.graphql;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
 
-@Data
-@Builder
-@ToString
-@AllArgsConstructor
-@EqualsAndHashCode
-public class RunId {
-  @NonNull private String runId;
-}
+// This class is just a place holder for EngineParameters to be parsed as camel case
+@JsonNaming()
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GqlEngineParameters extends EngineParameters {}

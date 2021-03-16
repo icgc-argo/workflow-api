@@ -16,21 +16,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.util;
+package org.icgc_argo.workflow.search.model.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
+import lombok.*;
 
-public class JacksonUtils {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  @SneakyThrows
-  public static String toJsonString(Object o) {
-    return OBJECT_MAPPER.writeValueAsString(o);
-  }
-
-  @SneakyThrows
-  public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-    return OBJECT_MAPPER.convertValue(fromValue, toValueType);
-  }
+@Data
+@Builder
+@ToString
+@AllArgsConstructor
+@EqualsAndHashCode
+public class RunId {
+  @NonNull private String runId;
 }

@@ -16,21 +16,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.util;
+package org.icgc_argo.workflow.search.service.graphql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-public class JacksonUtils {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  @SneakyThrows
-  public static String toJsonString(Object o) {
-    return OBJECT_MAPPER.writeValueAsString(o);
-  }
-
-  @SneakyThrows
-  public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-    return OBJECT_MAPPER.convertValue(fromValue, toValueType);
-  }
-}
+@Retention(RetentionPolicy.RUNTIME)
+@PreAuthorize("@queryAndMutationScopeChecker.apply(authentication)")
+public @interface HasQueryAndMutationAccess {}
