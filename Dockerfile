@@ -18,7 +18,7 @@ ENV APP_GID 9999
 
 WORKDIR $APP_HOME
 
-COPY --from=builder /usr/src/app/target/workflow-search-*.jar $APP_HOME/workflow-search.jar
+COPY --from=builder /usr/src/app/target/workflow-api-*.jar $APP_HOME/workflow-api.jar
 
 RUN addgroup -S -g $APP_GID $APP_USER  \
     && adduser -S -u $APP_UID -G $APP_USER $APP_USER \
@@ -26,5 +26,5 @@ RUN addgroup -S -g $APP_GID $APP_USER  \
 
 USER $APP_UID
 
-CMD ["java", "-ea", "-jar", "/srv/workflow-search.jar"]
+CMD ["java", "-ea", "-jar", "/srv/workflow-api.jar"]
 EXPOSE 8080/tcp
