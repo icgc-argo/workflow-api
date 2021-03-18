@@ -68,7 +68,7 @@ public class RunsApiController implements RunsApi {
     return wesRunService.run(runRequest).map(this::respondOk);
   }
 
-  @PostMapping(value = "/{run_id}/cancel")
+  @PostMapping(value = "/runs/{run_id}/cancel")
   public Mono<ResponseEntity<RunId>> cancelRun(@Valid @PathVariable("run_id") String runId) {
     return wesRunService.cancel(runId).map(this::respondOk);
   }

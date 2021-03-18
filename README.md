@@ -1,5 +1,5 @@
-# workflow-search
-This service exposes a REST API, which in combination with [workflow-management's](https://github.com/icgc-argo/workflow-management) API, is WES compliant for getting runs and service information. There is also a Graphql API for querying workflow runs and tasks information. Data fetching for both APIs is backed by elasticsearch (filter, paging, & sorting).
+# workflow-api
+This service exposes a WES compliant REST API and an ARGO Graphql API for getting, starting and canceling runs. Data fetching for both APIs is backed by elasticsearch (filter, paging, & sorting).
 
 ## Tech Stack
 - Java 11
@@ -9,6 +9,7 @@ This service exposes a REST API, which in combination with [workflow-management'
 - Elasticsearch
 - Graphql-java
 - Apollo Federation
+- Reactor Rabbitmq Streams
 
 ## REST API Endpoints
 
@@ -27,6 +28,15 @@ This service exposes a REST API, which in combination with [workflow-management'
 * Get information about workflow execution service:
     
     `GET /service-info`
+    
+* Send request to start new runs:
+    
+    `POST /runs`
+
+* Post request to cancel existing run:
+    
+    `POST /runs/{run_id}/cancel`
+
 
 If using `secure` profile, include token in authorization header: `{ Authorization: Bearer $JWT }`
 
@@ -78,7 +88,7 @@ mvn clean package
 ```
 With docker:
 ```bash 
-docker build . -t icgcargo/workflow-search:test
+docker build . -t icgcargo/workflow-api:test
 ```
 
 ## Run
@@ -92,8 +102,8 @@ mvn -Dspring-boot.run.profiles=secure spring-boot:run
 
 Docker with app default and secure profile:
 ```bash
-docker run icgcargo/song-search:test
+docker run icgcargo/workflow-api:test
 ```
 ```bash
-docker run -e "SPRING_PROFILES_ACTIVE=secure" icgcargo/workflow-search:test
+docker run -e "SPRING_PROFILES_ACTIVE=secure" icgcargo/workflow-api:test
 ```
