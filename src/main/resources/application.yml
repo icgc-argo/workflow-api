@@ -1,8 +1,8 @@
 spring:
   application:
-    name: "Workflow Search"
+    name: "Workflow API"
     version: ^project.version^
-    description: "Workflow Search API Documentation"
+    description: "Workflow API"
 
 server:
   port : 8080

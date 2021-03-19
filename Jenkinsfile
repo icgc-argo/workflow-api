@@ -1,5 +1,5 @@
 def dockerRepo = "ghcr.io/icgc-argo/workflow-api"
-def chartVersion = "0.4.0"
+def chartVersion = "0.1.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
 
@@ -88,7 +88,7 @@ spec:
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
                         [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'api'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
                     ])
@@ -129,7 +129,7 @@ spec:
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
                         [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'api'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
                     ])
