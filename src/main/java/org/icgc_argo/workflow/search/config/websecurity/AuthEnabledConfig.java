@@ -71,20 +71,16 @@ public class AuthEnabledConfig {
     http.csrf()
         .disable()
         .authorizeExchange()
-        .pathMatchers("/graphql/**")
-        .permitAll()
-        .pathMatchers("/actuator/**")
-        .permitAll()
-        // WES-API endpoints
-        .pathMatchers("/runs/**", "/service-info")
-        .permitAll()
+        .pathMatchers("/runs/**", "/service-info", "/graphql/**")
+        .authenticated()
         .pathMatchers(
             "/v2/api-docs",
             "/configuration/ui",
             "/swagger-resources/**",
             "/configuration/security",
             "/swagger-ui/**",
-            "/webjars/**")
+            "/webjars/**",
+            "/actuator/**")
         .permitAll()
         .and()
         .authorizeExchange()

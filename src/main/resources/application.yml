@@ -56,5 +56,5 @@ rabbit:
       password: pass
 
 api.producer:
-  topicExchangeName: "mgmt-in"
-  initializeRunReq: true
+  topicExchange: "gatekeeper-in"
+  initializeRunReq: false

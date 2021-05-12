@@ -47,14 +47,8 @@ import reactor.core.Disposable;
 @Configuration
 @RequiredArgsConstructor
 public class ApiProducerConfig {
-  @Value("${api.producer.queueName}")
-  private String queueName;
-
-  @Value("${api.producer.topicExchangeName}")
+  @Value("${api.producer.topicExchange}")
   private String topicExchangeName;
-
-  @Value("${api.producer.topicRoutingKeys}")
-  private String[] topicRoutingKeys;
 
   @Value("${api.producer.initializeRunReq}")
   private Boolean initializeRunReq;
