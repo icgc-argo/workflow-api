@@ -56,7 +56,5 @@ rabbit:
       password: pass
 
 api.producer:
-  queueName: "mgmt-in-default"
   topicExchangeName: "mgmt-in"
-  topicRoutingKeys:  "#" # comma separated Array of keys
   initializeRunReq: true

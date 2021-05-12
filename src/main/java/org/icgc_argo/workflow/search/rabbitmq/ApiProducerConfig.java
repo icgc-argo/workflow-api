@@ -70,7 +70,7 @@ public class ApiProducerConfig {
   }
 
   private Disposable createWfMgmtRunMsgProducer() {
-    return createTransProducerStream(rabbit, topicExchangeName, queueName, topicRoutingKeys)
+    return createTransProducerStream(rabbit, topicExchangeName)
         .send(
             sink.source()
                 .map(
@@ -98,25 +98,13 @@ public class ApiProducerConfig {
     return sink;
   }
 
-  public static TransactionalProducerStream<WfMgmtRunMsg> createTransProducerStream(
-      RabbitEndpointService rabbit, String topicName, String queueName, String... routingKey) {
-    val dlxName = topicName + "-dlx";
-    val dlqName = queueName + "-dlq";
+  public static TransactionalProducerStream<WfMgmtRunMsg> createTransProducerStream(RabbitEndpointService rabbit, String topicName) {
     return rabbit
         .declareTopology(
             topologyBuilder ->
                 topologyBuilder
-                    .declareExchange(dlxName)
-                    .and()
-                    .declareQueue(dlqName)
-                    .boundTo(dlxName)
-                    .and()
                     .declareExchange(topicName)
-                    .type(ExchangeType.topic)
-                    .and()
-                    .declareQueue(queueName)
-                    .boundTo(topicName, routingKey)
-                    .withDeadLetterExchange(dlxName))
+                    .type(ExchangeType.topic))
         .createTransactionalProducerStream(WfMgmtRunMsg.class)
         .route()
         .toExchange(topicName)
