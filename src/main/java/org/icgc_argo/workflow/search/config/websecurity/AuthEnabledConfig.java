@@ -71,7 +71,7 @@ public class AuthEnabledConfig {
     http.csrf()
         .disable()
         .authorizeExchange()
-        .pathMatchers("/runs/**", "/service-info", "/graphql/**")
+        .pathMatchers("/runs/**", "/service-info")
         .authenticated()
         .pathMatchers(
             "/v2/api-docs",
@@ -80,7 +80,8 @@ public class AuthEnabledConfig {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/actuator/**")
+            "/actuator/**",
+            "/graphql/**")
         .permitAll()
         .and()
         .authorizeExchange()

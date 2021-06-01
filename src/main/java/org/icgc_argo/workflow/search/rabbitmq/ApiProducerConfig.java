@@ -92,13 +92,11 @@ public class ApiProducerConfig {
     return sink;
   }
 
-  public static TransactionalProducerStream<WfMgmtRunMsg> createTransProducerStream(RabbitEndpointService rabbit, String topicName) {
+  public static TransactionalProducerStream<WfMgmtRunMsg> createTransProducerStream(
+      RabbitEndpointService rabbit, String topicName) {
     return rabbit
         .declareTopology(
-            topologyBuilder ->
-                topologyBuilder
-                    .declareExchange(topicName)
-                    .type(ExchangeType.topic))
+            topologyBuilder -> topologyBuilder.declareExchange(topicName).type(ExchangeType.topic))
         .createTransactionalProducerStream(WfMgmtRunMsg.class)
         .route()
         .toExchange(topicName)
