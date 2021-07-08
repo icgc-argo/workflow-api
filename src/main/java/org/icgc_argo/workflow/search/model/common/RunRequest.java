@@ -24,7 +24,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * To execute a workflow, send a run request including all the details needed to begin downloading

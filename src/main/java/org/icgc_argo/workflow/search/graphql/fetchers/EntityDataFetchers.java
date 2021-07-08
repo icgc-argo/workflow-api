@@ -18,19 +18,11 @@
 
 package org.icgc_argo.workflow.search.graphql.fetchers;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
-import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
-
 import com.apollographql.federation.graphqljava._Entity;
-import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
@@ -68,9 +60,7 @@ public class EntityDataFetchers {
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
                     final Object analysisId = values.get("analysisId");
                     if (analysisId instanceof String) {
-                      return Mono.just(
-                          new Analysis(
-                              (String) analysisId, inputForRunResolver((String) analysisId)));
+                      return Mono.just(new Analysis((String) analysisId));
                     }
                   }
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
@@ -84,22 +74,5 @@ public class EntityDataFetchers {
                   return Mono.empty();
                 })
             .collectList();
-  }
-
-  private AsyncDataFetcher<List<Run>> inputForRunResolver(String analysisId) {
-    return environment -> {
-      ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
-      val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
-
-      // short circuit here since can't find runs for invalid analysisId
-      if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
-        return Mono.empty();
-      }
-
-      Map<String, Object> mergedFilter = new HashMap<>(filter);
-      mergedFilter.put(ANALYSIS_ID, analysisId);
-
-      return runService.getRuns(mergedFilter, null);
-    };
   }
 }

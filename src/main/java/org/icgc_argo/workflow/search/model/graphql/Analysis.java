@@ -22,15 +22,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import graphql.schema.DataFetchingEnvironment;
-import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Run;
 
 @Data
 @AllArgsConstructor
@@ -41,15 +37,8 @@ public class Analysis {
 
   private String analysisId;
 
-  private AsyncDataFetcher<List<Run>> inputForRunsFetcher;
-
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Analysis.class);
-  }
-
-  @SneakyThrows
-  public List<Run> getInputForRuns(DataFetchingEnvironment env) {
-    return inputForRunsFetcher.get(env).get();
   }
 }
