@@ -30,7 +30,7 @@ import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.Task;
-import org.icgc_argo.workflow.search.model.graphql.*;
+import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
