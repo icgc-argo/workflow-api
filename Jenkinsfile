@@ -37,8 +37,8 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
-    - name: HOME
-        value: /mnt/executor
+      - name: HOME
+        value: /home/jenkins/agent
     volumeMounts:
       - name: docker-home
         mountPath: /mnt/executor
@@ -46,8 +46,6 @@ spec:
     runAsUser: 1000
   volumes:
   - name: docker-graph-storage
-    emptyDir: {}
-  - name: docker-home
     emptyDir: {}
 """
         }
