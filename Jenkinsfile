@@ -18,6 +18,11 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
+      - name: HOME
+        value: /mnt/executor
+    volumeMounts:
+      - name: docker-graph-storage
+        mountPath: /mnt/executor
   - name: dind-daemon
     image: docker:18.06-dind
     securityContext:
@@ -38,6 +43,8 @@ spec:
         value: tcp://localhost:2375
   volumes:
   - name: docker-graph-storage
+    emptyDir: {}
+  - name: docker-home
     emptyDir: {}
 """
         }
