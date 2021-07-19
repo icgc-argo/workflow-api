@@ -21,7 +21,7 @@ spec:
       - name: HOME
         value: /mnt/executor
     volumeMounts:
-      - name: docker-graph-storage
+      - name: docker-home
         mountPath: /mnt/executor
   - name: dind-daemon
     image: docker:18.06-dind
