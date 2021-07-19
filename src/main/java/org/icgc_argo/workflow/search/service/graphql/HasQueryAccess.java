@@ -16,22 +16,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.config;
+package org.icgc_argo.workflow.search.service.graphql;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-@Data
-@Configuration
-@ConfigurationProperties(prefix = "elastic")
-public class ElasticsearchProperties {
-  String host;
-  Integer port;
-  Boolean useHttps;
-  Boolean useAuthentication;
-  String username;
-  String password;
-  String workflowIndex;
-  String taskIndex;
-}
+@Retention(RetentionPolicy.RUNTIME)
+@PreAuthorize("@queryScopeChecker.apply(authentication)")
+public @interface HasQueryAccess {}

@@ -18,24 +18,22 @@
 
 package org.icgc_argo.workflow.search.service;
 
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.icgc_argo.workflow.search.index.model.TaskDocument;
-import org.icgc_argo.workflow.search.index.model.WorkflowDocument;
-import org.icgc_argo.workflow.search.model.SearchFields;
-import org.icgc_argo.workflow.search.model.wes.State;
-import org.icgc_argo.workflow.search.util.Converter;
-import org.junit.jupiter.api.Test;
+import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.icgc_argo.workflow.search.util.Converter.convertSourceMapToRunStatus;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.icgc_argo.workflow.search.model.SearchFields;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
+import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.Task;
+import org.icgc_argo.workflow.search.model.wes.State;
+import org.icgc_argo.workflow.search.util.Converter;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class ConverterTest {
@@ -63,8 +61,6 @@ public class ConverterTest {
   private static final Long TASK_READ_BYTES = 6789L;
   private static final Long TASK_WRITE_BYTES = 10123L;
 
-
-
   @Test
   public void TestConvertSourceMapToRunStatus() {
     val source = new HashMap<String, Object>();
@@ -79,7 +75,7 @@ public class ConverterTest {
   @Test
   public void testTaskDocumentToLog() {
     val taskDocument =
-        TaskDocument.builder()
+        Task.builder()
             .runId(RUN_ID)
             .sessionId(SESSION_ID)
             .taskId(TASK_ID)
@@ -89,7 +85,7 @@ public class ConverterTest {
             .container(TASK_CONTAINER)
             .attempt(TASK_ATTEMPT)
             .state(STATE_COMPLETE)
-            .submitTime(Instant.now())
+            .submitTime(Instant.now().toString())
             .exit(0)
             .script(SCRIPT)
             .workdir(TASK_WORKDIR)
@@ -114,9 +110,9 @@ public class ConverterTest {
     assertEquals(log.getContainer(), taskDocument.getContainer());
     assertEquals(log.getAttempt(), taskDocument.getAttempt());
     assertEquals(log.getState().toString(), STATE_COMPLETE);
-    assertEquals(log.getSubmitTime(), taskDocument.getSubmitTime().toString());
-    assertEquals(log.getStartTime(), "");
-    assertEquals(log.getEndTime(), "");
+    assertEquals(log.getSubmitTime(), taskDocument.getSubmitTime());
+    assertNull(log.getStartTime());
+    assertNull(log.getEndTime());
     assertTrue(log.getCmd().contains(SCRIPT));
     assertEquals(log.getExitCode().intValue(), 0);
     assertEquals(log.getStderr(), "");
@@ -136,7 +132,7 @@ public class ConverterTest {
 
   @Test
   public void testBuildRunLog() {
-    val doc = buildWorkflowDoc();
+    val doc = buildRunDoc();
     val workflowTypeVersion = "nextflow-dna-seq-alignment: 0.0.1";
     val workflowType = "nextflow";
     val runLog = Converter.buildRunLog(doc, workflowTypeVersion, workflowType);
@@ -158,27 +154,26 @@ public class ConverterTest {
     assertNotNull(log);
     assertEquals(log.getRunId(), RUN_ID);
     assertTrue(log.getCmd().contains(SCRIPT));
-    assertEquals(log.getStartTime(), doc.getStartTime().toString());
-    assertEquals(log.getEndTime(), doc.getCompleteTime().toString());
+    assertEquals(log.getStartTime(), doc.getStartTime());
+    assertEquals(log.getEndTime(), doc.getCompleteTime());
     assertEquals(log.getExitCode().intValue(), 0);
     assertEquals(log.getStdout(), "");
     assertEquals(log.getStderr(), doc.getErrorReport());
   }
 
-  private WorkflowDocument buildWorkflowDoc() {
+  private Run buildRunDoc() {
     val params = new HashMap<String, Object>();
     params.put("class", "File");
     params.put("path", "ftp://ftp-private.ebi.ac.uk/upload/foivos/test.txt");
 
-    val engineParams = new HashMap<String, Object>();
-    engineParams.put("revision", "test-branch-name");
+    val engineParams = EngineParameters.builder().revision("test-branch-name").build();
 
-    return WorkflowDocument.builder()
+    return Run.builder()
         .runId(RUN_ID)
         .sessionId(SESSION_ID)
         .commandLine(SCRIPT)
-        .startTime(Instant.now())
-        .completeTime(Instant.now())
+        .startTime(Instant.now().toString())
+        .completeTime(Instant.now().toString())
         .state(STATE_COMPLETE)
         .repository(REPOSITORY)
         .errorReport("No error found.")

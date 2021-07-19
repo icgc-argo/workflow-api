@@ -16,36 +16,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.config.elasticsearch;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import io.swagger.annotations.ApiModel;
-import lombok.*;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-/**
- * To execute a workflow, send a run request including all the details needed to begin downloading
- * and executing a given workflow.
- */
-@ApiModel(
-    description =
-        "To execute a workflow, send a run request including all the details needed to begin downloading and executing a given workflow.")
 @Data
-@Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class RunRequest {
-
-  private Object workflowParams;
-
-  private Object workflowEngineParams;
-
-  private String workflowType;
-
-  private String workflowTypeVersion;
-
-  private String workflowUrl;
+@Configuration
+@ConfigurationProperties(prefix = "elastic")
+public class ElasticsearchProperties {
+  String host;
+  Integer port;
+  Boolean useHttps;
+  Boolean useAuthentication;
+  String username;
+  String password;
+  String workflowIndex;
+  String taskIndex;
 }

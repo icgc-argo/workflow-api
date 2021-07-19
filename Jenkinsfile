@@ -1,13 +1,12 @@
-def dockerRepo = "ghcr.io/icgc-argo/workflow-search"
-def githubRepo = "icgc-argo/workflow-search"
-def chartVersion = "0.3.0"
+def dockerRepo = "ghcr.io/icgc-argo/workflow-api"
+def chartVersion = "0.1.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
 
 pipeline {
     agent {
         kubernetes {
-            label 'workflow-search'
+            label 'workflow-api'
             yaml """
 apiVersion: v1
 kind: Pod
@@ -23,6 +22,7 @@ spec:
     image: docker:18.06-dind
     securityContext:
         privileged: true
+        runAsUser: 0
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
@@ -34,14 +34,14 @@ spec:
   - name: docker
     image: docker:18-git
     tty: true
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
+    env:
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+      - name: HOME
+        value: /home/jenkins/agent
+  securityContext:
+    runAsUser: 1000
   volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
-      type: File
   - name: docker-graph-storage
     emptyDir: {}
 """
@@ -88,8 +88,8 @@ spec:
                 steps {
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
-                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-search'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'search'],
+                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
                     ])
@@ -107,7 +107,7 @@ spec:
                     container('docker') {
                         withCredentials([usernamePassword(credentialsId: 'argoGithub', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                             sh "git tag ${version}"
-                          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/icgc-argo/workflow-search --tags"
+                          sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/icgc-argo/workflow-api --tags"
                         }
 
                         withCredentials([usernamePassword(credentialsId:'argoContainers', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -129,8 +129,8 @@ spec:
                 steps {
                     build(job: "/provision/helm", parameters: [
                         [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
-                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-search'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'search'],
+                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
+                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
                         [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
                         [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
                     ])

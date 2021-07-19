@@ -16,15 +16,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.model.common;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data
+@ApiModel(description = "Describes valid workflow engine parameters (part of RunRequest)")
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
 @Builder
-@ToString
+@Data
 @AllArgsConstructor
-@EqualsAndHashCode
-public class RunId {
-  @NonNull private String runId;
+public class EngineParameters {
+  private String defaultContainer;
+  private String revision;
+  private String resume;
+  private String launchDir;
+  private String projectDir;
+  private String workDir;
+  private Boolean latest;
 }

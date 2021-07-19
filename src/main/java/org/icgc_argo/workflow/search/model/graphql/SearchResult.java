@@ -18,9 +18,8 @@
 
 package org.icgc_argo.workflow.search.model.graphql;
 
-import lombok.Value;
-
 import java.util.List;
+import lombok.Value;
 
 @Value
 public class SearchResult<T> {

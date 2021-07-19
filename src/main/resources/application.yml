@@ -1,8 +1,8 @@
 spring:
   application:
-    name: "Workflow Search"
+    name: "Workflow API"
     version: ^project.version^
-    description: "Workflow Search API Documentation"
+    description: "Workflow API"
 
 server:
   port : 8080
@@ -34,16 +34,6 @@ service-info:
       name: "NA"
       type: "NA"
 
-graphql:
-  servlet:
-    mapping: /graphql
-    enabled: true
-    corsEnabled: true
-  playground:
-    enabled: true
-    cdn:
-      enabled: false
-
 ---
 spring.profiles: secure
 auth:
@@ -54,3 +44,17 @@ auth:
       - RDPC-DEV.READ
     queryAndMutation:
       - RDPC-DEV.WRITE
+
+---
+rabbit:
+  default-endpoint-name: standalone
+  endpoints:
+    standalone:
+      host: localhost
+      port: 5672
+      username: user
+      password: pass
+
+api.producer:
+  topicExchange: "gatekeeper-in"
+  initializeRunReq: false

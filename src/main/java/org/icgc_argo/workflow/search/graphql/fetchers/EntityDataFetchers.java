@@ -16,26 +16,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.graphql;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.stream.Collectors.toList;
-import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
-import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
+package org.icgc_argo.workflow.search.graphql.fetchers;
 
 import com.apollographql.federation.graphqljava._Entity;
-import com.google.common.collect.ImmutableMap;
-import graphql.schema.DataFetcher;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
-import org.icgc_argo.workflow.search.model.graphql.Run;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -52,10 +45,11 @@ public class EntityDataFetchers {
     this.runService = runService;
   }
 
-  public DataFetcher getDataFetcher() {
+  public AsyncDataFetcher getDataFetcher() {
     return environment ->
-        environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream()
-            .map(
+        Flux.fromStream(
+                environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream())
+            .flatMap(
                 values -> {
                   if (RUN_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
@@ -66,35 +60,19 @@ public class EntityDataFetchers {
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
                     final Object analysisId = values.get("analysisId");
                     if (analysisId instanceof String) {
-                      return new Analysis(
-                          (String) analysisId, inputForRunResolver((String) analysisId));
+                      return Mono.just(new Analysis((String) analysisId));
                     }
                   }
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
-                      return new Workflow((String) runId, runService.getRunByRunId((String) runId));
+                      return runService
+                          .getRunByRunId((String) runId)
+                          .map(run -> new Workflow(run.getRunId(), run));
                     }
                   }
-                  return null;
+                  return Mono.empty();
                 })
-            .collect(toList());
-  }
-
-  private DataFetcher<List<Run>> inputForRunResolver(String analysisId) {
-    return environment -> {
-      ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
-      val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
-
-      // short circuit here since can't find runs for invalid analysisId
-      if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
-        return List.of();
-      }
-
-      Map<String, Object> mergedFilter = new HashMap<>(filter);
-      mergedFilter.put(ANALYSIS_ID, analysisId);
-
-      return runService.getRuns(mergedFilter, null);
-    };
+            .collectList();
   }
 }

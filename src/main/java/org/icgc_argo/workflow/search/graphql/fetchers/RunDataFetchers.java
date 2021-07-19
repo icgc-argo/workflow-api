@@ -16,22 +16,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.graphql;
+package org.icgc_argo.workflow.search.graphql.fetchers;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
+import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
+import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import graphql.schema.DataFetcher;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow.search.model.graphql.*;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
+import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.Task;
+import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
+import org.icgc_argo.workflow.search.model.graphql.Analysis;
+import org.icgc_argo.workflow.search.model.graphql.SearchResult;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -46,7 +56,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<SearchResult<Run>> getRunsDataFetcher() {
+  public AsyncDataFetcher<SearchResult<Run>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -60,9 +70,9 @@ public class RunDataFetchers {
         if (args.get("sorts") != null) {
           val rawSorts = (List<Object>) args.get("sorts");
           sorts.addAll(
-                  rawSorts.stream()
-                          .map(sort -> convertValue(sort, Sort.class))
-                          .collect(toUnmodifiableList()));
+              rawSorts.stream()
+                  .map(sort -> convertValue(sort, Sort.class))
+                  .collect(toUnmodifiableList()));
         }
       }
       return runService.searchRuns(filter.build(), page.build(), sorts.build());
@@ -70,7 +80,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<AggregationResult> getAggregateAnalysesDataFetcher() {
+  public AsyncDataFetcher<AggregationResult> getAggregateRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -83,10 +93,30 @@ public class RunDataFetchers {
     };
   }
 
-  public DataFetcher<Run> getNestedRunDataFetcher() {
+  public AsyncDataFetcher<Run> getNestedRunInTaskDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
       return runService.getRunByRunId(task.getRunId());
+    };
+  }
+
+  public AsyncDataFetcher<List<Run>> getNestedRunInAnalysisDataFetcher() {
+    return environment -> {
+      val analysis = (Analysis) environment.getSource();
+      val analysisId = analysis.getAnalysisId();
+
+      ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
+      val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
+
+      // short circuit here since can't find runs for invalid analysisId
+      if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
+        return Mono.empty();
+      }
+
+      Map<String, Object> mergedFilter = new HashMap<>(filter);
+      mergedFilter.put(ANALYSIS_ID, analysisId);
+
+      return runService.getRuns(mergedFilter, null);
     };
   }
 }

@@ -16,25 +16,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.rabbitmq;
 
-import io.swagger.annotations.ApiModel;
-import java.util.List;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 
-/** The service will return a RunListResponse when receiving a successful RunListRequest. */
-@ApiModel(
-    description =
-        "The service will return a RunListResponse when receiving a successful RunListRequest.")
-@Data
 @Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-public class RunListResponse {
-
-  @NonNull private List<RunStatus> runs;
-
-  private Integer nextPageToken;
+@Getter
+public class SenderDTO {
+  String runId;
+  boolean cancelRequest;
+  RunRequest runRequest;
 }

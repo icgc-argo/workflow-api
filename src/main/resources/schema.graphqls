@@ -19,11 +19,24 @@ type Run @key(fields: "runId") {
 }
 
 type EngineParameters {
+    defaultContainer: String
     launchDir: String
     projectDir: String
     resume: String
     revision: String
     workDir: String
+    latest: Boolean
+}
+
+# RequestEngineParameters is EngineParameters, but gql requires distinct input and type
+input RequestEngineParameters {
+    defaultContainer: String
+    launchDir: String
+    projectDir: String
+    resume: String
+    revision: String
+    workDir: String
+    latest: Boolean
 }
 
 type Task {
@@ -80,7 +93,7 @@ directive @fetch(from : String!) on FIELD_DEFINITION
 
 type Analysis @key(fields: "analysisId") @extends {
     analysisId: ID! @external
-    inputForRuns(filter: RunsFilter): [Run] @fetch(from: "inputForRuns")
+    inputForRuns(filter: RunsFilter): [Run]
 }
 
 type Workflow @key(fields: "runId") @extends {
@@ -140,6 +153,24 @@ type TasksSearchResult {
 
 type AggregationResult {
     totalHits: String!
+}
+
+type RunsResponse {
+    runId: ID
+}
+
+input RunsRequest {
+  workflowUrl: String!
+  workflowEngineParams: RequestEngineParameters
+  workflowParams: JSON
+  workflowType: String
+  workflowTypeVersion: String
+  tags: JSON
+}
+
+type Mutation {
+     startRun(request: RunsRequest!): RunsResponse
+     cancelRun(runId: ID!): RunsResponse
 }
 
 extend type Query {

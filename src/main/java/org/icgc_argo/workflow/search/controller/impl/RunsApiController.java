@@ -18,107 +18,65 @@
 
 package org.icgc_argo.workflow.search.controller.impl;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import javax.validation.Valid;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.icgc_argo.workflow.search.controller.RunsApi;
+import org.icgc_argo.workflow.search.model.common.RunId;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.wes.RunListResponse;
 import org.icgc_argo.workflow.search.model.wes.RunResponse;
 import org.icgc_argo.workflow.search.model.wes.RunStatus;
 import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
 import org.icgc_argo.workflow.search.service.wes.WesRunService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Controller
-@Api(
-    value = "WorkflowExecutionService",
-    description = "the runs API",
-    tags = "WorkflowExecutionService")
+@RequiredArgsConstructor
 public class RunsApiController implements RunsApi {
 
-  private WesRunService wesRunService;
-
-  @Autowired
-  public RunsApiController(WesRunService wesRunService) {
-    this.wesRunService = wesRunService;
-  }
+  private final WesRunService wesRunService;
 
   @GetMapping(value = "/runs/{run_id}")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            code = 200,
-            message = "Get detailed info about a workflow run",
-            response = RunResponse.class)
-      })
-  public ResponseEntity<RunResponse> getRunLog(
-      @ApiParam(required = true) @PathVariable("run_id") @NonNull String runId) {
-    val response = wesRunService.getRunLog(runId);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public Mono<ResponseEntity<RunResponse>> getRunLog(@NonNull String runId) {
+    return wesRunService.getRunLog(runId).map(this::respondOk);
   }
 
   @GetMapping(value = "/runs/{run_id}/status")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            code = 200,
-            message = "Get quick status info about a workflow run",
-            response = RunStatus.class)
-      })
-  public ResponseEntity<RunStatus> getRunStatus(
-      @ApiParam(required = true) @PathVariable("run_id") String runId) {
-
-    val response = wesRunService.getRunStatusById(runId);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public Mono<ResponseEntity<RunStatus>> getRunStatus(@NonNull String runId) {
+    return wesRunService.getRunStatusById(runId).map(this::respondOk);
   }
 
   @GetMapping(value = "/runs")
-  @ApiResponses(
-      value = {
-        @ApiResponse(code = 200, message = "List Run Results", response = RunListResponse.class)
-      })
-  public ResponseEntity<RunListResponse> listRuns(
-      @ApiParam(
-              example = "10",
-              value =
-                  "OPTIONAL The preferred number of workflow runs to return in a page. If not provided, the implementation should use a default page size. The implementation must not return more items than `page_size`, but it may return fewer.  Clients should not assume that if fewer than `page_size` items are returned that all items have been returned.  The availability of additional pages is indicated by the value of `next_page_token` in the response.")
-          @Valid
-          @RequestParam(value = "page_size", defaultValue = "10", required = false)
-          Integer pageSize,
-      @ApiParam(
-              example = "0",
-              value =
-                  "OPTIONAL Token to use to indicate where to start getting results. If unspecified, return the first page of results.")
-          @Valid
-          @RequestParam(value = "page_token", defaultValue = "0", required = false)
-          Integer pageToken) {
-
-    val response = wesRunService.listRuns(pageSize, pageToken);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public Mono<ResponseEntity<RunListResponse>> listRuns(Integer pageSize, Integer pageToken) {
+    return wesRunService.listRuns(pageSize, pageToken).map(this::respondOk);
   }
 
   @GetMapping(value = "/service-info")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            code = 200,
-            message = "Get information about workflow execution service.",
-            response = ServiceInfo.class)
-      })
-  public ResponseEntity<ServiceInfo> getServiceInfo() {
-    val response = wesRunService.getServiceInfo();
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public Mono<ResponseEntity<ServiceInfo>> getServiceInfo() {
+    return wesRunService.getServiceInfo().map(this::respondOk);
+  }
+
+  @PostMapping(value = "/runs")
+  public Mono<ResponseEntity<RunId>> postRun(@Valid @RequestBody RunRequest runRequest) {
+    return wesRunService.run(runRequest).map(this::respondOk);
+  }
+
+  @PostMapping(value = "/runs/{run_id}/cancel")
+  public Mono<ResponseEntity<RunId>> cancelRun(@Valid @PathVariable("run_id") String runId) {
+    return wesRunService.cancel(runId).map(this::respondOk);
+  }
+
+  private <T> ResponseEntity<T> respondOk(T response) {
+    return new ResponseEntity<T>(response, HttpStatus.OK);
   }
 }

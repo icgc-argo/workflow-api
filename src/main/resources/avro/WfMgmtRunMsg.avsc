@@ -1,0 +1,88 @@
+{
+  "type": "record",
+  "name": "WfMgmtRunMsg",
+  "namespace": "org.icgc_argo.workflow.search.rabbitmq.schema",
+  "fields": [
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "date"
+    },
+    {
+      "name": "runId",
+      "type": "string"
+    },
+    {
+      "name": "state",
+      "type": {
+              "type": "enum",
+              "name": "RunState",
+              "symbols": ["UNKNOWN", "QUEUED", "INITIALIZING", "RUNNING", "PAUSED", "CANCELING", "CANCELED", "COMPLETE", "EXECUTOR_ERROR", "SYSTEM_ERROR"]
+      }
+    },
+    {
+      "name": "workflowUrl",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "workflowType",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "workflowTypeVersion",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "workflowParamsJsonStr",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "workflowEngineParams",
+      "type": {
+        "type": "record",
+        "name": "EngineParams",
+        "fields": [
+            {
+                "name": "defaultContainer",
+                "type": ["null", "string"],
+                "default": null
+            },
+            {
+              "name": "revision",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "launchDir",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "projectDir",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "workDir",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "latest",
+              "type": ["null", "boolean"],
+              "default": null
+            },
+             {
+               "name": "resume",
+               "type": ["null", "string"],
+               "default": null
+             }
+        ]
+      }
+    }
+  ]
+}

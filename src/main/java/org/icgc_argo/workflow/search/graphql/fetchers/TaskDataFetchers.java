@@ -16,23 +16,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.graphql;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import graphql.schema.DataFetcher;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.icgc_argo.workflow.search.model.graphql.*;
-import org.icgc_argo.workflow.search.service.graphql.TaskService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
+package org.icgc_argo.workflow.search.graphql.fetchers;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
+import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.Task;
+import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
+import org.icgc_argo.workflow.search.model.graphql.SearchResult;
+import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.service.graphql.TaskService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -47,7 +50,7 @@ public class TaskDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<SearchResult<Task>> getTasksDataFetcher() {
+  public AsyncDataFetcher<SearchResult<Task>> getTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -61,17 +64,17 @@ public class TaskDataFetchers {
         if (args.get("sorts") != null) {
           val rawSorts = (List<Object>) args.get("sorts");
           sorts.addAll(
-                  rawSorts.stream()
-                          .map(sort -> convertValue(sort, Sort.class))
-                          .collect(toUnmodifiableList()));
+              rawSorts.stream()
+                  .map(sort -> convertValue(sort, Sort.class))
+                  .collect(toUnmodifiableList()));
         }
       }
-      return taskService.searchRuns(filter.build(), page.build(), sorts.build());
+      return taskService.searchTasks(filter.build(), page.build(), sorts.build());
     };
   }
 
   @SuppressWarnings("unchecked")
-  public DataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
+  public AsyncDataFetcher<AggregationResult> getAggregateTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -84,7 +87,7 @@ public class TaskDataFetchers {
     };
   }
 
-  public DataFetcher<List<Task>> getNestedTaskDataFetcher() {
+  public AsyncDataFetcher<List<Task>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
       val runId = ((Run) environment.getSource()).getRunId();

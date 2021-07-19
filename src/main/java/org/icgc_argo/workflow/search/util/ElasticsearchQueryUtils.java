@@ -18,6 +18,11 @@
 
 package org.icgc_argo.workflow.search.util;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.val;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -26,12 +31,6 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class ElasticsearchQueryUtils {
   /**

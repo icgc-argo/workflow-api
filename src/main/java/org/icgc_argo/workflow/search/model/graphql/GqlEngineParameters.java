@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -19,60 +19,10 @@
 package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
 
-import java.util.Map;
-
-@Data
+// This class is just a place holder for EngineParameters to be parsed as camel case
+@JsonNaming()
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Run {
-
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
-  private String runId;
-
-  private String sessionId;
-
-  private String repository;
-
-  private String state;
-
-  private Object parameters;
-
-  private String startTime;
-
-  private String completeTime;
-
-  private Boolean success;
-
-  private Integer exitStatus;
-
-  private String errorReport;
-
-  private Long duration;
-
-  private String commandLine;
-
-  private EngineParameters engineParameters;
-
-  @SneakyThrows
-  public static Run parse(@NonNull Map<String, Object> sourceMap) {
-    return MAPPER.convertValue(sourceMap, Run.class);
-  }
-
-  @Data
-  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class EngineParameters {
-    private String launchDir;
-    private String projectDir;
-    private String resume;
-    private String revision;
-    private String workDir;
-  }
-}
+public class GqlEngineParameters extends EngineParameters {}

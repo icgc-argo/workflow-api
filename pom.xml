@@ -5,16 +5,26 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.0.RELEASE</version>
+        <version>2.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.icgc_argo</groupId>
-    <artifactId>workflow-search</artifactId>
-    <version>2.6.0</version>
-    <name>workflow-search</name>
-    <description>Demo project for Spring Boot</description>
-
+    <artifactId>workflow-api</artifactId>
+    <version>1.0.0</version>
+    <name>workflow-api</name>
+    <description>Service exposing APIs for Run and Task operations</description>
+  
     <repositories>
+        <repository>
+            <id>rabbitmq-maven-milestones</id>
+            <url>https://packagecloud.io/rabbitmq/maven-milestones/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
@@ -24,7 +34,8 @@
     <properties>
         <java.version>11</java.version>
         <resource.delimiter>^</resource.delimiter>
-        <springfox-version>2.9.2</springfox-version>
+        <reactor-rabbitmq-streams.version>0.0.8</reactor-rabbitmq-streams.version>
+        <springfox.version>3.0.0</springfox.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <jackson-databind.version>2.11.1</jackson-databind.version>
         <jackson-dataformat-yaml.version>2.3.0</jackson-dataformat-yaml.version>
@@ -37,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,7 +67,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
-            <version>5.3.3.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -99,64 +109,89 @@
             <version>1.18.2</version>
             <scope>provided</scope>
         </dependency>
-
-        <!--SpringFox dependencies -->
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox-version}</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
         </dependency>
+
+        <!-- SpringFox dependencies (SWAGGER) -->
         <dependency>
             <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox-version}</version>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>${springfox.version}</version>
         </dependency>
 
         <!-- Elasticsearch dependencies -->
         <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>${elasticsearch.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
 
         <!-- Graphql java dependencies -->
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>14.0</version>
+            <version>15.0</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-spring-boot-starter-webmvc</artifactId>
-            <version>1.0</version>
+            <artifactId>graphql-java-spring-boot-starter-webflux</artifactId>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>playground-spring-boot-starter</artifactId>
-            <version>6.0.1</version>
-        </dependency>
 
         <!-- GraphQL Apollo Federation -->
         <dependency>
             <groupId>com.apollographql.federation</groupId>
             <artifactId>federation-graphql-java-support</artifactId>
-            <version>0.4.1</version>
+            <version>0.5.0</version>
         </dependency>
 
+        <!-- RabbitMQ -->
+        <dependency>
+            <groupId>com.pivotal.rabbitmq</groupId>
+            <artifactId>reactor-rabbitmq-streams-autoconfigure</artifactId>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.pivotal.rabbitmq</groupId>
+                <artifactId>reactor-rabbitmq-streams</artifactId>
+                <version>${reactor-rabbitmq-streams.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>1.10.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/resources/avro/</sourceDirectory>
+                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                            <!-- Set stringType to generate Java String instead of CharSequence -->
+                            <stringType>String</stringType>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

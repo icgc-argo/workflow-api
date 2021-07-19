@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -16,25 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.model.graphql;
 
-import io.swagger.annotations.ApiModel;
-import java.util.List;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Data;
+import org.icgc_argo.workflow.search.model.common.RunRequest;
 
-/** The service will return a RunListResponse when receiving a successful RunListRequest. */
-@ApiModel(
-    description =
-        "The service will return a RunListResponse when receiving a successful RunListRequest.")
+// This class is just a place holder for RunRequest to be parsed as camel case
 @Data
-@Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-public class RunListResponse {
-
-  @NonNull private List<RunStatus> runs;
-
-  private Integer nextPageToken;
+@JsonNaming()
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GqlRunRequest extends RunRequest {
+  private GqlEngineParameters workflowEngineParams = new GqlEngineParameters();
 }

@@ -16,25 +16,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflow.search.model.wes;
+package org.icgc_argo.workflow.search.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
-import java.util.List;
-import lombok.*;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/** The service will return a RunListResponse when receiving a successful RunListRequest. */
+/**
+ * To execute a workflow, send a run request including all the details needed to begin downloading
+ * and executing a given workflow.
+ */
 @ApiModel(
     description =
-        "The service will return a RunListResponse when receiving a successful RunListRequest.")
+        "To execute a workflow, send a run request including all the details needed to begin downloading and executing a given workflow.")
 @Data
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-public class RunListResponse {
-
-  @NonNull private List<RunStatus> runs;
-
-  private Integer nextPageToken;
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class RunRequest {
+  private String workflowUrl;
+  private Map<String, Object> workflowParams = new HashMap<>();
+  private EngineParameters workflowEngineParams = new EngineParameters();
+  private String workflowType;
+  private String workflowTypeVersion;
+  private Map<String, Object> tags;
 }
