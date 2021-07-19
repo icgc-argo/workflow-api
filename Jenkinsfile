@@ -39,9 +39,6 @@ spec:
         value: tcp://localhost:2375
       - name: HOME
         value: /home/jenkins/agent
-    volumeMounts:
-      - name: docker-home
-        mountPath: /mnt/executor
   securityContext:
     runAsUser: 1000
   volumes:
