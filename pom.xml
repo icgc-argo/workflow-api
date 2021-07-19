@@ -13,7 +13,7 @@
     <version>3.0.0</version>
     <name>workflow-api</name>
     <description>Service exposing APIs for Run and Task operations</description>
-
+  
     <repositories>
         <repository>
             <id>rabbitmq-maven-milestones</id>
