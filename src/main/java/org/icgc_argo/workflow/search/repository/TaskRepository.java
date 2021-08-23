@@ -94,7 +94,8 @@ public class TaskRepository {
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
-    // more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
+    // more info:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
     return execute(searchSourceBuilder);

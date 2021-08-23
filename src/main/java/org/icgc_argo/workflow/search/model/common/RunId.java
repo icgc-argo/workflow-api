@@ -18,6 +18,8 @@
 
 package org.icgc_argo.workflow.search.model.common;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
 @Data
@@ -25,6 +27,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class RunId {
   @NonNull private String runId;
 }
