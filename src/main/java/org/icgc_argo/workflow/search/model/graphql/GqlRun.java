@@ -19,10 +19,64 @@
 package org.icgc_argo.workflow.search.model.graphql;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.Map;
 import lombok.*;
-import org.icgc_argo.workflow.search.model.common.Run;
+import org.icgc_argo.workflow.search.model.common.EngineParameters;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming()
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GqlRun extends Run {}
+public class GqlRun {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  /** Workflow run ID */
+  @NonNull private String runId;
+
+  /** Workflow session ID */
+  private String sessionId;
+
+  /** The repository url */
+  @NonNull private String repository;
+
+  /** The overall state of the workflow run, mapped to WorkflowEvent - event */
+  @NonNull String state;
+
+  private Map<String, Object> parameters;
+
+  /** When the command started executing */
+  private String startTime;
+
+  /**
+   * When the command stopped executing (completed, failed, or cancelled), completeTime does not
+   * exist in ES when workflow is unfinished.
+   */
+  private String completeTime;
+
+  /** Did the workflow succeed */
+  private Boolean success;
+
+  /** Exit code of the program */
+  private Integer exitStatus;
+
+  /** A URL to retrieve standard error logs of the workflow run or task */
+  private String errorReport;
+
+  /** Workflow duration */
+  private Long duration;
+
+  /** The command line that was executed */
+  private String commandLine;
+
+  private EngineParameters engineParameters;
+
+  @SneakyThrows
+  public static GqlRun parse(@NonNull Map<String, Object> sourceMap) {
+    return MAPPER.convertValue(sourceMap, GqlRun.class);
+  }
+}

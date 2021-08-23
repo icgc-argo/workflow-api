@@ -22,8 +22,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.util.Map;
 import lombok.*;
+import org.icgc_argo.workflow.search.model.graphql.GqlTask;
 
 @Data
 @Builder
@@ -34,6 +34,7 @@ import lombok.*;
 public class Task {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+
   private String runId;
 
   private String sessionId;
@@ -100,8 +101,33 @@ public class Task {
    */
   private Long writeBytes;
 
-  @SneakyThrows
-  public static Task parse(@NonNull Map<String, Object> sourceMap) {
-    return MAPPER.convertValue(sourceMap, Task.class);
+  public static Task fromGqlTask(GqlTask task) {
+    return Task.builder()
+        .runId(task.getRunId())
+        .sessionId(task.getSessionId())
+        .taskId(task.getTaskId())
+        .name(task.getName())
+        .process(task.getProcess())
+        .state(task.getState())
+        .tag(task.getTag())
+        .container(task.getContainer())
+        .attempt(task.getAttempt())
+        .submitTime(task.getSubmitTime())
+        .startTime(task.getStartTime())
+        .completeTime(task.getCompleteTime())
+        .exit(task.getExit())
+        .script(task.getScript())
+        .workdir(task.getWorkdir())
+        .cpus(task.getCpus())
+        .memory(task.getMemory())
+        .duration(task.getDuration())
+        .realtime(task.getRealtime())
+        .rss(task.getRss())
+        .peakRss(task.getPeakRss())
+        .vmem(task.getVmem())
+        .peakVmem(task.getVmem())
+        .readBytes(task.getReadBytes())
+        .writeBytes(task.getWriteBytes())
+        .build();
   }
 }

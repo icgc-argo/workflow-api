@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
 import lombok.*;
+import org.icgc_argo.workflow.search.model.graphql.GqlRun;
 
 @Data
 @Builder
@@ -33,7 +34,8 @@ import lombok.*;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Run {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final ObjectMapper MAPPER =
+      new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
 
   /** Workflow run ID */
   @NonNull private String runId;
@@ -75,8 +77,21 @@ public class Run {
 
   private EngineParameters engineParameters;
 
-  @SneakyThrows
-  public static Run parse(@NonNull Map<String, Object> sourceMap) {
-    return MAPPER.convertValue(sourceMap, Run.class);
+  public static Run fromGqlRun(GqlRun run) {
+    return Run.builder()
+        .runId(run.getRunId())
+        .sessionId(run.getSessionId())
+        .repository(run.getRepository())
+        .state(run.getState())
+        .parameters(run.getParameters())
+        .startTime(run.getStartTime())
+        .completeTime(run.getCompleteTime())
+        .success(run.getSuccess())
+        .exitStatus(run.getExitStatus())
+        .errorReport(run.getErrorReport())
+        .duration(run.getDuration())
+        .commandLine(run.getCommandLine())
+        .engineParameters(run.getEngineParameters())
+        .build();
   }
 }

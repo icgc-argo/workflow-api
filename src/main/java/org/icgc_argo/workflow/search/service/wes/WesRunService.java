@@ -19,18 +19,19 @@
 package org.icgc_argo.workflow.search.service.wes;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
 import static org.icgc_argo.workflow.search.util.Converter.buildRunLog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.config.ServiceInfoProperties;
+import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.common.Task;
@@ -71,7 +72,7 @@ public class WesRunService {
                                   .runId(run.getRunId())
                                   .state(fromValue(run.getState()))
                                   .build())
-                      .collect(Collectors.toList());
+                      .collect(toList());
 
               val nextPageToken =
                   calculateNextPageToken(
@@ -97,13 +98,14 @@ public class WesRunService {
         .map(
             run ->
                 buildRunLog(
-                    run,
+                    Run.fromGqlRun(run),
                     serviceInfoProperties.getWorkflowTypeVersions().toString(),
                     serviceInfoProperties.getWorkflowType()))
         .flatMap(
             runLog ->
                 taskService
                     .getTasks(runId)
+                    .map(gqlTasks -> gqlTasks.stream().map(Task::fromGqlTask).collect(toList()))
                     .map(
                         tasks -> {
                           runLog.setTaskLogs(buildTaskLogsWithTasks(tasks));
@@ -150,6 +152,6 @@ public class WesRunService {
   }
 
   private List<TaskLog> buildTaskLogsWithTasks(@NonNull List<Task> taskList) {
-    return taskList.stream().map(Converter::taskDocumentToLog).collect(Collectors.toList());
+    return taskList.stream().map(Converter::taskDocumentToLog).collect(toList());
   }
 }
