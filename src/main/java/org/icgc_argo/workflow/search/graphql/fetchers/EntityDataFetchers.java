@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
+import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
@@ -54,6 +55,8 @@ public class EntityDataFetchers {
                   if (RUN_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
+                      // Need to cast to get appropriate jackson annotation (camelCase property
+                      // naming)
                       return runService.getRunByRunId((String) runId);
                     }
                   }
@@ -68,7 +71,7 @@ public class EntityDataFetchers {
                     if (runId instanceof String) {
                       return runService
                           .getRunByRunId((String) runId)
-                          .map(run -> new Workflow(run.getRunId(), run));
+                          .map(run -> new Workflow(run.getRunId(), Run.fromGqlRun(run)));
                     }
                   }
                   return Mono.empty();

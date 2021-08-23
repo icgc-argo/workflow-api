@@ -29,8 +29,8 @@ import java.util.Map;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
+import org.icgc_argo.workflow.search.model.graphql.GqlTask;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.repository.TaskRepository;
@@ -47,7 +47,7 @@ public class TaskService {
     this.taskRepository = taskRepository;
   }
 
-  public Mono<SearchResult<Task>> searchTasks(
+  public Mono<SearchResult<GqlTask>> searchTasks(
       Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     return taskRepository
         .getTasks(filter, page, sorts)
@@ -78,11 +78,11 @@ public class TaskService {
             });
   }
 
-  public Mono<List<Task>> getTasks(String runId) {
+  public Mono<List<GqlTask>> getTasks(String runId) {
     return getTasks(runId, null, null);
   }
 
-  public Mono<List<Task>> getTasks(
+  public Mono<List<GqlTask>> getTasks(
       String runId, Map<String, Object> filter, Map<String, Integer> page) {
     val mergedBuilder = ImmutableMap.<String, Object>builder();
     if (runId != null) {
@@ -102,8 +102,8 @@ public class TaskService {
                     .collect(toUnmodifiableList()));
   }
 
-  private static Task hitToTask(SearchHit hit) {
+  private static GqlTask hitToTask(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
-    return Task.parse(sourceMap);
+    return GqlTask.parse(sourceMap);
   }
 }

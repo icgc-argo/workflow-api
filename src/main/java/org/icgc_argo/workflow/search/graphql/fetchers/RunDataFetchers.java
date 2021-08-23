@@ -32,12 +32,8 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.Task;
-import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
-import org.icgc_argo.workflow.search.model.graphql.Analysis;
-import org.icgc_argo.workflow.search.model.graphql.SearchResult;
-import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +52,7 @@ public class RunDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public AsyncDataFetcher<SearchResult<Run>> getRunsDataFetcher() {
+  public AsyncDataFetcher<SearchResult<GqlRun>> getRunsDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -75,6 +71,7 @@ public class RunDataFetchers {
                   .collect(toUnmodifiableList()));
         }
       }
+
       return runService.searchRuns(filter.build(), page.build(), sorts.build());
     };
   }
@@ -93,14 +90,14 @@ public class RunDataFetchers {
     };
   }
 
-  public AsyncDataFetcher<Run> getNestedRunInTaskDataFetcher() {
+  public AsyncDataFetcher<GqlRun> getNestedRunInTaskDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
       return runService.getRunByRunId(task.getRunId());
     };
   }
 
-  public AsyncDataFetcher<List<Run>> getNestedRunInAnalysisDataFetcher() {
+  public AsyncDataFetcher<List<GqlRun>> getNestedRunInAnalysisDataFetcher() {
     return environment -> {
       val analysis = (Analysis) environment.getSource();
       val analysisId = analysis.getAnalysisId();
@@ -116,6 +113,7 @@ public class RunDataFetchers {
       Map<String, Object> mergedFilter = new HashMap<>(filter);
       mergedFilter.put(ANALYSIS_ID, analysisId);
 
+      // Need to cast to get appropriate jackson annotation (camelCase property naming)
       return runService.getRuns(mergedFilter, null);
     };
   }
