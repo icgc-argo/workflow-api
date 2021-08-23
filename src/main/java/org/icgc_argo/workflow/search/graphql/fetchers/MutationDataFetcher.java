@@ -27,8 +27,8 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
+import org.icgc_argo.workflow.search.model.graphql.GqlRunId;
 import org.icgc_argo.workflow.search.model.graphql.GqlRunRequest;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MutationDataFetcher {
 
-  @NonNull private final AsyncDataFetcher<RunId> cancelRunResolver;
-  @NonNull private final AsyncDataFetcher<RunId> startRunResolver;
+  @NonNull private final AsyncDataFetcher<GqlRunId> cancelRunResolver;
+  @NonNull private final AsyncDataFetcher<GqlRunId> startRunResolver;
 
   @Autowired
   public MutationDataFetcher(RunService runService) {
@@ -46,7 +46,7 @@ public class MutationDataFetcher {
         env -> {
           val args = env.getArguments();
           String runId = String.valueOf(args.get(RUN_ID));
-          return runService.cancelRun(runId);
+          return runService.cancelRun(runId).map(r -> new GqlRunId(r.getRunId()));
         };
 
     startRunResolver =
@@ -60,7 +60,7 @@ public class MutationDataFetcher {
           }
 
           RunRequest runRequest = convertValue(requestMap.build(), GqlRunRequest.class);
-          return runService.startRun(runRequest);
+          return runService.startRun(runRequest).map(r -> new GqlRunId(r.getRunId()));
         };
   }
 

@@ -24,6 +24,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
+import org.icgc_argo.workflow.search.model.graphql.GqlRun;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,9 @@ public class EntityDataFetchers {
                   if (RUN_ENTITY.equals(values.get("__typename"))) {
                     final Object runId = values.get("runId");
                     if (runId instanceof String) {
-                      return runService.getRunByRunId((String) runId);
+                      // Need to cast to get appropriate jackson annotation (camelCase property
+                      // naming)
+                      return runService.getRunByRunId((String) runId).map(run -> (GqlRun) run);
                     }
                   }
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
