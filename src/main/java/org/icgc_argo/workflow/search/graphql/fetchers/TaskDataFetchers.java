@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflow.search.graphql.fetchers;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
@@ -29,8 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
 import org.icgc_argo.workflow.search.model.common.Run;
-import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
+import org.icgc_argo.workflow.search.model.graphql.GqlTask;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
@@ -50,7 +51,7 @@ public class TaskDataFetchers {
   }
 
   @SuppressWarnings("unchecked")
-  public AsyncDataFetcher<SearchResult<Task>> getTasksDataFetcher() {
+  public AsyncDataFetcher<SearchResult<GqlTask>> getTasksDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
 
@@ -69,7 +70,17 @@ public class TaskDataFetchers {
                   .collect(toUnmodifiableList()));
         }
       }
-      return taskService.searchTasks(filter.build(), page.build(), sorts.build());
+      // Need to cast to get appropriate jackson annotation (camelCase property naming)
+      return taskService
+          .searchTasks(filter.build(), page.build(), sorts.build())
+          .map(
+              taskSearchResult ->
+                  new SearchResult<>(
+                      taskSearchResult.getContent().stream()
+                          .map(task -> (GqlTask) task)
+                          .collect(toList()),
+                      taskSearchResult.getInfo().getHasNextFrom(),
+                      taskSearchResult.getInfo().getTotalHits()));
     };
   }
 
@@ -87,12 +98,15 @@ public class TaskDataFetchers {
     };
   }
 
-  public AsyncDataFetcher<List<Task>> getNestedTaskDataFetcher() {
+  public AsyncDataFetcher<List<GqlTask>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
       val runId = ((Run) environment.getSource()).getRunId();
 
-      return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0));
+      // Need to cast to get appropriate jackson annotation (camelCase property naming)
+      return taskService
+          .getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0))
+          .map(tasks -> tasks.stream().map(task -> (GqlTask) task).collect(toList()));
     };
   }
 }
