@@ -18,7 +18,6 @@
 
 package org.icgc_argo.workflow.search.graphql.fetchers;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
@@ -71,16 +70,7 @@ public class TaskDataFetchers {
         }
       }
       // Need to cast to get appropriate jackson annotation (camelCase property naming)
-      return taskService
-          .searchTasks(filter.build(), page.build(), sorts.build())
-          .map(
-              taskSearchResult ->
-                  new SearchResult<>(
-                      taskSearchResult.getContent().stream()
-                          .map(task -> (GqlTask) task)
-                          .collect(toList()),
-                      taskSearchResult.getInfo().getHasNextFrom(),
-                      taskSearchResult.getInfo().getTotalHits()));
+      return taskService.searchTasks(filter.build(), page.build(), sorts.build());
     };
   }
 
@@ -104,9 +94,7 @@ public class TaskDataFetchers {
       val runId = ((Run) environment.getSource()).getRunId();
 
       // Need to cast to get appropriate jackson annotation (camelCase property naming)
-      return taskService
-          .getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0))
-          .map(tasks -> tasks.stream().map(task -> (GqlTask) task).collect(toList()));
+      return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0));
     };
   }
 }

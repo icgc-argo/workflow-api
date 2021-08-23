@@ -32,10 +32,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
 import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
+import org.icgc_argo.workflow.search.model.graphql.GqlRun;
 import org.icgc_argo.workflow.search.model.graphql.SearchResult;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.icgc_argo.workflow.search.rabbitmq.SenderDTO;
@@ -69,7 +69,7 @@ public class RunService {
   }
 
   @HasQueryAccess
-  public Mono<SearchResult<Run>> searchRuns(
+  public Mono<SearchResult<GqlRun>> searchRuns(
       Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
     return runRepository
         .getRuns(filter, page, sorts)
@@ -80,12 +80,12 @@ public class RunService {
               val from = page.getOrDefault("from", ES_PAGE_DEFAULT_FROM);
               val size = page.getOrDefault("size", ES_PAGE_DEFAULT_SIZE);
 
-              val analyses =
+              val runs =
                   Arrays.stream(responseSearchHits.getHits())
                       .map(RunService::hitToRun)
                       .collect(toUnmodifiableList());
               val nextFrom = (totalHits - from) / size > 0;
-              return new SearchResult<>(analyses, nextFrom, totalHits);
+              return new SearchResult<>(runs, nextFrom, totalHits);
             });
   }
 
@@ -107,7 +107,7 @@ public class RunService {
   }
 
   @HasQueryAccess
-  public Mono<List<Run>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+  public Mono<List<GqlRun>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return runRepository
         .getRuns(filter, page)
         .map(response -> Arrays.stream(response.getHits().getHits()))
@@ -115,7 +115,7 @@ public class RunService {
   }
 
   @HasQueryAccess
-  public Mono<Run> getRunByRunId(String runId) {
+  public Mono<GqlRun> getRunByRunId(String runId) {
     return runRepository
         .getRuns(Map.of(RUN_ID, runId), null)
         .map(response -> response.getHits().getHits())
@@ -124,8 +124,8 @@ public class RunService {
         .map(RunService::hitToRun);
   }
 
-  private static Run hitToRun(SearchHit hit) {
+  private static GqlRun hitToRun(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
-    return Run.parse(sourceMap);
+    return GqlRun.parse(sourceMap);
   }
 }

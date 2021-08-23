@@ -19,7 +19,6 @@
 package org.icgc_argo.workflow.search.graphql.fetchers;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
 import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
@@ -33,7 +32,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
@@ -73,17 +71,8 @@ public class RunDataFetchers {
                   .collect(toUnmodifiableList()));
         }
       }
-      // Need to cast to get appropriate jackson annotation (camelCase property naming)
-      return runService
-          .searchRuns(filter.build(), page.build(), sorts.build())
-          .map(
-              runSearchResult ->
-                  new SearchResult<>(
-                      runSearchResult.getContent().stream()
-                          .map((Run run) -> (GqlRun) run)
-                          .collect(toList()),
-                      runSearchResult.getInfo().getHasNextFrom(),
-                      runSearchResult.getInfo().getTotalHits()));
+
+      return runService.searchRuns(filter.build(), page.build(), sorts.build());
     };
   }
 
@@ -101,7 +90,7 @@ public class RunDataFetchers {
     };
   }
 
-  public AsyncDataFetcher<Run> getNestedRunInTaskDataFetcher() {
+  public AsyncDataFetcher<GqlRun> getNestedRunInTaskDataFetcher() {
     return environment -> {
       val task = (Task) environment.getSource();
       return runService.getRunByRunId(task.getRunId());
@@ -125,9 +114,7 @@ public class RunDataFetchers {
       mergedFilter.put(ANALYSIS_ID, analysisId);
 
       // Need to cast to get appropriate jackson annotation (camelCase property naming)
-      return runService
-          .getRuns(mergedFilter, null)
-          .map(runs -> runs.stream().map(run -> (GqlRun) run).collect(toList()));
+      return runService.getRuns(mergedFilter, null);
     };
   }
 }
