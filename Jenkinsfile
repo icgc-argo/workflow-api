@@ -86,12 +86,10 @@ spec:
                     branch "develop"
                 }
                 steps {
-                    build(job: "/provision/helm", parameters: [
-                        [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
-                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                        [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
+                    build(job: "/provision/update-app-version", parameters: [
+                        [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'dev' ],
+                        [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'workflow-api'],
+                        [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}-${commit}" ]
                     ])
                     // sleep(time:30,unit:"SECONDS")
                     // build(job: "/provision/rdpc-gateway-restart", parameters: [
@@ -127,12 +125,10 @@ spec:
                     branch "master"
                 }
                 steps {
-                    build(job: "/provision/helm", parameters: [
-                        [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
-                        [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'workflow-api'],
-                        [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                        [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
+                    build(job: "/provision/update-app-version", parameters: [
+                        [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'qa' ],
+                        [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'workflow-api'],
+                        [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}" ]
                     ])
                     // sleep(time:30,unit:"SECONDS")
                     // build(job: "/provision/rdpc-gateway-restart", parameters: [

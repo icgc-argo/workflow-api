@@ -18,6 +18,8 @@
 
 package org.icgc_argo.workflow.search.model.wes;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import java.util.List;
 import lombok.*;
@@ -32,6 +34,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class RunListResponse {
 
   @NonNull private List<RunStatus> runs;
