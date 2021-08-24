@@ -28,11 +28,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Run;
-import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
-import org.icgc_argo.workflow.search.model.graphql.GqlTask;
-import org.icgc_argo.workflow.search.model.graphql.SearchResult;
-import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,7 +87,7 @@ public class TaskDataFetchers {
   public AsyncDataFetcher<List<GqlTask>> getNestedTaskDataFetcher() {
     return environment -> {
       val args = environment.getArguments();
-      val runId = ((Run) environment.getSource()).getRunId();
+      val runId = ((GqlRun) environment.getSource()).getRunId();
 
       // Need to cast to get appropriate jackson annotation (camelCase property naming)
       return taskService.getTasks(runId, args, ImmutableMap.of("size", 100, "from", 0));
