@@ -32,7 +32,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.AsyncDataFetcher;
-import org.icgc_argo.workflow.search.model.common.Task;
 import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,7 @@ public class RunDataFetchers {
 
   public AsyncDataFetcher<GqlRun> getNestedRunInTaskDataFetcher() {
     return environment -> {
-      val task = (Task) environment.getSource();
+      val task = (GqlTask) environment.getSource();
       return runService.getRunByRunId(task.getRunId());
     };
   }
