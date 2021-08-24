@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
 @Configuration
 @Slf4j
@@ -62,6 +63,16 @@ public class ElasticsearchConfig {
 
     configurationBuilder.withConnectTimeout(connectTimeout);
     configurationBuilder.withSocketTimeout(socketTimeout);
+
+    // Avoid default buffer size limit
+    configurationBuilder.withWebClientConfigurer(
+        webClient -> {
+          val exchangeStrategies =
+              ExchangeStrategies.builder()
+                  .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1))
+                  .build();
+          return webClient.mutate().exchangeStrategies(exchangeStrategies).build();
+        });
 
     return ReactiveRestClients.create(configurationBuilder.build());
   }
