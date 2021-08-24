@@ -3,6 +3,11 @@ spring:
     name: "Workflow API"
     version: ^project.version^
     description: "Workflow API"
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          max-in-memory-size: -1
 
 server:
   port : 8080
