@@ -14,6 +14,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.icgc_argo.workflow.search.testcontainers.WorkflowElasticsearchContainer;
@@ -25,13 +26,24 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class RunRepositoryTest {
+  /*
+  !!!
+  IMPORTANT: These tests only work because the text analyzer for the repository field
+  was set to 'simple' instead of 'standard'. Given that the index mappings are managed
+  externally of this repo it is important to ensure that the 'simple' analyzer is used
+  for the repository field
+  !!!
+   */
 
   private static final String INDEX_NAME = "run-repo";
 
@@ -49,6 +61,7 @@ public class RunRepositoryTest {
             RestClient.builder(HttpHost.create(elasticsearchContainer.getHttpHostAddress())));
   }
 
+  @SneakyThrows
   @BeforeEach
   void testIsContainerRunning() {
     assertTrue(elasticsearchContainer.isRunning());
@@ -56,9 +69,29 @@ public class RunRepositoryTest {
   }
 
   @Test
-  void testBasicSearch() {
-    val result = searchForRepo("");
-    assertTrue(10L == result.getHits().getTotalHits().value);
+  void testMatchAll() {
+    val result = searchForRepo(null);
+    assertEquals(20L, result.getHits().getTotalHits().value);
+  }
+
+  @Test
+  void testSearchAll() {
+    val result = searchForRepo("icgc-argo-workflows");
+    assertEquals(20L, result.getHits().getTotalHits().value);
+  }
+
+  @Test
+  void testSearchOrgAndRepo() {
+    val result = searchForRepo("icgc-argo-workflows/open-access-variant-filtering");
+    assertEquals(10L, result.getHits().getTotalHits().value);
+  }
+
+  @Test
+  void testSearchExact() {
+    val result =
+        searchForRepo(
+            "https://www.github.com/icgc-argo-workflows/open-access-variant-filtering.git");
+    assertEquals(2L, result.getHits().getTotalHits().value);
   }
 
   @AfterAll
@@ -68,39 +101,53 @@ public class RunRepositoryTest {
 
   @SneakyThrows
   private void recreateIndex() {
+
     if (doesIndexExist()) {
       client.indices().delete(new DeleteIndexRequest(INDEX_NAME), RequestOptions.DEFAULT);
-
-      CreateIndexRequest createIndexRequest = new CreateIndexRequest(INDEX_NAME);
-
-      createIndexRequest.mapping(
-          "{\n"
-              + "  \"properties\": {\n"
-              + "    \"repository\": {\n"
-              + "      \"type\": \"text\",\n"
-              + "      \"analyzer\": \"standard\"\n"
-              + "    }\n"
-              + "  }\n"
-              + "}",
-          XContentType.JSON);
-
-      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-
-      val repos =
-          List.of(
-              "https://github.com/icgc-argo-workflows/open-access-variant-filtering.git",
-              "https://github.com/icgc-argo-workflows/open-access-variant-filtering",
-              "https://www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
-              "http://www.github.com/icgc-argo-workflows/open-access-variant-filtering",
-              "https://www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
-              "http://www.github.com/icgc-argo-workflows/open-access-variant-filtering",
-              "www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
-              "www.github.com/icgc-argo-workflows/open-access-variant-filtering",
-              "github.com/icgc-argo-workflows/open-access-variant-filtering.git",
-              "github.com/icgc-argo-workflows/open-access-variant-filtering");
-
-      repos.forEach(this::indexRepo);
     }
+
+    CreateIndexRequest createIndexRequest = new CreateIndexRequest(INDEX_NAME);
+
+    createIndexRequest.mapping(
+        "{\n"
+            + "  \"properties\": {\n"
+            + "    \"repository\": {\n"
+            + "      \"type\": \"text\",\n"
+            + "      \"analyzer\": \"simple\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}",
+        XContentType.JSON);
+
+    client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+
+    val repos =
+        List.of(
+            "https://github.com/icgc-argo-workflows/open-access-variant-filtering.git",
+            "https://github.com/icgc-argo-workflows/open-access-variant-filtering",
+            "https://www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
+            "http://www.github.com/icgc-argo-workflows/open-access-variant-filtering",
+            "https://www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
+            "http://www.github.com/icgc-argo-workflows/open-access-variant-filtering",
+            "www.github.com/icgc-argo-workflows/open-access-variant-filtering.git",
+            "www.github.com/icgc-argo-workflows/open-access-variant-filtering",
+            "github.com/icgc-argo-workflows/open-access-variant-filtering.git",
+            "github.com/icgc-argo-workflows/open-access-variant-filtering",
+            "https://github.com/icgc-argo-workflows/rna-seq-alignment.git",
+            "https://github.com/icgc-argo-workflows/rna-seq-alignment",
+            "https://www.github.com/icgc-argo-workflows/rna-seq-alignment.git",
+            "http://www.github.com/icgc-argo-workflows/rna-seq-alignment",
+            "https://www.github.com/icgc-argo-workflows/rna-seq-alignment.git",
+            "http://www.github.com/icgc-argo-workflows/rna-seq-alignment",
+            "www.github.com/icgc-argo-workflows/rna-seq-alignment.git",
+            "www.github.com/icgc-argo-workflows/rna-seq-alignment",
+            "github.com/icgc-argo-workflows/rna-seq-alignment.git",
+            "github.com/icgc-argo-workflows/rna-seq-alignment");
+
+    repos.forEach(this::indexRepo);
+
+    // added this so that the documents are actually there in time for the tests
+    Thread.sleep(1000);
   }
 
   @SneakyThrows
@@ -116,10 +163,17 @@ public class RunRepositoryTest {
   }
 
   @SneakyThrows
-  private SearchResponse searchForRepo(String repo) {
-    SearchRequest searchRequest = new SearchRequest();
+  private SearchResponse searchForRepo(@Nullable String repo) {
+    SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+
+    AbstractQueryBuilder<?> query = QueryBuilders.matchAllQuery();
+
+    if (Objects.nonNull(repo)) {
+      query = RunRepository.repositoryQueryFunc(repo);
+    }
+
+    searchSourceBuilder.query(query);
     searchRequest.source(searchSourceBuilder);
 
     return client.search(searchRequest, RequestOptions.DEFAULT);

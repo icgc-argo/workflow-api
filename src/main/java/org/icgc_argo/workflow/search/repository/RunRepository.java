@@ -18,17 +18,7 @@
 
 package org.icgc_argo.workflow.search.repository;
 
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.search.sort.SortOrder.DESC;
-import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
-
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +38,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.search.sort.SortOrder.DESC;
+import static org.icgc_argo.workflow.search.model.SearchFields.*;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
 @Slf4j
 @Repository
@@ -87,15 +88,14 @@ public class RunRepository {
               q.minimumShouldMatch("100%");
               return q;
             })
-        .put(
-            REPOSITORY,
-            value -> {
-              val q = new MatchQueryBuilder("repository", value);
-              q.operator(Operator.AND);
-              q.minimumShouldMatch("80%");
-              return q;
-            })
+        .put(REPOSITORY, RunRepository::repositoryQueryFunc)
         .build();
+  }
+
+  public static MatchQueryBuilder repositoryQueryFunc(String value) {
+    val q = new MatchQueryBuilder("repository", value);
+    q.operator(Operator.AND);
+    return q;
   }
 
   private static Map<String, FieldSortBuilder> sortPathMap() {
