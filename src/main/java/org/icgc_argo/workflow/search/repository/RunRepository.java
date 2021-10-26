@@ -87,15 +87,14 @@ public class RunRepository {
               q.minimumShouldMatch("100%");
               return q;
             })
-        .put(
-            REPOSITORY,
-            value -> {
-              val q = new MatchQueryBuilder("repository", value);
-              q.operator(Operator.AND);
-              q.minimumShouldMatch("80%");
-              return q;
-            })
+        .put(REPOSITORY, RunRepository::repositoryQueryFunc)
         .build();
+  }
+
+  public static MatchQueryBuilder repositoryQueryFunc(String value) {
+    val q = new MatchQueryBuilder("repository", value);
+    q.operator(Operator.AND);
+    return q;
   }
 
   private static Map<String, FieldSortBuilder> sortPathMap() {
