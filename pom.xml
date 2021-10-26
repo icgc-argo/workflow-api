@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.icgc_argo</groupId>
     <artifactId>workflow-api</artifactId>
-    <version>3.6.1</version>
+    <version>3.7.0</version>
     <name>workflow-api</name>
     <description>Service exposing APIs for Run and Task operations</description>
   
@@ -37,6 +37,7 @@
         <reactor-rabbitmq-streams.version>0.0.8</reactor-rabbitmq-streams.version>
         <springfox.version>3.0.0</springfox.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
+        <testcontainers.version>1.16.0</testcontainers.version>
         <jackson-databind.version>2.11.1</jackson-databind.version>
         <jackson-dataformat-yaml.version>2.3.0</jackson-dataformat-yaml.version>
     </properties>
@@ -69,6 +70,7 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
+        <!-- Dev Tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -80,6 +82,8 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -91,7 +95,26 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.16.0</version>
+            <scope>test</scope>
+        </dependency>
 
+        <!-- Utils -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
