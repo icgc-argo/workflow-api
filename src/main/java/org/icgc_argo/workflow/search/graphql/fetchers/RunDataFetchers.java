@@ -58,6 +58,7 @@ public class RunDataFetchers {
       val filter = ImmutableMap.<String, Object>builder();
       val page = ImmutableMap.<String, Integer>builder();
       val sorts = ImmutableList.<Sort>builder();
+      val ranges = ImmutableList.<Range>builder();
 
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
@@ -69,9 +70,16 @@ public class RunDataFetchers {
                   .map(sort -> convertValue(sort, Sort.class))
                   .collect(toUnmodifiableList()));
         }
+        if (args.get("ranges") != null) {
+          val rawRanges = (List<Object>) args.get("ranges");
+          ranges.addAll(
+                  rawRanges.stream()
+                          .map(sort -> convertValue(sort, Range.class))
+                          .collect(toUnmodifiableList()));
+        }
       }
 
-      return runService.searchRuns(filter.build(), page.build(), sorts.build());
+      return runService.searchRuns(filter.build(), page.build(), sorts.build(), ranges.build());
     };
   }
 

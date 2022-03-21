@@ -1,3 +1,4 @@
+directive @epochDateFormat on FIELD_DEFINITION
 scalar JSON
 scalar Long
 
@@ -7,8 +8,8 @@ type Run @key(fields: "runId") {
     repository: String
     state: String
     parameters: JSON
-    startTime: String
-    completeTime: String
+    startTime: String @epochDateFormat
+    completeTime: String @epochDateFormat
     success: Boolean
     exitStatus: Int
     errorReport: String
@@ -50,8 +51,8 @@ type Task {
     container: String
     attempt: Int
     submitTime: String
-    startTime: String
-    completeTime: String
+    startTime: String @epochDateFormat
+    completeTime: String @epochDateFormat
     exit: Int
     script: String
     workdir: String
@@ -173,8 +174,24 @@ type Mutation {
      cancelRun(runId: ID!): RunsResponse
 }
 
+enum RangeFields {
+    startTime,
+    completeTime
+}
+
+input Boundary {
+    value: Long!
+    inclusive: Boolean!
+}
+
+input Range {
+    from: Boundary
+    to: Boundary
+    fieldName: RangeFields!
+}
+
 extend type Query {
-    runs(filter: RunsFilter, page: Page, sorts: [RunSort!]): RunsSearchResult!
+    runs(filter: RunsFilter, page: Page, sorts: [RunSort!], ranges: [Range!]): RunsSearchResult!
     aggregateRuns(filter: RunsFilter): AggregationResult!
     tasks(filter: TasksFilter, page: Page, sorts: [TaskSort!]): TasksSearchResult!
     aggregateTasks(filter: TasksFilter): AggregationResult!

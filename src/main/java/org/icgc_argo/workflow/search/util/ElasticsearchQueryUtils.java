@@ -24,12 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.val;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.icgc_argo.workflow.search.model.graphql.Range;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 
 public class ElasticsearchQueryUtils {
@@ -70,6 +68,25 @@ public class ElasticsearchQueryUtils {
             })
         .collect(toUnmodifiableList());
   }
+
+  public static List<RangeQueryBuilder> rangesToEsRangeQueryBuilders(
+          Map<String, RangeQueryBuilder> RANGE_BUILDER_RESOLVER, List<Range> ranges) {
+    return ranges.stream()
+            .map(
+                    range -> {
+                      val rangeQueryBuilderBuilder = RANGE_BUILDER_RESOLVER.get(range.getFieldName());
+                      if (range.getFrom() != null) {
+                          rangeQueryBuilderBuilder
+                                  .from(range.getFrom().getValue(), range.getFrom().getInclusive());
+                      }
+                      if (range.getTo() != null) {
+                          rangeQueryBuilderBuilder.to(range.getTo().getValue(), range.getTo().getInclusive());
+                      }
+                      return rangeQueryBuilderBuilder;
+                    })
+            .collect(toUnmodifiableList());
+  }
+
 
   private static Function<String, AbstractQueryBuilder<?>> simpleTermQueryBuilderResolver(
       String key) {

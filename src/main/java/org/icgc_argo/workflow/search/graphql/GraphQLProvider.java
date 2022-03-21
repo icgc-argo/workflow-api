@@ -99,6 +99,7 @@ public class GraphQLProvider {
 
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
+        .directive("epochDateFormat", new EpochDateFormatting())
         .scalar(GraphQLLong)
         .scalar(ExtendedScalars.Json)
         .type(newTypeWiring("Mutation").dataFetchers(mutationDataFetcher.get()))

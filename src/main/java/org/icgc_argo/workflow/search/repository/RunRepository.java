@@ -21,8 +21,7 @@ package org.icgc_argo.workflow.search.repository;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.DESC;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -43,6 +42,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.icgc_argo.workflow.search.config.elasticsearch.ElasticsearchProperties;
+import org.icgc_argo.workflow.search.model.graphql.Range;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
@@ -62,6 +62,8 @@ public class RunRepository {
       argumentPathMap();
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
+
+  private static final Map<String, RangeQueryBuilder> RANGE_QUERY_BUILDER_MAP = rangePathMap();
 
   private final ReactiveElasticsearchClient client;
   private final String workflowIndex;
@@ -108,12 +110,18 @@ public class RunRepository {
         .build();
   }
 
+  private static Map<String, RangeQueryBuilder> rangePathMap() {
+    return ImmutableMap.<String, RangeQueryBuilder>builder()
+            .put(START_TIME, new RangeQueryBuilder("startTime"))
+            .build();
+  }
+
   public Mono<SearchResponse> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
-    return getRuns(filter, page, List.of());
+    return getRuns(filter, page, List.of(), List.of());
   }
 
   public Mono<SearchResponse> getRuns(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+          Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts, List<Range> ranges) {
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0)
             ? matchAllQuery()
@@ -128,7 +136,15 @@ public class RunRepository {
       sortBuilders.forEach(searchSourceBuilder::sort);
     }
 
-    searchSourceBuilder.query(query);
+    if (!ranges.isEmpty()) {
+      val boolQuery = QueryBuilders.boolQuery();
+      val rangeQueryBuilders = rangesToEsRangeQueryBuilders(RANGE_QUERY_BUILDER_MAP, ranges);
+      rangeQueryBuilders.forEach(boolQuery::must);
+      boolQuery.must(query);
+      searchSourceBuilder.query(boolQuery);
+    } else {
+      searchSourceBuilder.query(query);
+    }
 
     if (page != null && page.size() != 0) {
       searchSourceBuilder.size(page.get("size"));

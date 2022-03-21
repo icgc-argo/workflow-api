@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflow.search.service.graphql;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
@@ -34,10 +35,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflow.search.model.common.RunId;
 import org.icgc_argo.workflow.search.model.common.RunRequest;
-import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
-import org.icgc_argo.workflow.search.model.graphql.GqlRun;
-import org.icgc_argo.workflow.search.model.graphql.SearchResult;
-import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.rabbitmq.SenderDTO;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.springframework.stereotype.Service;
@@ -70,9 +68,9 @@ public class RunService {
 
   @HasQueryAccess
   public Mono<SearchResult<GqlRun>> searchRuns(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts, List<Range> ranges) {
     return runRepository
-        .getRuns(filter, page, sorts)
+        .getRuns(filter, page, sorts, ranges)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -92,7 +90,7 @@ public class RunService {
   @HasQueryAccess
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     return runRepository
-        .getRuns(filter, Map.of(), List.of())
+        .getRuns(filter, Map.of(), emptyList(), emptyList())
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
