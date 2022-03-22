@@ -34,6 +34,7 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.icgc_argo.workflow.search.graphql.directives.EpochDateFormatting;
 import org.icgc_argo.workflow.search.graphql.fetchers.EntityDataFetchers;
 import org.icgc_argo.workflow.search.graphql.fetchers.MutationDataFetcher;
 import org.icgc_argo.workflow.search.graphql.fetchers.RunDataFetchers;
@@ -99,6 +100,7 @@ public class GraphQLProvider {
 
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
+        .directive("epochDateFormat", new EpochDateFormatting())
         .scalar(GraphQLLong)
         .scalar(ExtendedScalars.Json)
         .type(newTypeWiring("Mutation").dataFetchers(mutationDataFetcher.get()))

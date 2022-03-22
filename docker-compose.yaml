@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: bitnami/rabbitmq:3.8.9
+    environment:
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: pass
+    ports:
+      - 5672:5672
+      - 15672:15672

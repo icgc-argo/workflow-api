@@ -24,12 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.val;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.icgc_argo.workflow.search.model.graphql.DateRange;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 
 public class ElasticsearchQueryUtils {
@@ -67,6 +65,24 @@ public class ElasticsearchQueryUtils {
             sort -> {
               val sortBuilder = SORT_BUILDER_RESOLVER.get(sort.getFieldName());
               return sortBuilder.order(SortOrder.fromString(sort.getOrder()));
+            })
+        .collect(toUnmodifiableList());
+  }
+
+  public static List<RangeQueryBuilder> dateRangesToEsRangeQueryBuilders(
+      Map<String, RangeQueryBuilder> DATE_RANGE_BUILDER_RESOLVER, List<DateRange> dateRanges) {
+    return dateRanges.stream()
+        .map(
+            dateRange -> {
+              val rangeQueryBuilderBuilder =
+                  DATE_RANGE_BUILDER_RESOLVER.get(dateRange.getFieldName());
+              if (dateRange.getFromEpochMilli() != null) {
+                rangeQueryBuilderBuilder.from(dateRange.getFromEpochMilli());
+              }
+              if (dateRange.getToEpochMilli() != null) {
+                rangeQueryBuilderBuilder.to(dateRange.getToEpochMilli());
+              }
+              return rangeQueryBuilderBuilder;
             })
         .collect(toUnmodifiableList());
   }
