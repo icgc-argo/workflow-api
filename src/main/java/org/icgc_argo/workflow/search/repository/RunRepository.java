@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflow.search.repository;
 
+import static java.util.Collections.emptyMap;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.DESC;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
@@ -42,7 +43,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.icgc_argo.workflow.search.config.elasticsearch.ElasticsearchProperties;
-import org.icgc_argo.workflow.search.model.graphql.Range;
+import org.icgc_argo.workflow.search.model.graphql.DateRange;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
@@ -63,7 +64,7 @@ public class RunRepository {
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
 
-  private static final Map<String, RangeQueryBuilder> RANGE_QUERY_BUILDER_MAP = rangePathMap();
+  private static final Map<String, RangeQueryBuilder> DATE_RANGE_QUERY_BUILDER_MAP = rangePathMap();
 
   private final ReactiveElasticsearchClient client;
   private final String workflowIndex;
@@ -76,44 +77,14 @@ public class RunRepository {
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
   }
 
-  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
-    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
-        .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
-        .put(SESSION_ID, value -> new TermQueryBuilder("sessionId", value))
-        .put(STATE, value -> new TermQueryBuilder("state", value))
-        .put(
-            ANALYSIS_ID,
-            value -> {
-              val q =
-                  new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new));
-              q.minimumShouldMatch("100%");
-              return q;
-            })
-        .put(REPOSITORY, RunRepository::repositoryQueryFunc)
-        .build();
-  }
-
   public static MatchQueryBuilder repositoryQueryFunc(String value) {
     val q = new MatchQueryBuilder("repository", value);
     q.operator(Operator.AND);
     return q;
   }
 
-  private static Map<String, FieldSortBuilder> sortPathMap() {
-    return ImmutableMap.<String, FieldSortBuilder>builder()
-        .put(RUN_ID, SortBuilders.fieldSort("runId"))
-        .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
-        .put(STATE, SortBuilders.fieldSort("state"))
-        .put(START_TIME, SortBuilders.fieldSort("startTime"))
-        .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
-        .put(REPOSITORY, SortBuilders.fieldSort("repository"))
-        .build();
-  }
-
-  private static Map<String, RangeQueryBuilder> rangePathMap() {
-    return ImmutableMap.<String, RangeQueryBuilder>builder()
-            .put(START_TIME, new RangeQueryBuilder("startTime"))
-            .build();
+  public Mono<SearchResponse> getRuns(Map<String, Object> filter) {
+    return getRuns(filter, emptyMap(), List.of(), List.of());
   }
 
   public Mono<SearchResponse> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
@@ -121,7 +92,10 @@ public class RunRepository {
   }
 
   public Mono<SearchResponse> getRuns(
-          Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts, List<Range> ranges) {
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> dateRanges) {
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0)
             ? matchAllQuery()
@@ -129,26 +103,26 @@ public class RunRepository {
 
     val searchSourceBuilder = new SearchSourceBuilder();
 
-    if (sorts.isEmpty()) {
+    if (sorts == null || sorts.isEmpty()) {
       searchSourceBuilder.sort(SORT_BUILDER_RESOLVER.get(START_TIME).order(DESC));
     } else {
-      val sortBuilders = sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts);
-      sortBuilders.forEach(searchSourceBuilder::sort);
-    }
-
-    if (!ranges.isEmpty()) {
-      val boolQuery = QueryBuilders.boolQuery();
-      val rangeQueryBuilders = rangesToEsRangeQueryBuilders(RANGE_QUERY_BUILDER_MAP, ranges);
-      rangeQueryBuilders.forEach(boolQuery::must);
-      boolQuery.must(query);
-      searchSourceBuilder.query(boolQuery);
-    } else {
-      searchSourceBuilder.query(query);
+      sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts).forEach(searchSourceBuilder::sort);
     }
 
     if (page != null && page.size() != 0) {
       searchSourceBuilder.size(page.get("size"));
       searchSourceBuilder.from(page.get("from"));
+    }
+
+    if (dateRanges == null || dateRanges.isEmpty()) {
+      searchSourceBuilder.query(query);
+    } else {
+      // date ranges and the filter query are wrapped into one bool query
+      val boolQuery = QueryBuilders.boolQuery();
+      boolQuery.must(query);
+      dateRangesToEsRangeQueryBuilders(DATE_RANGE_QUERY_BUILDER_MAP, dateRanges)
+          .forEach(boolQuery::must);
+      searchSourceBuilder.query(boolQuery);
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
@@ -193,5 +167,40 @@ public class RunRepository {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
     return client.searchForResponse(searchRequest);
+  }
+
+  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
+    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
+        .put(RUN_ID, value -> new TermQueryBuilder("runId", value))
+        .put(SESSION_ID, value -> new TermQueryBuilder("sessionId", value))
+        .put(STATE, value -> new TermQueryBuilder("state", value))
+        .put(
+            ANALYSIS_ID,
+            value -> {
+              val q =
+                  new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new));
+              q.minimumShouldMatch("100%");
+              return q;
+            })
+        .put(REPOSITORY, RunRepository::repositoryQueryFunc)
+        .build();
+  }
+
+  private static Map<String, FieldSortBuilder> sortPathMap() {
+    return ImmutableMap.<String, FieldSortBuilder>builder()
+        .put(RUN_ID, SortBuilders.fieldSort("runId"))
+        .put(SESSION_ID, SortBuilders.fieldSort("sessionId"))
+        .put(STATE, SortBuilders.fieldSort("state"))
+        .put(START_TIME, SortBuilders.fieldSort("startTime"))
+        .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
+        .put(REPOSITORY, SortBuilders.fieldSort("repository"))
+        .build();
+  }
+
+  private static Map<String, RangeQueryBuilder> rangePathMap() {
+    return ImmutableMap.<String, RangeQueryBuilder>builder()
+        .put(START_TIME, new RangeQueryBuilder(START_TIME))
+        .put(COMPLETE_TIME, new RangeQueryBuilder(COMPLETE_TIME))
+        .build();
   }
 }

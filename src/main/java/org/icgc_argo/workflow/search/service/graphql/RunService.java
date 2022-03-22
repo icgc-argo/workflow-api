@@ -18,7 +18,6 @@
 
 package org.icgc_argo.workflow.search.service.graphql;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
@@ -68,7 +67,10 @@ public class RunService {
 
   @HasQueryAccess
   public Mono<SearchResult<GqlRun>> searchRuns(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts, List<Range> ranges) {
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> ranges) {
     return runRepository
         .getRuns(filter, page, sorts, ranges)
         .map(SearchResponse::getHits)
@@ -90,7 +92,7 @@ public class RunService {
   @HasQueryAccess
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     return runRepository
-        .getRuns(filter, Map.of(), emptyList(), emptyList())
+        .getRuns(filter)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {

@@ -18,19 +18,11 @@
 
 package org.icgc_argo.workflow.search.model.graphql;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-public class Range {
-    Boundary from;
-    Boundary to;
-    String fieldName;
-
-    @Data
-    @NoArgsConstructor
-    public static class Boundary {
-        @NonNull Object value;
-        @NonNull Boolean inclusive;
-    }
+public class DateRange {
+  private Long fromEpochMilli;
+  private Long toEpochMilli;
+  private String fieldName;
 }

@@ -174,25 +174,20 @@ type Mutation {
      cancelRun(runId: ID!): RunsResponse
 }
 
-enum RangeFields {
+enum DateFields {
     startTime,
     completeTime
 }
 
-input Boundary {
-    value: Long!
-    inclusive: Boolean!
-}
-
-input Range {
-    from: Boundary
-    to: Boundary
-    fieldName: RangeFields!
+input DateRange {
+    fromEpochMilli: Long
+    toEpochMilli: Long
+    fieldName: DateFields!
 }
 
 extend type Query {
-    runs(filter: RunsFilter, page: Page, sorts: [RunSort!], ranges: [Range!]): RunsSearchResult!
+    runs(filter: RunsFilter, page: Page, sorts: [RunSort!], dateRanges: [DateRange!]): RunsSearchResult!
     aggregateRuns(filter: RunsFilter): AggregationResult!
-    tasks(filter: TasksFilter, page: Page, sorts: [TaskSort!]): TasksSearchResult!
+    tasks(filter: TasksFilter, page: Page, sorts: [TaskSort!], dateRanges: [DateRange!]): TasksSearchResult!
     aggregateTasks(filter: TasksFilter): AggregationResult!
 }

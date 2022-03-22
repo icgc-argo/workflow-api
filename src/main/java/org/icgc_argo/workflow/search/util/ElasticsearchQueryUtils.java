@@ -27,7 +27,7 @@ import lombok.val;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.icgc_argo.workflow.search.model.graphql.Range;
+import org.icgc_argo.workflow.search.model.graphql.DateRange;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 
 public class ElasticsearchQueryUtils {
@@ -69,24 +69,23 @@ public class ElasticsearchQueryUtils {
         .collect(toUnmodifiableList());
   }
 
-  public static List<RangeQueryBuilder> rangesToEsRangeQueryBuilders(
-          Map<String, RangeQueryBuilder> RANGE_BUILDER_RESOLVER, List<Range> ranges) {
-    return ranges.stream()
-            .map(
-                    range -> {
-                      val rangeQueryBuilderBuilder = RANGE_BUILDER_RESOLVER.get(range.getFieldName());
-                      if (range.getFrom() != null) {
-                          rangeQueryBuilderBuilder
-                                  .from(range.getFrom().getValue(), range.getFrom().getInclusive());
-                      }
-                      if (range.getTo() != null) {
-                          rangeQueryBuilderBuilder.to(range.getTo().getValue(), range.getTo().getInclusive());
-                      }
-                      return rangeQueryBuilderBuilder;
-                    })
-            .collect(toUnmodifiableList());
+  public static List<RangeQueryBuilder> dateRangesToEsRangeQueryBuilders(
+      Map<String, RangeQueryBuilder> DATE_RANGE_BUILDER_RESOLVER, List<DateRange> dateRanges) {
+    return dateRanges.stream()
+        .map(
+            dateRange -> {
+              val rangeQueryBuilderBuilder =
+                  DATE_RANGE_BUILDER_RESOLVER.get(dateRange.getFieldName());
+              if (dateRange.getFromEpochMilli() != null) {
+                rangeQueryBuilderBuilder.from(dateRange.getFromEpochMilli());
+              }
+              if (dateRange.getToEpochMilli() != null) {
+                rangeQueryBuilderBuilder.to(dateRange.getToEpochMilli());
+              }
+              return rangeQueryBuilderBuilder;
+            })
+        .collect(toUnmodifiableList());
   }
-
 
   private static Function<String, AbstractQueryBuilder<?>> simpleTermQueryBuilderResolver(
       String key) {

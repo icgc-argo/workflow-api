@@ -18,11 +18,12 @@
 
 package org.icgc_argo.workflow.search.repository;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.DESC;
 import static org.icgc_argo.workflow.search.model.SearchFields.*;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.queryFromArgs;
-import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.sortsToEsSortBuilders;
+import static org.icgc_argo.workflow.search.util.ElasticsearchQueryUtils.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -35,11 +36,14 @@ import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.icgc_argo.workflow.search.config.elasticsearch.ElasticsearchProperties;
+import org.icgc_argo.workflow.search.model.graphql.DateRange;
 import org.icgc_argo.workflow.search.model.graphql.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
@@ -55,6 +59,8 @@ public class TaskRepository {
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
 
+  private static final Map<String, RangeQueryBuilder> DATE_RANGE_QUERY_BUILDER_MAP = rangePathMap();
+
   private final ReactiveElasticsearchClient client;
   private final String workflowIndex;
 
@@ -66,12 +72,19 @@ public class TaskRepository {
     this.workflowIndex = elasticsearchProperties.getTaskIndex();
   }
 
+  public Mono<SearchResponse> getTasks(Map<String, Object> filter) {
+    return getTasks(filter, emptyMap(), emptyList(), emptyList());
+  }
+
   public Mono<SearchResponse> getTasks(Map<String, Object> filter, Map<String, Integer> page) {
-    return getTasks(filter, page, List.of());
+    return getTasks(filter, page, emptyList(), emptyList());
   }
 
   public Mono<SearchResponse> getTasks(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> dateRanges) {
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0)
             ? matchAllQuery()
@@ -79,7 +92,7 @@ public class TaskRepository {
 
     val searchSourceBuilder = new SearchSourceBuilder();
 
-    if (sorts.isEmpty()) {
+    if (sorts == null || sorts.isEmpty()) {
       searchSourceBuilder.sort(SORT_BUILDER_RESOLVER.get(START_TIME).order(DESC));
     } else {
       val sortBuilders = sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts);
@@ -91,6 +104,17 @@ public class TaskRepository {
     if (page != null && page.size() != 0) {
       searchSourceBuilder.size(page.get("size"));
       searchSourceBuilder.from(page.get("from"));
+    }
+
+    if (dateRanges == null || dateRanges.isEmpty()) {
+      searchSourceBuilder.query(query);
+    } else {
+      // date ranges and the filter query are wrapped into one bool query
+      val boolQuery = QueryBuilders.boolQuery();
+      boolQuery.must(query);
+      dateRangesToEsRangeQueryBuilders(DATE_RANGE_QUERY_BUILDER_MAP, dateRanges)
+          .forEach(boolQuery::must);
+      searchSourceBuilder.query(boolQuery);
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
@@ -127,6 +151,13 @@ public class TaskRepository {
         .put(COMPLETE_TIME, SortBuilders.fieldSort("completeTime"))
         .put(CPUS, SortBuilders.fieldSort("cpus"))
         .put(MEMORY, SortBuilders.fieldSort("memory"))
+        .build();
+  }
+
+  private static Map<String, RangeQueryBuilder> rangePathMap() {
+    return ImmutableMap.<String, RangeQueryBuilder>builder()
+        .put(START_TIME, new RangeQueryBuilder(START_TIME))
+        .put(COMPLETE_TIME, new RangeQueryBuilder(COMPLETE_TIME))
         .build();
   }
 }

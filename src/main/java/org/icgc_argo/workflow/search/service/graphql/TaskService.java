@@ -29,10 +29,7 @@ import java.util.Map;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.icgc_argo.workflow.search.model.graphql.AggregationResult;
-import org.icgc_argo.workflow.search.model.graphql.GqlTask;
-import org.icgc_argo.workflow.search.model.graphql.SearchResult;
-import org.icgc_argo.workflow.search.model.graphql.Sort;
+import org.icgc_argo.workflow.search.model.graphql.*;
 import org.icgc_argo.workflow.search.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -48,9 +45,12 @@ public class TaskService {
   }
 
   public Mono<SearchResult<GqlTask>> searchTasks(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> dateRanges) {
     return taskRepository
-        .getTasks(filter, page, sorts)
+        .getTasks(filter, page, sorts, dateRanges)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -69,7 +69,7 @@ public class TaskService {
 
   public Mono<AggregationResult> aggregateTasks(Map<String, Object> filter) {
     return taskRepository
-        .getTasks(filter, Map.of(), List.of())
+        .getTasks(filter)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {

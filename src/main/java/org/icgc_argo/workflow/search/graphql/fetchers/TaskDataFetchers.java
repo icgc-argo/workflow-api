@@ -53,6 +53,7 @@ public class TaskDataFetchers {
       val filter = ImmutableMap.<String, Object>builder();
       val page = ImmutableMap.<String, Integer>builder();
       val sorts = ImmutableList.<Sort>builder();
+      val ranges = ImmutableList.<DateRange>builder();
 
       if (args != null) {
         if (args.get("filter") != null) filter.putAll((Map<String, Object>) args.get("filter"));
@@ -64,9 +65,15 @@ public class TaskDataFetchers {
                   .map(sort -> convertValue(sort, Sort.class))
                   .collect(toUnmodifiableList()));
         }
+        if (args.get("dateRanges") != null) {
+          val rawDateRanges = (List<Object>) args.get("dateRanges");
+          ranges.addAll(
+              rawDateRanges.stream()
+                  .map(sort -> convertValue(sort, DateRange.class))
+                  .collect(toUnmodifiableList()));
+        }
       }
-      // Need to cast to get appropriate jackson annotation (camelCase property naming)
-      return taskService.searchTasks(filter.build(), page.build(), sorts.build());
+      return taskService.searchTasks(filter.build(), page.build(), sorts.build(), ranges.build());
     };
   }
 
