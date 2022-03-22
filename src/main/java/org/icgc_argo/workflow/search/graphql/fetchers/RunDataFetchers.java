@@ -74,7 +74,7 @@ public class RunDataFetchers {
           val rawDateRanges = (List<Object>) args.get("dateRanges");
           ranges.addAll(
               rawDateRanges.stream()
-                  .map(sort -> convertValue(sort, DateRange.class))
+                  .map(range -> convertValue(range, DateRange.class))
                   .collect(toUnmodifiableList()));
         }
       }

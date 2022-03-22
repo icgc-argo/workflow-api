@@ -28,8 +28,18 @@ import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * This directive is Modified version of the dateFormat from graphql-java:
+ * https://www.graphql-java.com/documentation/sdl-directives#another-example---date-formatting.
+ *
+ * It is used to add format functionalities for epoch time fields.
+ *
+ */
+@Slf4j
 public class EpochDateFormatting implements SchemaDirectiveWiring {
   @Override
   public GraphQLFieldDefinition onField(
@@ -46,10 +56,15 @@ public class EpochDateFormatting implements SchemaDirectiveWiring {
               if (isEmpty(format) || isEmpty(value)) {
                 return value;
               }
-              val dateTimeFormatter = buildFormatter(format.toString());
-              val epochTime = Long.parseLong(value.toString());
-              val date = new Date(epochTime);
-              return dateTimeFormatter.format(date);
+              try {
+                val dateTimeFormatter = buildFormatter(format.toString());
+                val epochTime = Long.parseLong(value.toString());
+                val date = new Date(epochTime);
+                return dateTimeFormatter.format(date);
+              } catch (Exception e) {
+                log.warn(e.getLocalizedMessage());
+                return value;
+              }
             }));
 
     val coordinates = FieldCoordinates.coordinates(parentType, field);
@@ -62,17 +77,14 @@ public class EpochDateFormatting implements SchemaDirectiveWiring {
                     .name("format")
                     .description(
                         "See Java SimpleDateFormat on format patterns: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
-                    .type(Scalars.GraphQLString)
-                //                        .defaultValue("dd-MM-YYYY")
-                ));
+                    .type(Scalars.GraphQLString)));
   }
 
   private static Boolean isEmpty(Object obj) {
     return obj == null || obj.toString().isEmpty();
   }
 
-  private static SimpleDateFormat buildFormatter(String format) {
-    String dtFormat = format != null ? format : "dd-MM-YYYY";
-    return new SimpleDateFormat(dtFormat);
+  private static SimpleDateFormat buildFormatter(@NonNull String format) {
+    return new SimpleDateFormat(format);
   }
 }

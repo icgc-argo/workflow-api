@@ -20,6 +20,7 @@ package org.icgc_argo.workflow.search.service.wes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.icgc_argo.workflow.search.model.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflow.search.model.wes.State.fromValue;
@@ -62,7 +63,7 @@ public class WesRunService {
     val from = pageToken == null ? 0 : sizeToUse * pageToken;
     val page = Map.of("from", from, "size", sizeToUse);
     return runService
-        .searchRuns(null, page, emptyList(), emptyList())
+        .searchRuns(emptyMap(), page, emptyList(), emptyList())
         .map(
             searchResult -> {
               val runStatuses =
