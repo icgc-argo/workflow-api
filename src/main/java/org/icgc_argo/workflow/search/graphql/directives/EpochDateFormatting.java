@@ -36,11 +36,14 @@ import lombok.val;
  * This directive is Modified version of the dateFormat from graphql-java:
  * https://www.graphql-java.com/documentation/sdl-directives#another-example---date-formatting.
  *
- * It is used to add format functionalities for epoch time fields.
- *
+ * <p>It is used to add format functionalities for epoch time fields.
  */
 @Slf4j
 public class EpochDateFormatting implements SchemaDirectiveWiring {
+  private static final String ARGUMENT_NAME = "format";
+  private static final String ARGUMENT_DESCRIPTION =
+      "See Java SimpleDateFormat for patterns rules and examples: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html";
+
   @Override
   public GraphQLFieldDefinition onField(
       SchemaDirectiveWiringEnvironment<GraphQLFieldDefinition> environment) {
@@ -52,7 +55,7 @@ public class EpochDateFormatting implements SchemaDirectiveWiring {
         wrapDataFetcher(
             originalFetcher,
             ((env, value) -> {
-              val format = env.getArgument("format");
+              val format = env.getArgument(ARGUMENT_NAME);
               if (isEmpty(format) || isEmpty(value)) {
                 return value;
               }
@@ -74,9 +77,8 @@ public class EpochDateFormatting implements SchemaDirectiveWiring {
         builder ->
             builder.argument(
                 GraphQLArgument.newArgument()
-                    .name("format")
-                    .description(
-                        "See Java SimpleDateFormat on format patterns: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html")
+                    .name(ARGUMENT_NAME)
+                    .description(ARGUMENT_DESCRIPTION)
                     .type(Scalars.GraphQLString)));
   }
 
