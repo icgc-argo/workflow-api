@@ -63,3 +63,9 @@ rabbit:
 api.producer:
   topicExchange: "gatekeeper-in"
   initializeRunReq: false
+
+logging:
+  level:
+    org:
+      icgc:
+        argo: DEBUG
