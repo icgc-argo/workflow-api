@@ -17,6 +17,8 @@ type Run @key(fields: "runId") {
     commandLine: String
     engineParameters: EngineParameters
     tasks(taskId: String, state: String, tag: String): [Task]
+    producedAnalyses(filter: RunsFilter): [Analysis] @fetch(from: "producedAnalyses")
+    inputAnalyses(filter: RunsFilter): [Analysis] @requires(fields: "parameters") @fetch(from: "inputAnalyses")
 }
 
 type EngineParameters {
@@ -75,6 +77,7 @@ input RunsFilter {
     state: String
     repository: String
     analysisId: String
+    studyId: String
 }
 
 input TasksFilter {
@@ -94,6 +97,7 @@ directive @fetch(from : String!) on FIELD_DEFINITION
 
 type Analysis @key(fields: "analysisId") @extends {
     analysisId: ID! @external
+    studyId: String! @external
     inputForRuns(filter: RunsFilter): [Run]
 }
 
