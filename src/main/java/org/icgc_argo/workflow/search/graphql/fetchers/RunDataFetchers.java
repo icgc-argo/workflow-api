@@ -21,6 +21,7 @@ package org.icgc_argo.workflow.search.graphql.fetchers;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflow.search.model.SearchFields.ANALYSIS_ID;
+import static org.icgc_argo.workflow.search.model.SearchFields.STUDY_ID;
 import static org.icgc_argo.workflow.search.util.Converter.asImmutableMap;
 import static org.icgc_argo.workflow.search.util.JacksonUtils.convertValue;
 
@@ -108,17 +109,21 @@ public class RunDataFetchers {
     return environment -> {
       val analysis = (Analysis) environment.getSource();
       val analysisId = analysis.getAnalysisId();
+      val studyId = analysis.getStudyId();
 
       ImmutableMap<String, Object> filter = asImmutableMap(environment.getArgument("filter"));
       val filerAnalysisId = filter.getOrDefault(ANALYSIS_ID, analysisId);
+      val filterStudyId = filter.getOrDefault(STUDY_ID, studyId);
 
       // short circuit here since can't find runs for invalid analysisId
-      if (isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId)) {
+      if ((isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId))
+          && (isNullOrEmpty(studyId) || !analysisId.equals(filterStudyId))) {
         return Mono.empty();
       }
 
       Map<String, Object> mergedFilter = new HashMap<>(filter);
       mergedFilter.put(ANALYSIS_ID, analysisId);
+      mergedFilter.put(STUDY_ID, studyId);
 
       // Need to cast to get appropriate jackson annotation (camelCase property naming)
       return runService.getRuns(mergedFilter, null);
