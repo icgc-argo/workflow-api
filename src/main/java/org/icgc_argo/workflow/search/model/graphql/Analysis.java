@@ -37,6 +37,8 @@ public class Analysis {
 
   private String analysisId;
 
+  private String studyId;
+
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Analysis.class);
