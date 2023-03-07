@@ -59,6 +59,13 @@ public class RunRepository {
           "parameters.analysis_id",
           "parameters.normal_aln_analysis_id",
           "parameters.tumour_aln_analysis_id");
+
+  private static final List<String> STUDY_SEARCH_FIELDS =
+      List.of(
+          "parameters.study_id",
+          "parameters.normal_aln_study_id",
+          "parameters.tumour_aln_study_id");
+
   private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
 
@@ -179,6 +186,13 @@ public class RunRepository {
             value -> {
               val q =
                   new MultiMatchQueryBuilder(value, ANALYSIS_SEARCH_FIELDS.toArray(String[]::new));
+              q.minimumShouldMatch("100%");
+              return q;
+            })
+        .put(
+            STUDY_ID,
+            value -> {
+              val q = new MultiMatchQueryBuilder(value, STUDY_SEARCH_FIELDS.toArray(String[]::new));
               q.minimumShouldMatch("100%");
               return q;
             })
