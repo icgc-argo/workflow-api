@@ -62,9 +62,9 @@ public class EntityDataFetchers {
                   }
                   if (ANALYSIS_ENTITY.equals(values.get("__typename"))) {
                     final Object analysisId = values.get("analysisId");
-                    final Object studyId = values.get("studyId");
-                    if (analysisId instanceof String && studyId instanceof String) {
-                      return Mono.just(new Analysis((String) analysisId, (String) studyId));
+                      final Object studyId = values.get("studyId");
+                    if (analysisId instanceof String || studyId instanceof String) {
+                      return Mono.just(new Analysis((String) analysisId, (String) studyId);
                     }
                   }
                   if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {

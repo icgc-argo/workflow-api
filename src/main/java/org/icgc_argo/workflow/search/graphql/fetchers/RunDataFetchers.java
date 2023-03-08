@@ -117,7 +117,7 @@ public class RunDataFetchers {
 
       // short circuit here since can't find runs for invalid analysisId
       if ((isNullOrEmpty(analysisId) || !analysisId.equals(filerAnalysisId))
-          && (isNullOrEmpty(studyId) || !analysisId.equals(filterStudyId))) {
+          && (isNullOrEmpty(studyId) || !studyId.equals(filterStudyId))) {
         return Mono.empty();
       }
 
