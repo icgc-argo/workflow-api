@@ -29,7 +29,6 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 
 @Data
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Analysis {
@@ -39,8 +38,23 @@ public class Analysis {
 
   private String studyId;
 
+  public Analysis(String analysisId, String studyId) {
+    if (null!=analysisId) {
+      this.analysisId = analysisId;
+    } else {
+      this.analysisId = "";
+    }
+    if (null!=studyId) {
+      this.studyId = studyId;
+    } else {
+      this.studyId = "";
+    }
+  }
+
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Analysis.class);
   }
+
+
 }
