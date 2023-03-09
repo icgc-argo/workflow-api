@@ -40,4 +40,5 @@ public class SearchFields {
   public static final String ANALYSIS_ID = "analysisId";
   public static final String CPUS = "cpus";
   public static final String MEMORY = "memory";
+  public static final String STUDY_ID = "studyId";
 }
