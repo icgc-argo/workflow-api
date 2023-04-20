@@ -29,14 +29,14 @@ import org.icgc_argo.workflow.search.model.wes.RunListResponse;
 import org.icgc_argo.workflow.search.model.wes.RunResponse;
 import org.icgc_argo.workflow.search.model.wes.RunStatus;
 import org.icgc_argo.workflow.search.model.wes.ServiceInfo;
+import org.icgc_argo.workflow.search.rabbitmq.ApiProducerConfig;
 import org.icgc_argo.workflow.search.service.wes.WesRunService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -45,6 +45,12 @@ import reactor.core.publisher.Mono;
 public class RunsApiController implements RunsApi {
 
   private final WesRunService wesRunService;
+
+  @Autowired
+  private RabbitTemplate template;
+
+  @Autowired
+  private ApiProducerConfig apiProducerConfig;
 
   @GetMapping(value = "/runs/{run_id}")
   public Mono<ResponseEntity<RunResponse>> getRunLog(@NonNull String runId) {
@@ -74,6 +80,12 @@ public class RunsApiController implements RunsApi {
   @PostMapping(value = "/runs/{run_id}/cancel")
   public Mono<ResponseEntity<RunId>> cancelRun(@Valid @PathVariable("run_id") String runId) {
     return wesRunService.cancel(runId).map(this::respondOk);
+  }
+
+  @PostMapping(value = "/runs/trigger")
+  @ResponseBody
+  public void trigger() {
+    template.convertAndSend(apiProducerConfig.exchange, apiProducerConfig.routingKey, "Trigger");
   }
 
   private <T> ResponseEntity<T> respondOk(T response) {
