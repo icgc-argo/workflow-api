@@ -50,6 +50,8 @@ public class RunService {
   private final RunRepository runRepository;
   private final Sender<SenderDTO> sender;
 
+  private final Sender<String> triggerSender;
+
   @HasQueryAndMutationAccess
   public Mono<RunId> startRun(RunRequest runRequest) {
     val runId = generateWesRunId();
@@ -57,6 +59,10 @@ public class RunService {
     return Mono.just(SenderDTO.builder().runId(runId).runRequest(runRequest).build())
         .flatMap(sender::send)
         .map(o -> new RunId(runId));
+  }
+
+  public void startTrigger() {
+    triggerSender.send("Trigger");
   }
 
   @HasQueryAndMutationAccess
