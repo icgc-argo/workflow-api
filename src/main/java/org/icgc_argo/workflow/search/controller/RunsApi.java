@@ -253,7 +253,7 @@ public interface RunsApi {
               + "This method publishes a Trigger String message onto the Trigger-queue then read by the scheduler, initiating the fetch\n\n",
       response = String.class,
       tags = {
-        "WorkflowExecutionService",
+        "WES Management",
       })
   @ApiResponses(
       value = {
