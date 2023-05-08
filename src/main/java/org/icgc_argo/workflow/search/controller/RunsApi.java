@@ -243,4 +243,33 @@ public interface RunsApi {
             response = ErrorResponse.class)
       })
   Mono<ResponseEntity<RunId>> cancelRun(@Valid @RequestBody String runId);
+
+  @ApiOperation(
+      value = "Trigger the scheduler to fetch and initialize runs",
+      nickname = "Manual trigger schedule",
+      notes =
+          "This endpoint causes the management scheduler to fetch runs from the management database and set their state to INITIALIZING.\n\n"
+              + "After the state change, the runs are published on the gatekeeper-in-queue.\n\n"
+              + "This method publishes a Trigger String message onto the Trigger-queue then read by the scheduler, initiating the fetch\n\n",
+      response = String.class,
+      tags = {
+        "WorkflowExecutionService",
+      })
+  @ApiResponses(
+      value = {
+        @ApiResponse(code = 200, message = "", response = String.class),
+        @ApiResponse(
+            code = 401,
+            message = "The request is unauthorized.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 403,
+            message = "The requester is not authorized to perform this action.",
+            response = ErrorResponse.class),
+        @ApiResponse(
+            code = 500,
+            message = "An unexpected error occurred.",
+            response = ErrorResponse.class)
+      })
+  String trigger();
 }
