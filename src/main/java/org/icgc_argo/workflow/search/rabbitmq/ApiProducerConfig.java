@@ -53,14 +53,26 @@ public class ApiProducerConfig {
   @Value("${api.producer.initializeRunReq}")
   private Boolean initializeRunReq;
 
+  @Value("${trigger.producer.topicExchange}")
+  public String exchange;
+
+  @Value("${trigger.producer.routingKey}")
+  public String routingKey;
+
   private final RabbitEndpointService rabbit;
+
   private final OnDemandSource<SenderDTO> sink = new OnDemandSource<>("apiSource");
 
+  private final OnDemandSource<String> triggerSink = new OnDemandSource<>("triggerSource");
+
   private Disposable apiProducer;
+
+  private Disposable triggerProducer;
 
   @PostConstruct
   public void init() {
     this.apiProducer = createWfMgmtRunMsgProducer();
+    this.triggerProducer = createTriggerRunMsgProducer();
   }
 
   private Disposable createWfMgmtRunMsgProducer() {
@@ -87,13 +99,23 @@ public class ApiProducerConfig {
             });
   }
 
+  private Disposable createTriggerRunMsgProducer() {
+    return createTriggerProducerStream(rabbit, exchange).send(triggerSink.source()).subscribe();
+  }
+
   @Bean
   public Sender<SenderDTO> sender() {
     return sink;
   }
 
+  @Bean
+  public Sender<String> triggerSender() {
+    return triggerSink;
+  }
+
   public static TransactionalProducerStream<WfMgmtRunMsg> createTransProducerStream(
       RabbitEndpointService rabbit, String topicName) {
+
     return rabbit
         .declareTopology(
             topologyBuilder -> topologyBuilder.declareExchange(topicName).type(ExchangeType.topic))
@@ -104,8 +126,25 @@ public class ApiProducerConfig {
         .then();
   }
 
+  public static TransactionalProducerStream<String> createTriggerProducerStream(
+      RabbitEndpointService rabbit, String topicName) {
+
+    return rabbit
+        .declareTopology(
+            topologyBuilder -> topologyBuilder.declareExchange(topicName).type(ExchangeType.topic))
+        .createTransactionalProducerStream(String.class)
+        .route()
+        .toExchange(topicName)
+        .withRoutingKey(routingTriggerKeySelector())
+        .then();
+  }
+
   private static Function<WfMgmtRunMsg, String> routingKeySelector() {
     return msg -> msg.getState().toString();
+  }
+
+  private static Function<String, String> routingTriggerKeySelector() {
+    return msg -> "trigger-routingKey";
   }
 
   private static WfMgmtRunMsg createWfMgmtRunMsg(

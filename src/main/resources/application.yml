@@ -63,3 +63,13 @@ rabbit:
 api.producer:
   topicExchange: "gatekeeper-in"
   initializeRunReq: false
+
+trigger.producer:
+  topicExchange: "gatekeeper-out"
+  routingKey: "trigger-routingKey"
+
+logging:
+  level:
+    org:
+      icgc:
+        argo: DEBUG

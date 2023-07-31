@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -43,21 +44,30 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RunService {
 
   private final RunRepository runRepository;
   private final Sender<SenderDTO> sender;
 
+  private final Sender<String> triggerSender;
+
   @HasQueryAndMutationAccess
   public Mono<RunId> startRun(RunRequest runRequest) {
     val runId = generateWesRunId();
+    log.debug("starting rung for: {}",runId);
     return Mono.just(SenderDTO.builder().runId(runId).runRequest(runRequest).build())
         .flatMap(sender::send)
         .map(o -> new RunId(runId));
   }
 
+  public void startTrigger() {
+    triggerSender.send("Trigger");
+  }
+
   @HasQueryAndMutationAccess
   public Mono<RunId> cancelRun(String runId) {
+    log.debug("cancel runs");
     return getRunByRunId(runId)
         .map(run -> SenderDTO.builder().runId(runId).cancelRequest(true).build())
         .flatMap(sender::send)
@@ -71,6 +81,7 @@ public class RunService {
       Map<String, Integer> page,
       List<Sort> sorts,
       List<DateRange> ranges) {
+    log.debug("search runs");
     return runRepository
         .getRuns(filter, page, sorts, ranges)
         .map(SearchResponse::getHits)
@@ -91,6 +102,7 @@ public class RunService {
 
   @HasQueryAccess
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
+    log.debug("aggregate runs");
     return runRepository
         .getRuns(filter)
         .map(SearchResponse::getHits)
@@ -108,6 +120,7 @@ public class RunService {
 
   @HasQueryAccess
   public Mono<List<GqlRun>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+    log.debug("get runs");
     return runRepository
         .getRuns(filter, page)
         .map(response -> Arrays.stream(response.getHits().getHits()))
@@ -116,6 +129,7 @@ public class RunService {
 
   @HasQueryAccess
   public Mono<GqlRun> getRunByRunId(String runId) {
+    log.debug("get run by id");
     return runRepository
         .getRuns(Map.of(RUN_ID, runId), null)
         .map(response -> response.getHits().getHits())

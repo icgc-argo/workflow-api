@@ -83,6 +83,13 @@ public class RunRepository {
     return q;
   }
 
+  public static MatchQueryBuilder matchQueryAndFunc(String fieldName, String value) {
+    val q = new MatchQueryBuilder(fieldName, value);
+    q.operator(Operator.AND);
+    return q;
+  }
+
+
   public Mono<SearchResponse> getRuns(Map<String, Object> filter) {
     return getRuns(filter, emptyMap(), List.of(), List.of());
   }
@@ -130,6 +137,7 @@ public class RunRepository {
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
+    log.debug("Search Source Query: "+searchSourceBuilder.query());
     return execute(searchSourceBuilder);
   }
 
@@ -182,7 +190,9 @@ public class RunRepository {
               q.minimumShouldMatch("100%");
               return q;
             })
-        .put(REPOSITORY, RunRepository::repositoryQueryFunc)
+        .put(REPOSITORY, value -> matchQueryAndFunc("repository", value))
+        .put(STUDY_ID, value -> matchQueryAndFunc("parameters.study_id", value))
+
         .build();
   }
 

@@ -75,6 +75,7 @@ input RunsFilter {
     state: String
     repository: String
     analysisId: String
+    studyId: String
 }
 
 input TasksFilter {
