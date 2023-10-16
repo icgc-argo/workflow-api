@@ -35,6 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
@@ -67,13 +69,17 @@ public class RunRepository {
   private static final Map<String, RangeQueryBuilder> DATE_RANGE_QUERY_BUILDER_MAP = rangePathMap();
 
   private final ReactiveElasticsearchClient client;
+  private final RestHighLevelClient restEsClient;
+
   private final String workflowIndex;
 
   @Autowired
   public RunRepository(
       @NonNull ReactiveElasticsearchClient client,
-      @NonNull ElasticsearchProperties elasticsearchProperties) {
+      @NonNull RestHighLevelClient restEsClient,
+    @NonNull ElasticsearchProperties elasticsearchProperties) {
     this.client = client;
+    this.restEsClient = restEsClient;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
   }
 
@@ -141,6 +147,53 @@ public class RunRepository {
     return execute(searchSourceBuilder);
   }
 
+
+  public SearchResponse getGqlRuns(Map<String, Object> filter, Map<String, Integer> page) {
+    return getGqlRuns(filter, page, List.of(), List.of());
+  }
+
+
+  public SearchResponse getGqlRuns(
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> dateRanges) {
+
+    final AbstractQueryBuilder<?> query =
+        (filter == null || filter.size() == 0)
+            ? matchAllQuery()
+            : queryFromArgs(QUERY_RESOLVER, filter);
+
+    val searchSourceBuilder = new SearchSourceBuilder();
+
+    if (sorts == null || sorts.isEmpty()) {
+      searchSourceBuilder.sort(SORT_BUILDER_RESOLVER.get(START_TIME).order(DESC));
+    } else {
+      sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts).forEach(searchSourceBuilder::sort);
+    }
+
+    if (page != null && page.size() != 0) {
+      searchSourceBuilder.size(page.get("size"));
+      searchSourceBuilder.from(page.get("from"));
+    }
+
+    if (dateRanges == null || dateRanges.isEmpty()) {
+      searchSourceBuilder.query(query);
+    } else {
+      // date ranges and the filter query are wrapped into one bool query
+      val boolQuery = QueryBuilders.boolQuery();
+      boolQuery.must(query);
+      dateRangesToEsRangeQueryBuilders(DATE_RANGE_QUERY_BUILDER_MAP, dateRanges)
+          .forEach(boolQuery::must);
+      searchSourceBuilder.query(boolQuery);
+    }
+    searchSourceBuilder.trackTotalHits(true);
+
+    log.debug("Search Source Query: "+searchSourceBuilder.query());
+    return executeQuery(searchSourceBuilder);
+  }
+
+
   /**
    * The system statistics, key is the statistic, value is the count of runs in that state. See the
    * State enum for the possible keys.
@@ -176,6 +229,16 @@ public class RunRepository {
     searchRequest.source(builder);
     return client.searchForResponse(searchRequest);
   }
+
+
+  //Non-reactive ES client search
+  @SneakyThrows
+  private SearchResponse executeQuery(@NonNull SearchSourceBuilder builder) {
+    val searchRequest = new SearchRequest(workflowIndex);
+    searchRequest.source(builder);
+    return restEsClient.search(searchRequest, RequestOptions.DEFAULT);
+  }
+
 
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
     return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
