@@ -9,6 +9,7 @@ import org.icgc_argo.workflow.search.model.graphql.Workflow;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.icgc_argo.workflow.search.service.graphql.EntityFetcherService;
 import org.icgc_argo.workflow.search.service.graphql.RunService;
+import org.icgc_argo.workflow.search.util.JacksonUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -34,10 +35,9 @@ public class WorkflowDataFetcher {
   }
 
   public DataFetcher<List<Workflow>> getDataFetcher() {
-    System.out.println("synchronous EntityDataFetchers --> getDataFetcher");
     return environment ->{
       val args = environment.getArguments();
-      System.out.println("env args: "+args);
+      log.debug("env args: {}",args);
       List<Workflow> workflows = new ArrayList();
 
       List argMapList = (List)args.get("representations");
@@ -48,8 +48,24 @@ public class WorkflowDataFetcher {
           final Object runId = argMap.get("runId");
           if (runId instanceof String) {
             GqlRun gqlRun = entityFetcherService.getGqlRunByRunId((String)runId);
-            workflows.add(new Workflow(runId.toString(), Run.builder().runId(gqlRun.getRunId()).state(gqlRun.getState()).repository(gqlRun.getRepository()).build()) );
-            //workflows.add(new Workflow(runId.toString(), Run.builder().runId(runId.toString()).state("COMPLETE").repository("").build()) );
+            //Run run = JacksonUtils.convertValue(gqlRun,Run.class);
+            Run run = Run.builder()
+                  .runId(gqlRun.getRunId())
+                  .sessionId(gqlRun.getSessionId())
+                  .repository(gqlRun.getRepository())
+                  .state(gqlRun.getState())
+                  .parameters(gqlRun.getParameters())
+                  .startTime(gqlRun.getStartTime())
+                  .completeTime(gqlRun.getCompleteTime())
+                  .success(gqlRun.getSuccess())
+                  .exitStatus(gqlRun.getExitStatus())
+                  .duration(gqlRun.getDuration())
+                  .commandLine(gqlRun.getCommandLine())
+                  .engineParameters(gqlRun.getEngineParameters())
+                  .build();
+
+            workflows.add(new Workflow(runId.toString(), run));
+            //workflows.add(new Workflow(runId.toString(), Run.builder().runId(gqlRun.getRunId()).state(gqlRun.getState()).repository(gqlRun.getRepository()).build()) );
           }
         }
       }
@@ -57,24 +73,6 @@ public class WorkflowDataFetcher {
     };
 
   }
-
-
-  /*private GqlRun getGqlRunByRunId(String runId){
-   *//*SearchHit hit = runRepository
-        .getGqlRuns(Map.of(RUN_ID, runId), null).getHits().getHits()[0];*//*
-    SearchResponse searchResponse = runRepository
-        .getGqlRuns(Map.of(RUN_ID, runId), null);
-    System.out.println("search Hits length "+searchResponse.getHits().getHits().length);
-    SearchHit[] sh = searchResponse.getHits().getHits();
-
-    return hitToRun(sh[0]);
-    //return GqlRun.builder().runId(runId).repository("").state("COMPLETE").build();
-  }
-
-  private static GqlRun hitToRun(SearchHit hit) {
-    val sourceMap = hit.getSourceAsMap();
-    return GqlRun.parse(sourceMap);
-  }*/
 
 }
 

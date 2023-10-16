@@ -96,68 +96,45 @@ public class RunRepository {
   }
 
 
-  public Mono<SearchResponse> getRuns(Map<String, Object> filter) {
-    return getRuns(filter, emptyMap(), List.of(), List.of());
+  public Mono<SearchResponse> getRunsAsync(Map<String, Object> filter) {
+    return getRunsAsync(filter, emptyMap(), List.of(), List.of());
   }
 
-  public Mono<SearchResponse> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+  public Mono<SearchResponse> getRunsAsync(Map<String, Object> filter, Map<String, Integer> page) {
+    return getRunsAsync(filter, page, List.of(), List.of());
+  }
+
+  public Mono<SearchResponse> getRunsAsync(
+      Map<String, Object> filter,
+      Map<String, Integer> page,
+      List<Sort> sorts,
+      List<DateRange> dateRanges) {
+
+    return executeAsync(getSearchSourceBuilder(filter,page,sorts, dateRanges));
+  }
+
+
+  public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return getRuns(filter, page, List.of(), List.of());
   }
 
-  public Mono<SearchResponse> getRuns(
+
+  public SearchResponse getRuns(
       Map<String, Object> filter,
       Map<String, Integer> page,
       List<Sort> sorts,
       List<DateRange> dateRanges) {
-    final AbstractQueryBuilder<?> query =
-        (filter == null || filter.size() == 0)
-            ? matchAllQuery()
-            : queryFromArgs(QUERY_RESOLVER, filter);
 
-    val searchSourceBuilder = new SearchSourceBuilder();
-
-    if (sorts == null || sorts.isEmpty()) {
-      searchSourceBuilder.sort(SORT_BUILDER_RESOLVER.get(START_TIME).order(DESC));
-    } else {
-      sortsToEsSortBuilders(SORT_BUILDER_RESOLVER, sorts).forEach(searchSourceBuilder::sort);
-    }
-
-    if (page != null && page.size() != 0) {
-      searchSourceBuilder.size(page.get("size"));
-      searchSourceBuilder.from(page.get("from"));
-    }
-
-    if (dateRanges == null || dateRanges.isEmpty()) {
-      searchSourceBuilder.query(query);
-    } else {
-      // date ranges and the filter query are wrapped into one bool query
-      val boolQuery = QueryBuilders.boolQuery();
-      boolQuery.must(query);
-      dateRangesToEsRangeQueryBuilders(DATE_RANGE_QUERY_BUILDER_MAP, dateRanges)
-          .forEach(boolQuery::must);
-      searchSourceBuilder.query(boolQuery);
-    }
-
-    // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
-    // more info:
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
-    searchSourceBuilder.trackTotalHits(true);
-
-    log.debug("Search Source Query: "+searchSourceBuilder.query());
-    return execute(searchSourceBuilder);
+    return executeQuery(getSearchSourceBuilder(filter,page,sorts, dateRanges));
   }
 
 
-  public SearchResponse getGqlRuns(Map<String, Object> filter, Map<String, Integer> page) {
-    return getGqlRuns(filter, page, List.of(), List.of());
-  }
 
-
-  public SearchResponse getGqlRuns(
+  private SearchSourceBuilder getSearchSourceBuilder(
       Map<String, Object> filter,
       Map<String, Integer> page,
       List<Sort> sorts,
-      List<DateRange> dateRanges) {
+      List<DateRange> dateRanges){
 
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0)
@@ -190,9 +167,8 @@ public class RunRepository {
     searchSourceBuilder.trackTotalHits(true);
 
     log.debug("Search Source Query: "+searchSourceBuilder.query());
-    return executeQuery(searchSourceBuilder);
+    return searchSourceBuilder;
   }
-
 
   /**
    * The system statistics, key is the statistic, value is the count of runs in that state. See the
@@ -224,7 +200,7 @@ public class RunRepository {
   }
 
   @SneakyThrows
-  private Mono<SearchResponse> execute(@NonNull SearchSourceBuilder builder) {
+  private Mono<SearchResponse> executeAsync(@NonNull SearchSourceBuilder builder) {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
     return client.searchForResponse(searchRequest);

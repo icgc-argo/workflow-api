@@ -9,6 +9,7 @@ import org.icgc_argo.workflow.search.model.graphql.GqlRun;
 import org.icgc_argo.workflow.search.repository.RunRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.icgc_argo.workflow.search.model.SearchFields.RUN_ID;
@@ -20,16 +21,11 @@ public class EntityFetcherService {
   private final RunRepository runRepository;
 
   public GqlRun getGqlRunByRunId(String runId){
-    /*SearchHit hit = runRepository
-
-        .getGqlRuns(Map.of(RUN_ID, runId), null).getHits().getHits()[0];*/
     SearchResponse searchResponse = runRepository
-        .getGqlRuns(Map.of(RUN_ID, runId), null);
-    System.out.println("search Hits length "+searchResponse.getHits().getHits().length);
+        .getRuns(Map.of(RUN_ID, runId), null);
+    log.debug("search Hits length {}",searchResponse.getHits().getHits().length);
     SearchHit[] sh = searchResponse.getHits().getHits();
-
-    return hitToRun(sh[0]);
-    //return GqlRun.builder().runId(runId).repository("").state("COMPLETE").build();
+    return hitToRun(Arrays.stream(sh).findFirst().get());
   }
 
   private static GqlRun hitToRun(SearchHit hit) {
