@@ -48,7 +48,6 @@ public class WorkflowDataFetcher {
           final Object runId = argMap.get("runId");
           if (runId instanceof String) {
             GqlRun gqlRun = entityFetcherService.getGqlRunByRunId((String)runId);
-            //Run run = JacksonUtils.convertValue(gqlRun,Run.class);
             Run run = Run.builder()
                   .runId(gqlRun.getRunId())
                   .sessionId(gqlRun.getSessionId())
@@ -65,7 +64,6 @@ public class WorkflowDataFetcher {
                   .build();
 
             workflows.add(new Workflow(runId.toString(), run));
-            //workflows.add(new Workflow(runId.toString(), Run.builder().runId(gqlRun.getRunId()).state(gqlRun.getState()).repository(gqlRun.getRepository()).build()) );
           }
         }
       }
