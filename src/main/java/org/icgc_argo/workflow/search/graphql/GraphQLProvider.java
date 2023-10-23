@@ -55,7 +55,7 @@ public class GraphQLProvider {
   private final TaskDataFetchers taskDataFetchers;
   private final EntityDataFetchers entityDataFetchers;
   private final MutationDataFetcher mutationDataFetcher;
-  private final WorkflowDataFetcher workflowDataFetcher;
+  private final WorkflowEntityDataFetcher workflowEntityDataFetcher;
 
 
   @PostConstruct
@@ -74,7 +74,7 @@ public class GraphQLProvider {
   private GraphQLSchema buildSchema(String sdl) {
     return Federation.transform(sdl, buildWiring())
         .fetchEntities(entityDataFetchers.getDataFetcher())
-        .fetchEntities(workflowDataFetcher.getDataFetcher())
+        .fetchEntities(workflowEntityDataFetcher.getDataFetcher())
         .resolveEntityType(
             typeResolutionEnvironment -> {
               final Object src = typeResolutionEnvironment.getObject();
