@@ -156,4 +156,8 @@ public class WesRunService {
   private List<TaskLog> buildTaskLogsWithTasks(@NonNull List<Task> taskList) {
     return taskList.stream().map(Converter::taskDocumentToLog).collect(toList());
   }
+
+  public void runTrigger() {
+    runService.startTrigger();
+  }
 }

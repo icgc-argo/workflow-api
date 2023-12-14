@@ -33,10 +33,7 @@ import org.icgc_argo.workflow.search.service.wes.WesRunService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -74,6 +71,13 @@ public class RunsApiController implements RunsApi {
   @PostMapping(value = "/runs/{run_id}/cancel")
   public Mono<ResponseEntity<RunId>> cancelRun(@Valid @PathVariable("run_id") String runId) {
     return wesRunService.cancel(runId).map(this::respondOk);
+  }
+
+  @PostMapping(value = "/runs/trigger")
+  @ResponseBody
+  public String trigger() {
+    wesRunService.runTrigger();
+    return "Runs Triggered Successfully!";
   }
 
   private <T> ResponseEntity<T> respondOk(T response) {

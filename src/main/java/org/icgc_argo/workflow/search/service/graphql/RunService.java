@@ -50,6 +50,8 @@ public class RunService {
   private final RunRepository runRepository;
   private final Sender<SenderDTO> sender;
 
+  private final Sender<String> triggerSender;
+
   @HasQueryAndMutationAccess
   public Mono<RunId> startRun(RunRequest runRequest) {
     val runId = generateWesRunId();
@@ -57,6 +59,10 @@ public class RunService {
     return Mono.just(SenderDTO.builder().runId(runId).runRequest(runRequest).build())
         .flatMap(sender::send)
         .map(o -> new RunId(runId));
+  }
+
+  public void startTrigger() {
+    triggerSender.send("Trigger");
   }
 
   @HasQueryAndMutationAccess
@@ -77,7 +83,7 @@ public class RunService {
       List<DateRange> ranges) {
     log.debug("search runs");
     return runRepository
-        .getRuns(filter, page, sorts, ranges)
+        .getRunsAsync(filter, page, sorts, ranges)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -98,7 +104,7 @@ public class RunService {
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     log.debug("aggregate runs");
     return runRepository
-        .getRuns(filter)
+        .getRunsAsync(filter)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -116,7 +122,7 @@ public class RunService {
   public Mono<List<GqlRun>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     log.debug("get runs");
     return runRepository
-        .getRuns(filter, page)
+        .getRunsAsync(filter, page)
         .map(response -> Arrays.stream(response.getHits().getHits()))
         .map(hitStream -> hitStream.map(RunService::hitToRun).collect(toUnmodifiableList()));
   }
@@ -125,7 +131,7 @@ public class RunService {
   public Mono<GqlRun> getRunByRunId(String runId) {
     log.debug("get run by id");
     return runRepository
-        .getRuns(Map.of(RUN_ID, runId), null)
+        .getRunsAsync(Map.of(RUN_ID, runId), null)
         .map(response -> response.getHits().getHits())
         .flatMapMany(Flux::fromArray)
         .next()

@@ -34,6 +34,7 @@ public class SearchFields {
   public static final String EXIT_STATUS = "exitStatus";
   public static final String PARAMETERS = "parameters";
   public static final String REPOSITORY = "repository";
+  public static final String STUDY_ID = "studyId";
   public static final String ERROR_REPORT = "errorReport";
   public static final String TAG = "tag";
   public static final String WORK_DIR = "workDir";

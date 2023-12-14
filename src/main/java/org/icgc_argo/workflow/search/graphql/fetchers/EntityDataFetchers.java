@@ -66,14 +66,6 @@ public class EntityDataFetchers {
                       return Mono.just(new Analysis((String) analysisId));
                     }
                   }
-                  if (WORKFLOW_ENTITY.equals(values.get("__typename"))) {
-                    final Object runId = values.get("runId");
-                    if (runId instanceof String) {
-                      return runService
-                          .getRunByRunId((String) runId)
-                          .map(run -> new Workflow(run.getRunId(), Run.fromGqlRun(run)));
-                    }
-                  }
                   return Mono.empty();
                 })
             .collectList();
