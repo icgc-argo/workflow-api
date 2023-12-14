@@ -35,8 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
@@ -69,17 +67,13 @@ public class RunRepository {
   private static final Map<String, RangeQueryBuilder> DATE_RANGE_QUERY_BUILDER_MAP = rangePathMap();
 
   private final ReactiveElasticsearchClient client;
-  private final RestHighLevelClient restEsClient;
-
   private final String workflowIndex;
 
   @Autowired
   public RunRepository(
       @NonNull ReactiveElasticsearchClient client,
-      @NonNull RestHighLevelClient restEsClient,
-    @NonNull ElasticsearchProperties elasticsearchProperties) {
+      @NonNull ElasticsearchProperties elasticsearchProperties) {
     this.client = client;
-    this.restEsClient = restEsClient;
     this.workflowIndex = elasticsearchProperties.getWorkflowIndex();
   }
 
@@ -96,46 +90,19 @@ public class RunRepository {
   }
 
 
-  public Mono<SearchResponse> getRunsAsync(Map<String, Object> filter) {
-    return getRunsAsync(filter, emptyMap(), List.of(), List.of());
+  public Mono<SearchResponse> getRuns(Map<String, Object> filter) {
+    return getRuns(filter, emptyMap(), List.of(), List.of());
   }
 
-  public Mono<SearchResponse> getRunsAsync(Map<String, Object> filter, Map<String, Integer> page) {
-    return getRunsAsync(filter, page, List.of(), List.of());
-  }
-
-  public Mono<SearchResponse> getRunsAsync(
-      Map<String, Object> filter,
-      Map<String, Integer> page,
-      List<Sort> sorts,
-      List<DateRange> dateRanges) {
-
-    return executeAsync(getSearchSourceBuilder(filter,page,sorts, dateRanges));
-  }
-
-
-  public SearchResponse getRuns(Map<String, Object> filter, Map<String, Integer> page) {
+  public Mono<SearchResponse> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     return getRuns(filter, page, List.of(), List.of());
   }
 
-
-  public SearchResponse getRuns(
+  public Mono<SearchResponse> getRuns(
       Map<String, Object> filter,
       Map<String, Integer> page,
       List<Sort> sorts,
       List<DateRange> dateRanges) {
-
-    return executeQuery(getSearchSourceBuilder(filter,page,sorts, dateRanges));
-  }
-
-
-
-  private SearchSourceBuilder getSearchSourceBuilder(
-      Map<String, Object> filter,
-      Map<String, Integer> page,
-      List<Sort> sorts,
-      List<DateRange> dateRanges){
-
     final AbstractQueryBuilder<?> query =
         (filter == null || filter.size() == 0)
             ? matchAllQuery()
@@ -164,10 +131,14 @@ public class RunRepository {
           .forEach(boolQuery::must);
       searchSourceBuilder.query(boolQuery);
     }
+
+    // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
+    // more info:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
     log.debug("Search Source Query: "+searchSourceBuilder.query());
-    return searchSourceBuilder;
+    return execute(searchSourceBuilder);
   }
 
   /**
@@ -200,21 +171,11 @@ public class RunRepository {
   }
 
   @SneakyThrows
-  private Mono<SearchResponse> executeAsync(@NonNull SearchSourceBuilder builder) {
+  private Mono<SearchResponse> execute(@NonNull SearchSourceBuilder builder) {
     val searchRequest = new SearchRequest(workflowIndex);
     searchRequest.source(builder);
     return client.searchForResponse(searchRequest);
   }
-
-
-  //Non-reactive ES client search
-  @SneakyThrows
-  private SearchResponse executeQuery(@NonNull SearchSourceBuilder builder) {
-    val searchRequest = new SearchRequest(workflowIndex);
-    searchRequest.source(builder);
-    return restEsClient.search(searchRequest, RequestOptions.DEFAULT);
-  }
-
 
   private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
     return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
