@@ -83,7 +83,7 @@ public class RunService {
       List<DateRange> ranges) {
     log.debug("search runs");
     return runRepository
-        .getRuns(filter, page, sorts, ranges)
+        .getRunsAsync(filter, page, sorts, ranges)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -104,7 +104,7 @@ public class RunService {
   public Mono<AggregationResult> aggregateRuns(Map<String, Object> filter) {
     log.debug("aggregate runs");
     return runRepository
-        .getRuns(filter)
+        .getRunsAsync(filter)
         .map(SearchResponse::getHits)
         .map(
             responseSearchHits -> {
@@ -122,7 +122,7 @@ public class RunService {
   public Mono<List<GqlRun>> getRuns(Map<String, Object> filter, Map<String, Integer> page) {
     log.debug("get runs");
     return runRepository
-        .getRuns(filter, page)
+        .getRunsAsync(filter, page)
         .map(response -> Arrays.stream(response.getHits().getHits()))
         .map(hitStream -> hitStream.map(RunService::hitToRun).collect(toUnmodifiableList()));
   }
@@ -131,7 +131,7 @@ public class RunService {
   public Mono<GqlRun> getRunByRunId(String runId) {
     log.debug("get run by id");
     return runRepository
-        .getRuns(Map.of(RUN_ID, runId), null)
+        .getRunsAsync(Map.of(RUN_ID, runId), null)
         .map(response -> response.getHits().getHits())
         .flatMapMany(Flux::fromArray)
         .next()

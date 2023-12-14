@@ -35,10 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow.search.graphql.directives.EpochDateFormatting;
-import org.icgc_argo.workflow.search.graphql.fetchers.EntityDataFetchers;
-import org.icgc_argo.workflow.search.graphql.fetchers.MutationDataFetcher;
-import org.icgc_argo.workflow.search.graphql.fetchers.RunDataFetchers;
-import org.icgc_argo.workflow.search.graphql.fetchers.TaskDataFetchers;
+import org.icgc_argo.workflow.search.graphql.fetchers.*;
 import org.icgc_argo.workflow.search.model.common.Run;
 import org.icgc_argo.workflow.search.model.graphql.Analysis;
 import org.icgc_argo.workflow.search.model.graphql.Workflow;
@@ -58,6 +55,8 @@ public class GraphQLProvider {
   private final TaskDataFetchers taskDataFetchers;
   private final EntityDataFetchers entityDataFetchers;
   private final MutationDataFetcher mutationDataFetcher;
+  private final WorkflowEntityDataFetcher workflowEntityDataFetcher;
+
 
   @PostConstruct
   public void init() throws IOException {
@@ -75,6 +74,7 @@ public class GraphQLProvider {
   private GraphQLSchema buildSchema(String sdl) {
     return Federation.transform(sdl, buildWiring())
         .fetchEntities(entityDataFetchers.getDataFetcher())
+        .fetchEntities(workflowEntityDataFetcher.getDataFetcher())
         .resolveEntityType(
             typeResolutionEnvironment -> {
               final Object src = typeResolutionEnvironment.getObject();
